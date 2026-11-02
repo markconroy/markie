@@ -14,6 +14,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests AI translation of media entities.
+ *
+ * @group ai_translate
  */
 #[Group('ai_translate')]
 #[RunTestsInSeparateProcesses]

@@ -21,6 +21,22 @@ class TagsTest extends TagsTestBase {
   protected static $modules = ['metatag_favicons', 'field_ui'];
 
   /**
+   * The database connection object.
+   *
+   * @var \Drupal\Core\Database\Connection|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    $this->database = $this->container->get('database');
+  }
+
+  /**
    * Legacy data for the MaskIcon tag just stored a single string, not an array.
    */
   public function testMaskIconLegacy() {
@@ -44,7 +60,7 @@ class TagsTest extends TagsTestBase {
     self::assertEquals((string) $xpath[0]->getAttribute('href'), 'mask_icon_href');
 
     // Update the database record.
-    \Drupal::database()->update('node__field_metatag')
+    $this->database->update('node__field_metatag')
       ->fields([
         'field_metatag_value' => Json::encode([
           'mask_icon' => 'mask_icon_href',

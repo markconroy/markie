@@ -5,21 +5,14 @@
  * Contains metatag_open_graph_products.module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\metatag_open_graph_products\Hook\HelpHooks;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Implements hook_help().
  */
+#[LegacyHook]
 function metatag_open_graph_products_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    // Main module help for the metatag_open_graph_products module.
-    case 'help.page.metatag_open_graph_products':
-      $output = '';
-      $output .= '<h3>' . (string) new TranslatableMarkup('About') . '</h3>';
-      $output .= '<p>' . (string) new TranslatableMarkup('Provides additional Open Graph Protocol meta tags for describing products.') . '</p>';
-      return $output;
-
-    default:
-  }
+  return \Drupal::service(HelpHooks::class)->help($route_name, $route_match);
 }

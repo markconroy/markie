@@ -20,14 +20,14 @@ class MetatagController extends ControllerBase {
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $tagManager;
+  protected MetatagTagPluginManager $tagManager;
 
   /**
    * Metatag group plugin manager.
    *
    * @var \Drupal\metatag\MetatagGroupPluginManager
    */
-  protected $groupManager;
+  protected MetatagGroupPluginManager $groupManager;
 
   /**
    * Constructs a new \Drupal\views_ui\Controller\ViewsUIController object.

@@ -5,8 +5,10 @@
  * Contains hook implementations for the metatag_views module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\metatag_views\Hook\MetatagHooks;
+use Drupal\metatag_views\Hook\ViewsHooks;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\metatag_views\Plugin\views\display_extender\MetatagDisplayExtender;
 use Drupal\views\Plugin\views\cache\CachePluginBase;
 use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
@@ -40,74 +42,47 @@ function metatag_views_get_view_tags($view, $display_id = NULL, $args = []) {
   $view->setDisplay($display_id);
   $view->setArguments($args);
   $view->preExecute();
-  $view->buildTitle();
+  try {
+    $view->buildTitle();
 
-  // And get the list of extenders for this display.
-  $extenders = $view->getDisplay()->getExtenders();
-  if (!isset($extenders['metatag_display_extender'])) {
-    // If the id of the plugin is not in the list then something is wrong.
-    return;
+    // And get the list of extenders for this display.
+    $extenders = $view->getDisplay()->getExtenders();
+    if (!isset($extenders['metatag_display_extender'])) {
+      // If the id of the plugin is not in the list then something is wrong.
+      return;
+    }
+
+    // Retrieve the metatag settings from the extender.
+    /** @var \Drupal\metatag_views\Plugin\views\display_extender\MetatagDisplayExtender */
+    $extender = $extenders['metatag_display_extender'];
+    return $extender->getMetatags();
   }
-
-  // Retrieve the metatag settings from the extender.
-  /** @var \Drupal\metatag_views\Plugin\views\display_extender\MetatagDisplayExtender */
-  $extender = $extenders['metatag_display_extender'];
-  return $extender->getMetatags();
+  finally {
+    // Restore the previous current view; preExecute() made this view current.
+    $view->postExecute();
+  }
 }
 
 /**
  * Implements hook_metatags_alter().
  */
+#[LegacyHook]
 function metatag_views_metatags_alter(array &$metatags, array &$context) {
-  if (!$context['entity'] instanceof ViewEntityInterface) {
-    return;
-  }
-
-  $view = $context['entity']->getExecutable();
-  // If display_id is not available, will default to Master display.
-  $route_match = \Drupal::routeMatch();
-  $display_id = $route_match->getParameter('display_id');
-
-  $args = [];
-  $route = $route_match->getRouteObject();
-  $map = $route->hasOption('_view_argument_map') ? $route->getOption('_view_argument_map') : [];
-  foreach ($map as $attribute => $parameter_name) {
-    if (isset($map[$attribute])) {
-      $attribute = $map[$attribute];
-    }
-    if (!$arg = $route_match->getRawParameter($attribute)) {
-      $arg = $route_match->getParameter($attribute);
-    }
-    if (isset($arg)) {
-      $args[] = $arg;
-    }
-  }
-
-  // Apply view overrides.
-  if ($tags = metatag_views_get_view_tags($view, $display_id, $args)) {
-    $metatags = array_merge($metatags, $tags);
-  }
+  return \Drupal::service(MetatagHooks::class)->metatagsAlter($metatags, $context);
 }
 
 /**
  * Implements hook_metatag_route_entity().
  */
+#[LegacyHook]
 function metatag_views_metatag_route_entity(RouteMatchInterface $route_match) {
-  if ($view_id = $route_match->getParameter('view_id')) {
-    $entity = \Drupal::entityTypeManager()->getStorage('view')->load($view_id);
-    return $entity;
-  }
+  return \Drupal::service(MetatagHooks::class)->metatagRouteEntity($route_match);
 }
 
 /**
  * Implements hook_views_post_render().
  */
+#[LegacyHook]
 function metatag_views_views_post_render(ViewExecutable $view, &$output, CachePluginBase $cache) {
-  $extenders = $view->getDisplay()->getExtenders();
-  if (isset($extenders['metatag_display_extender'])) {
-    $first_row_tokens = MetatagDisplayExtender::getFirstRowTokensFromStylePlugin($view);
-    /** @var \Drupal\metatag_views\Plugin\views\display_extender\MetatagDisplayExtender */
-    $extender = $extenders['metatag_display_extender'];
-    $extender->setFirstRowTokens($first_row_tokens);
-  }
+  \Drupal::service(ViewsHooks::class)->viewsPostRender($view, $output, $cache);
 }

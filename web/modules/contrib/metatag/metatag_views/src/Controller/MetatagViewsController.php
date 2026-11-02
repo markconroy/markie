@@ -21,14 +21,14 @@ class MetatagViewsController extends ControllerBase {
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $viewStorage;
+  protected EntityStorageInterface $viewStorage;
 
   /**
    * The Metatag manager interface.
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * Associative array of labels.

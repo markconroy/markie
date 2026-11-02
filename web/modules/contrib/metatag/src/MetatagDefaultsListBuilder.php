@@ -2,9 +2,15 @@
 
 namespace Drupal\metatag;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of Metatag defaults entities.
@@ -12,6 +18,45 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
 
   use StringTranslationTrait;
+
+  /**
+   * The state store.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected StateInterface $state;
+
+  /**
+   * Constructs an object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The entity storage class.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The system state.
+   * @param \Drupal\Core\Messenger\MessengerInterface|null $messenger
+   *   The messenger service.
+   */
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, StateInterface $state, ?MessengerInterface $messenger = NULL) {
+    parent::__construct($entity_type, $storage);
+    $this->state = $state;
+    if ($messenger) {
+      $this->setMessenger($messenger);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    return new static(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('state'),
+      $container->get('messenger')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -87,15 +132,15 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function getOperations(EntityInterface $entity) {
-    $operations = parent::getOperations($entity);
+  public function getOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
+    $operations = parent::getOperations($entity, $cacheability);
 
     // Global and entity defaults can be reverted but not deleted.
     if (in_array($entity->id(), MetatagManager::protectedDefaults())) {
       unset($operations['delete']);
       $operations['revert'] = [
         'title' => $this->t('Revert'),
-        'weight' => $operations['edit']['weight'] + 1,
+        'weight' => isset($operations['edit']['weight']) ? $operations['edit']['weight'] + 1 : 10,
         'url' => $entity->toUrl('revert-form'),
       ];
     }
@@ -163,8 +208,8 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
-    if (\Drupal::state()->get('system.maintenance_mode')) {
-      \Drupal::messenger()->addMessage($this->t('Please note that while the site is in maintenance mode none of the usual meta tags will be output.'));
+    if ($this->state->get('system.maintenance_mode')) {
+      $this->messenger()->addMessage($this->t('Please note that while the site is in maintenance mode none of the usual meta tags will be output.'));
     }
     return parent::render();
   }

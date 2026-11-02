@@ -67,15 +67,20 @@ class EntityTranslationOrchestratorKernelTest extends EntityKernelTestBase {
       'name' => 'page',
     ])->save();
 
-    FieldStorageConfig::create([
-      'field_name' => 'body',
-      'type' => 'text_with_summary',
-      'entity_type' => 'node',
-      'cardinality' => 1,
-      'persist_with_no_fields' => TRUE,
-      'translatable' => TRUE,
-    ])->save();
+    // The node module ships the body field storage in its config up to Drupal
+    // 11.2, so only create it on versions that no longer do.
     $fieldStorage = FieldStorageConfig::loadByName('node', 'body');
+    if (!$fieldStorage) {
+      $fieldStorage = FieldStorageConfig::create([
+        'field_name' => 'body',
+        'type' => 'text_with_summary',
+        'entity_type' => 'node',
+        'cardinality' => 1,
+        'persist_with_no_fields' => TRUE,
+        'translatable' => TRUE,
+      ]);
+      $fieldStorage->save();
+    }
     FieldConfig::create([
       'field_storage' => $fieldStorage,
       'bundle' => 'page',

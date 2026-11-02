@@ -52,7 +52,7 @@ class TokenCommands extends DrushCommands {
       return;
     }
 
-    $types['token'] = 'token_clear_cache';
+    $types['token'] = fn () => \Drupal::token()->resetInfo();
   }
 
 }

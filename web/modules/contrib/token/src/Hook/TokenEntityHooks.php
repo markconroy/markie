@@ -9,6 +9,10 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\menu_link_content\MenuLinkContentInterface;
 use Drupal\node\NodeInterface;
+use Drupal\taxonomy\TermInterface;
+use Drupal\token\TokenMenuLinkHelper;
+use Drupal\token\TokenTermHelper;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 
 /**
  * Entity hooks for token module.
@@ -19,18 +23,24 @@ final class TokenEntityHooks {
 
   public function __construct(
     protected readonly ModuleHandlerInterface $moduleHandler,
+    #[AutowireServiceClosure('token')]
+    protected readonly \Closure $token,
+    #[AutowireServiceClosure(TokenMenuLinkHelper::class)]
+    protected readonly \Closure $menuLinkHelper,
+    #[AutowireServiceClosure(TokenTermHelper::class)]
+    protected readonly \Closure $termHelper,
   ) {
   }
 
   /**
-   * Implements various entity CRUD hooks that require a cache clear.
+   * Implements various entity CRUD hooks that change the available tokens.
    */
   #[Hook('date_format_insert')]
   #[Hook('date_format_delete')]
   #[Hook('field_config_presave')]
   #[Hook('field_config_delete')]
   public function entitySaveClearCache() {
-    token_clear_cache();
+    ($this->token)()->resetInfo();
   }
 
   /**
@@ -98,7 +108,15 @@ final class TokenEntityHooks {
    */
   #[Hook('menu_link_content_presave')]
   public function menuLinkContentPresave(MenuLinkContentInterface $menu_link_content): void {
-    drupal_static_reset('token_menu_link_load_all_parents');
+    ($this->menuLinkHelper)()->resetParents();
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_presave() for taxonomy_term.
+   */
+  #[Hook('taxonomy_term_presave')]
+  public function taxonomyTermPresave(TermInterface $term): void {
+    ($this->termHelper)()->resetParents();
   }
 
   /**

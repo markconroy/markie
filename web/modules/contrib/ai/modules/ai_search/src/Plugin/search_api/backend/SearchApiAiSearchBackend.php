@@ -22,6 +22,8 @@ use Drupal\ai_search\EmbeddingStrategyPluginManager;
 use Drupal\search_api\Backend\BackendSpecificInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\ItemInterface;
+use Drupal\search_api\Query\ConditionGroupInterface;
+use Drupal\search_api\Query\ConditionInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -155,6 +157,11 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       'tokenizer',
       // Boosting does not apply here.
       'type_boost',
+      // Access is checked per result instead, as these filter on fields that
+      // are not stored in the vector database. Their conditions are ignored.
+      // @see ::removeUnsupportedAccessConditions()
+      'content_access',
+      'role_access',
     ];
   }
 
@@ -611,6 +618,10 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       }
     }
 
+    // Drop conditions from access processors that cannot work here, so they do
+    // not filter out every result. Access is checked per result instead.
+    $this->removeUnsupportedAccessConditions($query->getConditionGroup(), $this->getRoleAccessFieldIds($index));
+
     if ($filters = $vdb_client->prepareFilters($query)) {
       $params['filters'] = $filters;
     }
@@ -987,6 +998,57 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       $this->vdbClient = $this->vdbProviderManager->createInstance($this->configuration['database']);
     }
     return $this->vdbClient;
+  }
+
+  /**
+   * Removes conditions added by the unsupported access processors.
+   *
+   * The "Content access" and "Role-based access" processors filter on hidden
+   * fields which are never stored in the vector database, so their conditions
+   * would match nothing.
+   *
+   * @param \Drupal\search_api\Query\ConditionGroupInterface $condition_group
+   *   The condition group to clean up, including nested groups.
+   * @param string[] $role_access_field_ids
+   *   The IDs of index fields holding role-based access information.
+   */
+  protected function removeUnsupportedAccessConditions(ConditionGroupInterface $condition_group, array $role_access_field_ids): void {
+    $conditions = &$condition_group->getConditions();
+    foreach ($conditions as $key => $condition) {
+      if ($condition instanceof ConditionGroupInterface) {
+        // @see \Drupal\search_api\Plugin\search_api\processor\ContentAccess::addNodeAccess()
+        foreach (['content_access', 'content_access_enabled', 'content_access_grants'] as $tag) {
+          if ($condition->hasTag($tag)) {
+            unset($conditions[$key]);
+            continue 2;
+          }
+        }
+        $this->removeUnsupportedAccessConditions($condition, $role_access_field_ids);
+      }
+      elseif ($condition instanceof ConditionInterface && in_array($condition->getField(), $role_access_field_ids, TRUE)) {
+        unset($conditions[$key]);
+      }
+    }
+  }
+
+  /**
+   * Gets the IDs of index fields added by the "Role-based access" processor.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search index.
+   *
+   * @return string[]
+   *   The field IDs.
+   */
+  protected function getRoleAccessFieldIds(IndexInterface $index): array {
+    $field_ids = [];
+    foreach ($index->getFields() as $field_id => $field) {
+      // @see \Drupal\search_api\Plugin\search_api\processor\RoleAccess::ROLE_ACCESS_FIELD
+      if ($field->getDatasourceId() === NULL && $field->getPropertyPath() === 'search_api_role_access') {
+        $field_ids[] = $field_id;
+      }
+    }
+    return $field_ids;
   }
 
   /**

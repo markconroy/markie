@@ -7,8 +7,10 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueFactory;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\Attribute\AiAutomatorProcessRule;
+use Drupal\ai_automators\AutomatorFallbackUser;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorFieldProcessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,11 +35,23 @@ class QueueWorkerProcessor implements AiAutomatorFieldProcessInterface, Containe
   protected Connection $connection;
 
   /**
+   * The current user.
+   */
+  protected AccountProxyInterface $currentUser;
+
+  /**
+   * The user to run as when there is no current user.
+   */
+  protected AutomatorFallbackUser $fallbackUser;
+
+  /**
    * Constructor.
    */
-  final public function __construct(QueueFactory $queueFactory, Connection $connection) {
+  final public function __construct(QueueFactory $queueFactory, Connection $connection, AccountProxyInterface $currentUser, AutomatorFallbackUser $fallbackUser) {
     $this->queueFactory = $queueFactory;
     $this->connection = $connection;
+    $this->currentUser = $currentUser;
+    $this->fallbackUser = $fallbackUser;
   }
 
   /**
@@ -47,6 +61,8 @@ class QueueWorkerProcessor implements AiAutomatorFieldProcessInterface, Containe
     return new static(
       $container->get('queue'),
       $container->get('database'),
+      $container->get('current_user'),
+      $container->get('ai_automator.fallback_user'),
     );
   }
 
@@ -66,8 +82,28 @@ class QueueWorkerProcessor implements AiAutomatorFieldProcessInterface, Containe
       'entity_type' => $entity->getEntityTypeId(),
       'fieldDefinition' => $fieldDefinition,
       'automatorConfig' => $automatorConfig,
+      // The worker runs as this user, see AutomatorFieldData::processItem().
+      'uid' => $this->getRunAsUid(),
     ]);
     return TRUE;
+  }
+
+  /**
+   * Gets the id of the user the queue worker should run as.
+   *
+   * This is the current user. If there is none, for example on a save from
+   * cron or drush, it is the fallback user from the settings. The owner of the
+   * entity is not used, since whoever saved it may have less access.
+   *
+   * @return int|string|null
+   *   The user id, or NULL to run as anonymous.
+   */
+  protected function getRunAsUid(): int|string|null {
+    $uid = $this->currentUser->id();
+    if (empty($uid)) {
+      $uid = $this->fallbackUser->getAccount()?->id();
+    }
+    return $uid ?: NULL;
   }
 
   /**

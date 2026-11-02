@@ -5,12 +5,16 @@ namespace Drupal\Tests\token\Kernel;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the node and content type tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class NodeTest extends TokenKernelTestBase {
 
   /**

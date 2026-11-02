@@ -1,0 +1,9 @@
+# @file
+# Custom services for the Metatag Custom Tags module.
+
+services:
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_custom_tags\Hook\HelpHooks:
+    class: Drupal\metatag_custom_tags\Hook\HelpHooks
+    autowire: true

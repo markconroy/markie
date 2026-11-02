@@ -3,23 +3,23 @@
 namespace Drupal\metatag_favicons\Plugin\metatag\Tag;
 
 use Drupal\Component\Utility\Random;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\LinkRelBase;
 
 /**
  * The Favicons "mask-icon" meta tag.
- *
- * @MetatagTag(
- *   id = "mask_icon",
- *   label = @Translation("Mask icon (SVG)"),
- *   description = @Translation("A grayscale scalable vector graphic (SVG) file."),
- *   name = "mask-icon",
- *   group = "favicons",
- *   weight = 2,
- *   type = "image",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'mask_icon',
+  label: new TranslatableMarkup('Mask icon (SVG)'),
+  name: 'mask-icon',
+  group: 'favicons',
+  type: MetatagType::Image,
+  description: new TranslatableMarkup('A grayscale scalable vector graphic (SVG) file.'),
+  weight: 2,
+)]
 class MaskIcon extends LinkRelBase {
 
   /**

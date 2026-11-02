@@ -17,6 +17,12 @@ variables:
   _PHPUNIT_CONCURRENT: 1
   SKIP_ESLINT: 1
 
+# PHPStan and kernel tests need the real AI Context consumer type API. This
+# is not a runtime dependency of ai_validations.
+.composer-base:
+  before_script:
+    - composer require --dev drupal/ai_context:1.0.x-dev --no-update
+
 cspell:
   allow_failure: false
 stylelint:

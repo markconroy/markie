@@ -2,16 +2,19 @@
 
 namespace Drupal\metatag_views\Form;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\language\ConfigurableLanguageManagerInterface;
 use Drupal\metatag\MetatagManagerInterface;
 use Drupal\metatag\MetatagTagPluginManager;
 use Drupal\metatag\MetatagToken;
 use Drupal\metatag_views\MetatagViewsValuesCleanerTrait;
+use Drupal\views\ViewEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -27,44 +30,44 @@ class MetatagViewsTranslationForm extends FormBase {
   /**
    * Drupal\metatag\MetatagManager definition.
    *
-   * @var \Drupal\metatag\MetatagManager
+   * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * The language manager.
    *
    * @var \Drupal\language\ConfigurableLanguageManagerInterface
    */
-  protected $languageManager;
+  protected ConfigurableLanguageManagerInterface $languageManager;
 
   /**
    * The Views manager.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $viewsManager;
+  protected EntityStorageInterface $viewsManager;
 
   /**
    * The Metatag token service.
    *
    * @var \Drupal\metatag\MetatagToken
    */
-  protected $tokenService;
+  protected MetatagToken $tokenService;
 
   /**
    * The Metatag tag plugin manager.
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $tagPluginManager;
+  protected MetatagTagPluginManager $tagPluginManager;
 
   /**
    * The View entity object.
    *
    * @var \Drupal\views\ViewEntityInterface
    */
-  protected $view;
+  protected ViewEntityInterface $view;
 
   /**
    * View ID.
@@ -85,14 +88,14 @@ class MetatagViewsTranslationForm extends FormBase {
    *
    * @var \Drupal\Core\Language\LanguageInterface
    */
-  protected $language;
+  protected LanguageInterface $language;
 
   /**
    * The language of the translation source.
    *
    * @var \Drupal\Core\Language\LanguageInterface
    */
-  protected $sourceLanguage;
+  protected LanguageInterface $sourceLanguage;
 
   /**
    * An array of base language data.

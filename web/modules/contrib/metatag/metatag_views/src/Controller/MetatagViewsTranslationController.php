@@ -21,14 +21,14 @@ class MetatagViewsTranslationController extends ControllerBase {
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $viewStorage;
+  protected EntityStorageInterface $viewStorage;
 
   /**
    * The Metatag manager.
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * The language manager.
@@ -42,7 +42,7 @@ class MetatagViewsTranslationController extends ControllerBase {
    *
    * @var \Symfony\Component\HttpFoundation\RequestStack
    */
-  protected $requestStack;
+  protected RequestStack $requestStack;
 
   /**
    * The configuration factory.
@@ -82,10 +82,10 @@ class MetatagViewsTranslationController extends ControllerBase {
    *   Page render array.
    */
   public function itemPage() {
-    // @todo This method doesn't exist?
-    $view_id = $this->requestStack->get('view_id');
-    // @todo This method doesn't exist?
-    $display_id = $this->requestStack->get('display_id');
+    /** @var \Symfony\Component\HttpFoundation\InputBag $request_params */
+    $request_params = $this->requestStack->getCurrentRequest()->request;
+    $view_id = $request_params->has('view_id') ? $request_params->all()['view_id'] : [];
+    $display_id = $request_params->has('display_id') ? $request_params->all()['display_id'] : [];
 
     $view = $this->viewStorage->load($view_id);
     $original_langcode = $view->language()->getId();
@@ -125,9 +125,9 @@ class MetatagViewsTranslationController extends ControllerBase {
       }
       else {
         // Get the metatag translation for this language.
-        // @todo The getLanguageConfigOverride() method doesn't exist?
-        $config_translation = $this->languageManager
-          ->getLanguageConfigOverride($langcode, $config_name)
+        /** @var \Drupal\language\ConfigurableLanguageManagerInterface $config_translation */
+        $config_translation = $this->languageManager;
+        $config_translation->getLanguageConfigOverride($langcode, $config_name)
           ->get($config_path);
 
         // If no translation exists for this language, link to add one.

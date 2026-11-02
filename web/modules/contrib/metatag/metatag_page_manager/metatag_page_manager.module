@@ -5,6 +5,9 @@
  * Contains metatag_page_manager.module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\metatag_page_manager\Hook\FormHooks;
+use Drupal\metatag_page_manager\Hook\MetatagHooks;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\metatag\Entity\MetatagDefaults;
@@ -12,10 +15,14 @@ use Drupal\page_manager\Entity\PageVariant;
 
 /**
  * Implements hook_form_FORM_ID_alter().
+ *
+ * @deprecated in metatag:2.2.2 and is removed from metatag:3.0.0. No replacement is available.
+ *
+ * @see https://www.drupal.org/node/3633239
  */
+#[LegacyHook]
 function metatag_page_manager_form_metatag_defaults_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $variants_options['Page Variants'] = _metatag_page_manager_get_variants();
-  $form['id']['#options'] = array_merge($form['id']['#options'], $variants_options);
+  \Drupal::service(FormHooks::class)->formMetatagDefaultsAddFormAlter($form, $form_state, $form_id);
 }
 
 /**
@@ -23,6 +30,10 @@ function metatag_page_manager_form_metatag_defaults_add_form_alter(&$form, FormS
  *
  * @return string[]
  *   A list of page variants keyed by label.
+ *
+ * @deprecated in metatag:2.2.2 and is removed from metatag:3.0.0. No replacement is available.
+ *
+ * @see https://www.drupal.org/node/3633239
  */
 function _metatag_page_manager_get_variants() {
   /** @var \Drupal\page_manager\Entity\PageVariant[] $variants */
@@ -43,6 +54,10 @@ function _metatag_page_manager_get_variants() {
 
 /**
  * Implements hook_metatag_alter().
+ *
+ * @deprecated in metatag:2.2.2 and is removed from metatag:3.0.0. No replacement is available.
+ *
+ * @see https://www.drupal.org/node/3633239
  */
 function metatag_page_manager_metatags_alter(array &$metatags, array &$context) {
   if (!$context['entity'] instanceof PageVariant) {
@@ -58,14 +73,12 @@ function metatag_page_manager_metatags_alter(array &$metatags, array &$context) 
 
 /**
  * Implements hook_metatag_route_entity().
+ *
+ * @deprecated in metatag:2.2.2 and is removed from metatag:3.0.0. No replacement is available.
+ *
+ * @see https://www.drupal.org/node/3633239
  */
+#[LegacyHook]
 function metatag_page_manager_metatag_route_entity(RouteMatchInterface $route_match) {
-  if ($variant = $route_match->getParameter('page_manager_page_variant')) {
-    return $variant;
-  }
-
-  if (strpos($route_match->getRouteName(), 'page_manager.page_view') === 0) {
-    $page_variant_id = $route_match->getRouteObject()->getDefault('_page_manager_page_variant');
-    return PageVariant::load($page_variant_id);
-  }
+  return \Drupal::service(MetatagHooks::class)->metatagRouteEntity($route_match);
 }

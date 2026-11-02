@@ -7,12 +7,16 @@ use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests comment tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class CommentTest extends TokenKernelTestBase {
 
   use CommentTestTrait;

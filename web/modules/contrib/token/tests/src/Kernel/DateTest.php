@@ -2,11 +2,16 @@
 
 namespace Drupal\Tests\token\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests date tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class DateTest extends TokenKernelTestBase {
 
   /**

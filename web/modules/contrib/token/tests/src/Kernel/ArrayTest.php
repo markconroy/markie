@@ -2,11 +2,16 @@
 
 namespace Drupal\Tests\token\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests array tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class ArrayTest extends TokenKernelTestBase {
 
   function testArrayTokens() {

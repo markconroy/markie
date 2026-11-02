@@ -3,12 +3,20 @@
 namespace Drupal\metatag\Plugin\migrate;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\migrate\MigrateException;
 
 /**
  * Provides some helper logic for migrating data from Metatag-D7.
  */
 trait MigrateMetatagD7Trait {
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected ModuleHandlerInterface $metatagModuleHandler;
 
   /**
    * Convert meta tags from Metatag-D7 to the new naming convention.
@@ -459,7 +467,7 @@ trait MigrateMetatagD7Trait {
 
     // Trigger hook_metatag_migrate_metatagd7_tags_map_alter().
     // Allow modules to override tags or the entity used for token replacements.
-    \Drupal::service('module_handler')->alter('metatag_migrate_metatagd7_tags_map', $map);
+    $this->metatagModuleHandler->alter('metatag_migrate_metatagd7_tags_map', $map);
 
     return $map;
   }

@@ -4,7 +4,6 @@ namespace Drupal\Tests\metatag\Unit;
 
 use Drupal\metatag\MetatagTrimmer;
 use Drupal\Tests\UnitTestCase;
-use PHPUnit\Framework\Exception;
 
 /**
  * This class provides methods for testing the MetaTagtrimmer service.
@@ -18,7 +17,7 @@ class MetatagTrimmerTest extends UnitTestCase {
    *
    * @var \Drupal\metatag\MetatagTrimmer
    */
-  protected $metatagTrimmer;
+  protected MetatagTrimmer $metatagTrimmer;
 
   /**
    * {@inheritDoc}
@@ -74,7 +73,7 @@ class MetatagTrimmerTest extends UnitTestCase {
    * Tests if trimByMethod will throw an error when given a non existing method.
    */
   public function testTrimByMethodError() {
-    $this->expectException(Exception::class);
+    $this->expectException('\Exception');
     $this->metatagTrimmer->trimByMethod('test', 4, 'noValue');
   }
 

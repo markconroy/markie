@@ -20,20 +20,6 @@ use Drupal\image\ImageStyleInterface;
 class AiConstraintValidatorBaseTest extends UnitTestCase {
 
   /**
-   * Storage mock for the image_style entity type.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface|\PHPUnit\Framework\MockObject\MockObject
-   */
-  private EntityStorageInterface $imageStyleStorage;
-
-  /**
-   * The validator under test (abstract class mocked for instantiation).
-   *
-   * @var \Drupal\ai_validations\AiConstraintValidatorBase|\PHPUnit\Framework\MockObject\MockObject
-   */
-  private AiConstraintValidatorBase $validator;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -58,25 +44,14 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
     }, TRUE, TRUE);
 
     parent::setUp();
-
-    $this->imageStyleStorage = $this->createMock(EntityStorageInterface::class);
-
-    $entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
-    $entityTypeManager->method('getStorage')
-      ->with('image_style')
-      ->willReturn($this->imageStyleStorage);
-
-    // AiProviderPluginManager is final and cannot be mocked. Since
-    // applyImageStyle() only uses entityTypeManager, bypass the constructor
-    // and inject the dependency directly.
-    $this->validator = $this->createMock(AiConstraintValidatorBase::class);
-
-    $property = new \ReflectionProperty($this->validator, 'entityTypeManager');
-    $property->setValue($this->validator, $entityTypeManager);
   }
 
   /**
-   * Calls the protected applyImageStyle() via reflection.
+   * Calls the protected applyImageStyle() on a validator using the storage.
+   *
+   * Builds a validator wired to an entity type manager that returns the
+   * given image_style storage mock, then invokes applyImageStyle() on it via
+   * reflection.
    *
    * @param \Drupal\ai\OperationType\GenericType\ImageFile $image
    *   The ImageFile object to populate.
@@ -84,10 +59,24 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
    *   The original uploaded file entity.
    * @param string|null $imageStyleId
    *   An image style machine name, or NULL to use the original.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $imageStyleStorage
+   *   Storage mock for the image_style entity type.
    */
-  private function invokeApplyImageStyle(ImageFile $image, File $file, ?string $imageStyleId): void {
-    $method = new \ReflectionMethod($this->validator, 'applyImageStyle');
-    $method->invoke($this->validator, $image, $file, $imageStyleId);
+  private function invokeApplyImageStyle(ImageFile $image, File $file, ?string $imageStyleId, EntityStorageInterface $imageStyleStorage): void {
+    $entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
+    $entityTypeManager->method('getStorage')
+      ->with('image_style')
+      ->willReturn($imageStyleStorage);
+
+    // AiProviderPluginManager is final and cannot be mocked. Since
+    // applyImageStyle() only uses entityTypeManager, bypass the constructor
+    // and inject the dependency directly.
+    $validator = $this->createMock(AiConstraintValidatorBase::class);
+    $property = new \ReflectionProperty($validator, 'entityTypeManager');
+    $property->setValue($validator, $entityTypeManager);
+
+    $method = new \ReflectionMethod($validator, 'applyImageStyle');
+    $method->invoke($validator, $image, $file, $imageStyleId);
   }
 
   /**
@@ -96,13 +85,15 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
    * @covers ::applyImageStyle
    */
   public function testNoStyleIdUsesOriginalFile(): void {
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->expects($this->never())->method('load');
+
     $file = $this->createMock(File::class);
     $image = $this->createMock(ImageFile::class);
     $image->expects($this->once())->method('setFileFromFile')->with($file);
     $image->expects($this->never())->method('setFileFromUri');
-    $this->imageStyleStorage->expects($this->never())->method('load');
 
-    $this->invokeApplyImageStyle($image, $file, NULL);
+    $this->invokeApplyImageStyle($image, $file, NULL, $storage);
   }
 
   /**
@@ -111,14 +102,15 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
    * @covers ::applyImageStyle
    */
   public function testMissingStyleFallsBackToOriginal(): void {
-    $this->imageStyleStorage->method('load')->with('nonexistent')->willReturn(NULL);
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->method('load')->with('nonexistent')->willReturn(NULL);
 
     $file = $this->createMock(File::class);
     $image = $this->createMock(ImageFile::class);
     $image->expects($this->once())->method('setFileFromFile')->with($file);
     $image->expects($this->never())->method('setFileFromUri');
 
-    $this->invokeApplyImageStyle($image, $file, 'nonexistent');
+    $this->invokeApplyImageStyle($image, $file, 'nonexistent', $storage);
   }
 
   /**
@@ -135,13 +127,14 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
     $style = $this->createMock(ImageStyleInterface::class);
     $style->method('buildUri')->with('public://original.jpg')->willReturn($derivative);
     $style->expects($this->never())->method('createDerivative');
-    $this->imageStyleStorage->method('load')->with('medium')->willReturn($style);
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->method('load')->with('medium')->willReturn($style);
 
     $image = $this->createMock(ImageFile::class);
     $image->expects($this->once())->method('setFileFromUri')->with($derivative);
     $image->expects($this->never())->method('setFileFromFile');
 
-    $this->invokeApplyImageStyle($image, $file, 'medium');
+    $this->invokeApplyImageStyle($image, $file, 'medium', $storage);
 
     unlink($derivative);
   }
@@ -163,13 +156,14 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
       touch($derivative);
       return TRUE;
     });
-    $this->imageStyleStorage->method('load')->with('medium')->willReturn($style);
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->method('load')->with('medium')->willReturn($style);
 
     $image = $this->createMock(ImageFile::class);
     $image->expects($this->once())->method('setFileFromUri')->with($derivative);
     $image->expects($this->never())->method('setFileFromFile');
 
-    $this->invokeApplyImageStyle($image, $file, 'medium');
+    $this->invokeApplyImageStyle($image, $file, 'medium', $storage);
 
     unlink($derivative);
   }
@@ -188,13 +182,14 @@ class AiConstraintValidatorBaseTest extends UnitTestCase {
     $style = $this->createMock(ImageStyleInterface::class);
     $style->method('buildUri')->with('public://original.jpg')->willReturn($derivative);
     // createDerivative does nothing — the derivative file is never written.
-    $this->imageStyleStorage->method('load')->with('medium')->willReturn($style);
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->method('load')->with('medium')->willReturn($style);
 
     $image = $this->createMock(ImageFile::class);
     $image->expects($this->never())->method('setFileFromUri');
     $image->expects($this->once())->method('setFileFromFile')->with($file);
 
-    $this->invokeApplyImageStyle($image, $file, 'medium');
+    $this->invokeApplyImageStyle($image, $file, 'medium', $storage);
   }
 
 }

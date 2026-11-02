@@ -21,3 +21,17 @@ function stage_file_proxy_help($route_name, RouteMatchInterface $route_match) {
       return $output;
   }
 }
+
+/**
+ * Implements hook_file_url_alter().
+ *
+ * Points a public file that is missing locally at the origin site, so that it
+ * is served from there instead of being requested from this site and logged as
+ * a failure. Image style derivatives are left alone: those are handled by the
+ * module's own image download controller.
+ */
+function stage_file_proxy_file_url_alter(&$uri): void {
+  if ($result = \Drupal::service('stage_file_proxy.download_manager')->rewriteFileUrl($uri)) {
+    $uri = $result;
+  }
+}

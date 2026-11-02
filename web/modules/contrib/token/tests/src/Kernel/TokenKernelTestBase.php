@@ -22,6 +22,7 @@ abstract class TokenKernelTestBase extends KernelTestBase {
     'system',
     'user',
     'path_alias',
+    'filter',
   ];
 
   /**

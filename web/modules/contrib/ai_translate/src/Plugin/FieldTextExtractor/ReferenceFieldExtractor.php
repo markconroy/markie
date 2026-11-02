@@ -81,7 +81,7 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
     $instance->config = $container->get('config.factory')
       ->get('ai_translate.settings');
     $instance->entityTypeManager = $container->get('entity_type.manager');

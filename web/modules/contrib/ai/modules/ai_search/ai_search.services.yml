@@ -11,3 +11,6 @@ services:
     tags:
       - { name: event_subscriber }
     arguments: ['@ai.vdb_provider']
+  ai_search.results_cache_variation:
+    class: Drupal\ai_search\ResultsCacheVariation
+    arguments: ['@config.factory', '@current_user']

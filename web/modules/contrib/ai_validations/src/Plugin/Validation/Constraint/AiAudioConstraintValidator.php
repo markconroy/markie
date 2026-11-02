@@ -40,7 +40,13 @@ final class AiAudioConstraintValidator extends AiConstraintValidatorBase {
     }
 
     $prompt = $constraint->prompt . PHP_EOL . $constraint->message;
-    if (!$this->runBooleanChat($chatOption, $prompt, $transcript)) {
+    $result = $this->runBooleanChat($chatOption, $prompt, $transcript, ruleUuid: $constraint->ruleUuid);
+    if ($result === NULL) {
+      // Validation could not run; the failure has already been logged and a
+      // distinct violation already raised by runBooleanChat().
+      return;
+    }
+    if (!$result) {
       $this->context->addViolation($constraint->message, []);
     }
   }

@@ -10,7 +10,7 @@
         "drupal/field_widget_actions": "^1.4",
         "drupal/key": "^1.18",
         "league/commonmark": "^2.8",
-        "league/html-to-markdown": "^5.1",
+        "league/html-to-markdown": "^5.2.3",
         "yethee/tiktoken": "^0.5.1",
         "openai-php/client": ">=v0.10.1"
     },

@@ -1,0 +1,5 @@
+
+services:
+  Drupal\metatag_test_custom_route\Hook\MetatagHooks:
+    class: Drupal\metatag_test_custom_route\Hook\MetatagHooks
+    autowire: true

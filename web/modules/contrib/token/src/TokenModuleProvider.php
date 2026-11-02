@@ -52,7 +52,7 @@ class TokenModuleProvider extends CacheCollector {
   /**
    * {@inheritdoc}
    */
-  protected function resolveCacheMiss($key) {
+  protected function resolveCacheMiss($key): mixed {
     [$type, $name] = explode(static::SEPARATOR, $key, 2);
     $token_info = $this->token->getTokenInfo($type, $name);
     $this->storage[$key] = $token_info['module'] ?? NULL;

@@ -4,6 +4,5 @@ dependencies: {  }
 id: '403'
 label: '403 access denied'
 tags:
-  robots: noindex
-  canonical_url: '[site:url]'
-  shortlink: '[site:url]'
+  canonical_url: '<none>'
+  shortlink: '<none>'

@@ -3,25 +3,29 @@
 namespace Drupal\metatag\Plugin\metatag\Tag;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 
 /**
  * The basic "Referrer policy" meta tag.
  *
  * Note that this meta tag serves the same purpose as the HTTP header
  * "Referrer-Policy", so both are not needed.
- *
- * @MetatagTag(
- *   id = "referrer",
- *   label = @Translation("Referrer policy"),
- *   description = @Translation("Indicate to search engines and other page scrapers whether or not links should be followed. See <a href='https://w3c.github.io/webappsec/specs/referrer-policy/'>the W3C specifications</a> for further details. Note: this serves the same purpose as the HTTP header by the same name."),
- *   name = "referrer",
- *   group = "advanced",
- *   weight = 5,
- *   type = "label",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'referrer',
+  label: new TranslatableMarkup('Referrer policy'),
+  name: 'referrer',
+  group: 'advanced',
+  type: MetatagType::Label,
+  description: new TranslatableMarkup(
+    'Indicate to search engines and other page scrapers whether or not links should be followed. See <a href=":url">the W3C specifications</a> for further details. Note: this serves the same purpose as the HTTP header by the same name.', [
+      ':url' => 'https://w3c.github.io/webappsec/specs/referrer-policy/',
+    ]
+  ),
+  weight: 5,
+)]
 class Referrer extends MetaNameBase {
 
   use StringTranslationTrait;

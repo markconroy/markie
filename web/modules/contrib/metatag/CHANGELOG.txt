@@ -1,3 +1,108 @@
+Metatag 2.2.5, 2026-10-31
+-------------------------
+#3633665 by hcksharp, wkr1shna, camhoward, DamienMcKenna: addMessage() fails
+  when site is maintenance mode.
+#3626128 by ptmkenny, csakiistvan, DamienMcKenna: Fixed OOM error in
+  metatag_views.
+#3633340 by shubhamgoel, DamienMcKenna: MetatagDefaultsListBuilder::
+  getOperations() missing argument.
+#3633338 by shubhamgoel, csakiistvan, DamienMcKenna: Missing
+  PreWarmableInterface in MetatagViewsCachePluginManager.
+#3302453 by andrewsuth, damienmckenna, erik_petra, bbu23, introfini, dimas11,
+  undersound3, matdemeue, eugene bocharov, aniketto, bassline, gengo_k,
+  yukihyogo, nironan: Canonical meta tag on config entity pages (e.g. Views) no
+  longer refers to current language.
+#3633331 by shubhamgoel, DamienMcKenna: Resolve "Call to an undefined method"
+  phpstan errors.
+#3489837 by idebr, DamienMcKenna: Remove mpyw/phpunit-patch-serializable
+  -comparison dev dependency.
+
+
+Metatag 2.2.4, 2026-10-28
+-------------------------
+#3633988 by jimmb, DamienMcKenna: Fixed Shortlink URL meta tag label.
+#3633337 by shubhamgoel, DamienMcKenna, liam morland: Remove PHP limit from info
+  and composer files.
+#3633958 by bserem, DamienMcKenna: Token 8.x-1.17 is required.
+#3633739 by Jonasanne, rahulk, liam morland, DamienMcKenna: Fixed deprecated
+  services.
+
+
+Metatag 2.2.3, 2026-10-27
+-------------------------
+#3633443 by eduardo morales alberti, lmoeni, vensires, mrshowerman, johnatas,
+  chemeon, damienmckenna: List of config items wasn't converted to a string in
+  metatag_post_update_v2_06_error_page_defaults().
+
+
+Metatag 2.2.2, 2026-10-27
+-------------------------
+#3632975 by fherman95, shubhamgoel, DamienMcKenna: Empty update script to force
+  a cache rebuild.
+#3632995 by wamwam, f0ns, jaypan, DamienMcKenna: Missing service alias for
+  MetatagRoutesHelperInterface.
+#3633005 by f0ns, gillesbailleux, DamienMcKenna: Tag and group descriptions
+  stopped displaying.
+#3632998 by a.dmitriiev, a.dmitriiev, DamienMcKenna: Revert change to
+  MetaNameBase::label(), description() that broke API compatibility.
+#3633219 by f0ns, DamienMcKenna: Test coverage for plugin definitions.
+#3616901 by shubhamgoel, DamienMcKenna: Deprecated metatag_page_manager.
+#3582789 by shubhamgoel, DamienMcKenna: Fixed Forum tests against 11.4.x.
+#3247275 by andybody, vbouchet, primsi, DamienMcKenna, berdir: Remove canonical
+  URL tag for 403, 404 pages.
+#3633335 by DamienMcKenna, joegraduate: Fixed tests.
+
+
+Metatag 2.2.1, 2026-10-24
+-------------------------
+#3550674 by damienmckenna: Refactored URL logic in MetaNameBase.
+#3484975 by ankitv18, damienmckenna, ptmkenny, kul.pratap, a.aaronjake: Resolve
+  phpcs issues.
+#3563261 by nickdickinsonwilde, damienmckenna: PHP 8.5 setAccessible deprecated.
+#3552557 by anybody, jwilson3, damienmckenna, priyansu18: List helpful
+  additional modules in README.md.
+#3574862 by damienmckenna: Resolve test failures in 2.2.x against D11.
+#3574819 by ghost of drupal past, nicxvan, damienmckenna: Metatag: Convert hooks
+  to OOP.
+#3577367 by moneeshk, damienmckenna: Static caching in sortedTags() and
+  sortedGroups().
+#3579705 by DamienMcKenna: Streamlined hook class names.
+#3581128 by gulshan verma, damienmckenna: PHP 8.5 setAccessible issue.
+#3559765 by andrew.wang, sammy_g, damienmckenna: Fix broken links.
+#3483107 by kadantsew, damienmckenna: V2 post updates not working well when
+  there are several entities have metatag field.
+#3581509 by damienmckenna, berdir, larowlan: Workaround for tests failing on D10
+  due to an incompatible release of the History module.
+#3464549 by damienmckenna, ankitv18: Resolve phpstan issues.
+#3583643 by DamienMcKenna: Reverted changes to MetaNameBase that accidentally
+  broke other modules.
+#3590487 by prudloff, enomo103, avinash.jha, damienmckenna: Remove unused
+  variable in NodeJsonOutputTest.php.
+#3548268 by phjou, jejddx, damienmckenna, jatingupta40: Fix for preg_replace()
+  returning NULL and the value passing into trim().
+#3398796 by damienmckenna, daniel_j: Add PHP attributes for all plugins.
+#3609320 by alexpott, DamienMcKenna: Remove field cardinality again.
+#3609332 by alexpott, DamienMcKenna: Fixed tests against D10.
+#3378434 by zolt_toth, damienmckenna, heykarthikwithu, xamount,
+  pradhumanjain2311, naveenvalecha, abhinand gokhala k, eleonel, radimklaska,
+  skipper-vp: Empty values not removed from multi-value meta tags.
+#3471340 by msypes, damienmckenna, kasey_mk, sriram_s, sriram_s: Views meta tags
+  can't output a zero on its own.
+#3600244 by Project Update Bot, DamienMcKenna: D12 compatibility fixes.
+#3483034 by lisa.rae, sebastix, DamienMcKenna: Deprecated
+  apple-mobile-web-app-capable meta tag.
+#3582721 by prudloff, DamienMcKenna: Deprecated set-cookie meta tag.
+#3583288 by anton4uk, DamienMcKenna: MetatagViewsCachePluginManager missing
+  a trait.
+#3616963 by yusuf_khan, DamienMcKenna: Fix phpcs issues.
+#3620511 by DamienMcKenna: Updated og:image description.
+#3631155 by DamienMcKenna: Improved limiting of entity types.
+#3631058 by vbouchet, wkr1shna, csakiistvan, damienmckenna: <none> value does
+  not prevent default canonical and shortlink tags.
+#3618075 by flemming.fridthjof, damienmckenna, brian@graith: PHP 8.5 Using null
+  as an array offset is deprecated.
+
+
 Metatag 2.2.0, 2025-09-23
 -------------------------
 #3458724 by damienmckenna, rachel_norfolk, pacproduct, petr illek: Add support
@@ -68,6 +173,18 @@ Metatag 2.1.0, 2024-11-07
 #2952675 by biancaradu27, loze, alvar0hurtad0, id.conky, damienmckenna,
   marysmech, musa.thomas, justskew, smavri, anybody, jason.bell, waldomero,
   zaporylie: Add support for contextual path arguments.
+#3426426 by damienmckenna, erwangel: Explain that the Administer Metatag
+  permission does not control access to the per-entity field.
+#3422406 by eduardo morales alberti, sascha_meissner, damienmckenna: Generate
+  tokens values method does not take into account the entity language.
+
+
+Metatag 2.0.3, 2024-11-07
+-------------------------
+#3433376 by damienmckenna, ankitv18, murilohp, project update bot, jrglasgow,
+  chandu7929: Automated Drupal 11 compatibility fixes.
+#3484991 by damienmckenna: Enable testing against 10.3.
+#3469049 by damienmckenna, ankitv18, anybody: Minor typo in metatag.install.
 #3426426 by damienmckenna, erwangel: Explain that the Administer Metatag
   permission does not control access to the per-entity field.
 #3422406 by eduardo morales alberti, sascha_meissner, damienmckenna: Generate

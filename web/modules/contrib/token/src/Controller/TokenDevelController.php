@@ -32,7 +32,7 @@ class TokenDevelController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('token.tree_builder'),
       $container->get('token.entity_mapper')

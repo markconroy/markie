@@ -2,16 +2,21 @@
 
 namespace Drupal\Tests\token\Kernel;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\VocabularyInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests entity tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class EntityTest extends TokenKernelTestBase {
 
   /**
@@ -94,8 +99,13 @@ class EntityTest extends TokenKernelTestBase {
 
     // Emulate the original entity property that would be available from
     // during node save and change the title for the node.
-    $node->original = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($node->id());
-    $node->title = 'New title';
+    $original = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($node->id());
+    DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION, '11.2.0',
+      fn() => $node->setOriginal($original),
+      fn() => $node->original = $original,
+    );
+    $node->setTitle('New title');
 
     $tokens = [
       'nid' => $node->id(),

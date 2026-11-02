@@ -12,3 +12,5 @@ unflatten
 updatedb
 pymdownx
 superfences
+nbsp
+unparseable

@@ -9,6 +9,7 @@ use OpenAI\Contracts\Resources\RealtimeContract;
 use OpenAI\Contracts\Resources\ThreadsContract;
 use OpenAI\Contracts\Resources\VectorStoresContract;
 use OpenAI\Contracts\TransporterContract;
+use OpenAI\Resources\Agents;
 use OpenAI\Resources\Assistants;
 use OpenAI\Resources\Audio;
 use OpenAI\Resources\Batches;
@@ -16,6 +17,7 @@ use OpenAI\Resources\Chat;
 use OpenAI\Resources\Completions;
 use OpenAI\Resources\Containers;
 use OpenAI\Resources\Conversations;
+use OpenAI\Resources\Decisions;
 use OpenAI\Resources\Edits;
 use OpenAI\Resources\Embeddings;
 use OpenAI\Resources\Files;
@@ -26,7 +28,9 @@ use OpenAI\Resources\Models;
 use OpenAI\Resources\Moderations;
 use OpenAI\Resources\Realtime;
 use OpenAI\Resources\Responses;
+use OpenAI\Resources\Skills;
 use OpenAI\Resources\Threads;
+use OpenAI\Resources\Vaults;
 use OpenAI\Resources\VectorStores;
 
 final class Client implements ClientContract
@@ -88,6 +92,36 @@ final class Client implements ClientContract
     public function containers(): Containers
     {
         return new Containers($this->transporter);
+    }
+
+    /**
+     * Create and manage skills for use with the Responses API shell tools.
+     *
+     * @see https://developers.openai.com/api/reference/resources/skills
+     */
+    public function skills(): Skills
+    {
+        return new Skills($this->transporter);
+    }
+
+    /**
+     * Create and manage reusable agents.
+     *
+     * @see https://developers.openai.com/api/reference/resources/beta/subresources/agents
+     */
+    public function agents(): Agents
+    {
+        return new Agents($this->transporter);
+    }
+
+    /**
+     * Store credentials for MCP servers and OpenAI-hosted environments.
+     *
+     * @see https://developers.openai.com/api/reference/resources/beta/subresources/agents/subresources/vaults
+     */
+    public function vaults(): Vaults
+    {
+        return new Vaults($this->transporter);
     }
 
     /**
@@ -160,6 +194,16 @@ final class Client implements ClientContract
     public function fineTunes(): FineTunes
     {
         return new FineTunes($this->transporter);
+    }
+
+    /**
+     * Evaluate text, images, or both against a list of questions.
+     *
+     * @see https://developers.openai.com/api/docs/guides/decisions
+     */
+    public function decisions(): Decisions
+    {
+        return new Decisions($this->transporter);
     }
 
     /**

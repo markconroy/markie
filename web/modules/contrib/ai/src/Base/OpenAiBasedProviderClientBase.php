@@ -7,8 +7,8 @@ use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInput;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInterface;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionOutput;
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Bytes;
 use Drupal\Core\Config\ImmutableConfig;
-use Drupal\Core\File\FileExists;
 use Drupal\ai\Dto\TokenUsageDto;
 use Drupal\ai\Dto\ChatProviderLimitsDto;
 use Drupal\ai\Enum\AiProviderCapability;
@@ -42,6 +42,7 @@ use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInterface;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechOutput;
 use Drupal\ai\ProviderClient\OpenAiBasedProviderClientInterface;
 use Drupal\ai\Traits\OperationType\EmbeddingsTrait;
+use GuzzleHttp\Psr7\Stream;
 use OpenAI\Client;
 use OpenAI\Responses\Meta\MetaInformation;
 use Psr\Http\Client\ClientInterface;
@@ -540,16 +541,38 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
   public function speechToText(string|SpeechToTextInput $input, string $model_id, array $tags = []): SpeechToTextOutput {
     $this->loadClient();
 
+    $filename = 'audio';
     if ($input instanceof SpeechToTextInput) {
+      $filename = $input->getFile()->getFilename() ?: $filename;
       $input = $input->getBinary();
     }
+    // The API derives the audio format from the extension, so default to mp3
+    // when the filename has none.
+    if (pathinfo($filename, PATHINFO_EXTENSION) === '') {
+      $filename .= '.mp3';
+    }
 
-    $path = $this->fileSystem->saveData($input, 'temporary://speech_to_text.mp3', FileExists::Replace);
-    $input = fopen($path, 'r');
+    // The copy below duplicates the audio, so fail with a catchable exception
+    // instead of a fatal "allowed memory size exhausted" error. The limit is
+    // enforced against the real allocated size, so that is what is compared.
+    $memory_limit = (string) ini_get('memory_limit');
+    if ($memory_limit !== '-1' && strlen($input) > Bytes::toNumber($memory_limit) - memory_get_usage(TRUE)) {
+      throw new AiRequestErrorException('The audio file is too large to be processed in memory.');
+    }
+
+    // Keep the audio in memory, so it is never written to disk where other
+    // requests or local users could read it. php://temp is not used because
+    // it spills to a file on disk above 2 MB. The API derives the audio
+    // format from the uploaded filename, which the multipart builder only
+    // sends for non-php:// streams, so the filename is set as metadata.
+    $handle = fopen('php://memory', 'r+');
+    fwrite($handle, $input);
+    rewind($handle);
+    $file = new Stream($handle, ['metadata' => ['uri' => $filename]]);
 
     $payload = [
       'model' => $model_id,
-      'file' => $input,
+      'file' => $file,
     ] + $this->configuration;
 
     try {
@@ -560,9 +583,7 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
       throw $e;
     }
     finally {
-      if (is_resource($input)) {
-        fclose($input);
-      }
+      $file->close();
     }
     return new SpeechToTextOutput($response['text'], $response, []);
   }

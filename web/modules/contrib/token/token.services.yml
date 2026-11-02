@@ -20,6 +20,8 @@ services:
     tags:
       - { name: needs_destruction }
   Drupal\token\TokenModuleProvider: '@token.module_provider'
+  Drupal\token\TokenMenuLinkHelper: {}
+  Drupal\token\TokenTermHelper: {}
 
   Drupal\token\Hook\TokenFormHooks:
     class: Drupal\token\Hook\TokenFormHooks
@@ -33,3 +35,5 @@ services:
     class: Drupal\token\Hook\TokenTokensHooks
   Drupal\token\Hook\TokenTokenInfoHooks:
     class: Drupal\token\Hook\TokenTokenInfoHooks
+  Drupal\token\Hook\TokenRequirementsHooks:
+    class: Drupal\token\Hook\TokenRequirementsHooks

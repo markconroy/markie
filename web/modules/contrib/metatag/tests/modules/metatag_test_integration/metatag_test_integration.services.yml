@@ -1,0 +1,5 @@
+
+services:
+  Drupal\metatag_test_integration\Hook\MetatagHooks:
+    class: Drupal\metatag_test_integration\Hook\MetatagHooks
+    autowire: true

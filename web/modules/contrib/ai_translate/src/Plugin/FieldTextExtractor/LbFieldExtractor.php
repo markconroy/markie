@@ -43,6 +43,20 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
   use StringTranslationTrait;
 
   /**
+   * Sentinel key used when inline blocks exist without translatable text.
+   *
+   * This is intentionally not a real block UUID. Its only purpose is to make
+   * the layout field return non-empty metadata so the generic translation
+   * pipeline still calls setValue() for the layout field.
+   *
+   * In asymmetric Layout Builder translation, setValue() is responsible for
+   * cloning and rewiring inline blocks. Without this sentinel, layouts that
+   * contain only non-text inline blocks would return an empty metadata array,
+   * causing TextExtractor::insertTextMetadata() to skip the field entirely.
+   */
+  protected const NO_TEXT_INLINE_BLOCKS_SENTINEL = '_layout_builder_inline_blocks_present';
+
+  /**
    * Module configuration.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -117,7 +131,7 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
     $instance->config = $container->get('config.factory')?->get('ai_translate.settings');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->sectionStorageManager = $container->get('plugin.manager.layout_builder.section_storage');
@@ -148,6 +162,7 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
       return [];
     }
     $textMeta = [];
+    $hasInlineBlocks = FALSE;
     /** @var \Drupal\layout_builder\Field\LayoutSectionItemList $sectionList */
     $sectionList = $entity->get($fieldName);
     foreach ($sectionList->getSections() as $section) {
@@ -156,6 +171,7 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
         if (!$plugin instanceof InlineBlock) {
           continue;
         }
+        $hasInlineBlocks = TRUE;
         // Mimic behavior of (protected) InlineBlock::getEntity().
         $blockEntity = NULL;
         $blockConfig = $plugin->getConfiguration();
@@ -178,6 +194,18 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
           $textMeta[] = ['delta' => $blockEntity->uuid()] + $subMeta;
         }
       }
+    }
+    // In asymmetric Layout Builder translation, the block cloning happens in
+    // setValue(), but the generic translation pipeline only invokes setValue()
+    // for fields whose extract() call returned metadata. If this layout
+    // contains inline blocks but none of them yield translatable text
+    // metadata, return a sentinel item so the layout field still flows through
+    // insertTextMetadata() and the inline blocks can still be cloned.
+    if ($hasInlineBlocks && empty($textMeta) && $this->moduleHandler->moduleExists('layout_builder_at')) {
+      $textMeta[] = [
+        self::NO_TEXT_INLINE_BLOCKS_SENTINEL => TRUE,
+        '_columns' => [],
+      ];
     }
     return $textMeta;
   }

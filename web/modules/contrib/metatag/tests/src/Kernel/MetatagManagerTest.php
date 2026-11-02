@@ -2,7 +2,10 @@
 
 namespace Drupal\Tests\metatag\Kernel;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\metatag\MetatagManagerInterface;
 use Drupal\metatag\MetatagSeparator;
 
 /**
@@ -37,21 +40,21 @@ class MetatagManagerTest extends KernelTestBase {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The metatag manager.
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * Config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * {@inheritdoc}
@@ -349,6 +352,176 @@ class MetatagManagerTest extends KernelTestBase {
     ];
     $this->assertEquals($expected, $tags);
 
+  }
+
+  /**
+   * Tests that empty values are removed from multi-value meta tags.
+   *
+   * @covers \Drupal\metatag\Plugin\metatag\Tag\MetaNameBase::output
+   *
+   * @see https://www.drupal.org/project/metatag/issues/3378434
+   */
+  public function testMetatagMultipleRemovesEmptyValues() {
+    // A multi-value tag where some of the values are empty or whitespace-only,
+    // as happens when one of several tokens resolves to nothing. The empty and
+    // whitespace-only segments must not generate empty meta tags. This also
+    // covers leading and trailing empty segments collapsing away.
+    $tags = $this->metatagManager->generateElements([
+      'article_tag' => ',,tag1, ,tag2,,',
+    ]);
+
+    $expected = [
+      '#attached' => [
+        'html_head' => [
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => 'tag1',
+              ],
+            ],
+            'article_tag_0',
+          ],
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => 'tag2',
+              ],
+            ],
+            'article_tag_1',
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected, $tags);
+  }
+
+  /**
+   * Tests that a literal "0" is preserved in a multi-value meta tag.
+   *
+   * "Empty" must mean a blank/whitespace-only string, not any PHP-falsy value;
+   * the number zero is a legitimate value and must still be rendered. This is
+   * the case an array_filter()-based fix gets wrong.
+   *
+   * @covers \Drupal\metatag\Plugin\metatag\Tag\MetaNameBase::output
+   *
+   * @see https://www.drupal.org/project/metatag/issues/3378434
+   */
+  public function testMetatagMultiplePreservesZero() {
+    $tags = $this->metatagManager->generateElements([
+      'article_tag' => '0,5',
+    ]);
+
+    $expected = [
+      '#attached' => [
+        'html_head' => [
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => '0',
+              ],
+            ],
+            'article_tag_0',
+          ],
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => '5',
+              ],
+            ],
+            'article_tag_1',
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected, $tags);
+  }
+
+  /**
+   * Tests that empty value removal respects the configured separator.
+   *
+   * @covers \Drupal\metatag\Plugin\metatag\Tag\MetaNameBase::output
+   *
+   * @see https://www.drupal.org/project/metatag/issues/3378434
+   */
+  public function testMetatagMultipleRemovesEmptyValuesWithCustomSeparator() {
+    $this->configFactory->getEditable('metatag.settings')
+      ->set('separator', '||')
+      ->save();
+
+    $tags = $this->metatagManager->generateElements([
+      'article_tag' => 'tag1|| ||tag2',
+    ]);
+
+    $expected = [
+      '#attached' => [
+        'html_head' => [
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => 'tag1',
+              ],
+            ],
+            'article_tag_0',
+          ],
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'property' => 'article:tag',
+                'content' => 'tag2',
+              ],
+            ],
+            'article_tag_1',
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected, $tags);
+  }
+
+  /**
+   * Tests that single-value tags are unaffected by empty value removal.
+   *
+   * A single-value tag whose value legitimately contains the separator
+   * character must be rendered unchanged, i.e. the multi-value splitting and
+   * empty-removal logic must not leak into single-value handling.
+   *
+   * @covers \Drupal\metatag\Plugin\metatag\Tag\MetaNameBase::output
+   *
+   * @see https://www.drupal.org/project/metatag/issues/3378434
+   */
+  public function testMetatagSingleValueWithSeparatorCharUnaffected() {
+    $tags = $this->metatagManager->generateElements([
+      'description' => 'Hello, world',
+    ]);
+
+    $expected = [
+      '#attached' => [
+        'html_head' => [
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => [
+                'name' => 'description',
+                'content' => 'Hello, world',
+              ],
+            ],
+            'description',
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected, $tags);
   }
 
 }

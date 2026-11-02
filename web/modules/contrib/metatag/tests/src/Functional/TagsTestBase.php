@@ -3,6 +3,7 @@
 namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\metatag\MetatagTagPluginManager;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -45,10 +46,19 @@ abstract class TagsTestBase extends BrowserTestBase {
   protected $debugMode = FALSE;
 
   /**
+   * The Metatag tag plugin manager.
+   *
+   * @var \Drupal\metatag\MetatagTagPluginManager
+   */
+  protected MetatagTagPluginManager $tagPluginManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
+
+    $this->tagPluginManager = $this->container->get('plugin.manager.metatag.tag');
 
     // Use the test page as the front page.
     $this->config('system.site')->set('page.front', '/test-page')->save();
@@ -75,9 +85,8 @@ abstract class TagsTestBase extends BrowserTestBase {
     ]);
 
     // Build a list of all tag objects that will be used later on.
-    $tag_manager = \Drupal::service('plugin.manager.metatag.tag');
     $all_tags = [];
-    foreach ($tag_manager->getDefinitions() as $tag_name => $tag_spec) {
+    foreach ($this->tagPluginManager->getDefinitions() as $tag_name => $tag_spec) {
       $all_tags[$tag_name] = $tag_spec['class']::create($this->container, [], $tag_name, $tag_spec);
     }
     if ($this->debugMode) {

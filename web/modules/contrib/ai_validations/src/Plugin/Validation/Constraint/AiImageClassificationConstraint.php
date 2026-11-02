@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
 use Symfony\Component\Validator\Constraint;
 
 /**
  * Ai classification check constraint.
- *
- * @Constraint(
- *   id = "AiImageClassification",
- *   label = @Translation("AI Image Classification Check", context = "Validation"),
- * )
  */
+#[ConstraintAttribute(
+  id: 'AiImageClassification',
+  label: new TranslatableMarkup('AI Image Classification Check', [], ['context' => 'Validation']),
+)]
 class AiImageClassificationConstraint extends Constraint {
 
   /**
@@ -21,7 +22,7 @@ class AiImageClassificationConstraint extends Constraint {
    *
    * @var string
    */
-  public $message = '';
+  public string $message = 'The image did not pass the AI classification check.';
 
   /**
    * The AI model.

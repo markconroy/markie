@@ -3,6 +3,7 @@
 namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\State\StateInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -38,6 +39,22 @@ class MaintenanceModeTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * The state store.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected StateInterface $state;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    $this->state = $this->container->get('state');
+  }
+
+  /**
    * Put the site into maintenance mode, see what the meta tags are.
    */
   public function testUser1() {
@@ -50,7 +67,7 @@ class MaintenanceModeTest extends BrowserTestBase {
     $session->responseNotContains('<title>Site under maintenance | ');
 
     // Put the site into maintenance mode.
-    \Drupal::state()->set('system.maintenance_mode', TRUE);
+    $this->state->set('system.maintenance_mode', TRUE);
     Cache::invalidateTags(['rendered']);
 
     // Load the user 1 profile page again.

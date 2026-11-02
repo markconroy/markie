@@ -57,15 +57,15 @@ function _metatag_list_entity_field_tables(): array {
         throw new \Exception("There is a problem in the field configuration, see https://www.drupal.org/node/3366933 for discussion on how to resolve it.\nOriginal message: " . $e->getMessage());
       }
 
-      $tables = [];
       foreach ($fields as $field) {
         $entity_type_id = $field->getTargetEntityTypeId();
         $entity_type = $entity_type_manager->getDefinition($entity_type_id);
 
         // Determine the table and "value" field names.
+        /** @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage $entity_storage */
+        $entity_storage = $entity_type_manager->getStorage($entity_type_id);
         /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
-        $table_mapping = $entity_type_manager->getStorage($entity_type_id)
-          ->getTableMapping();
+        $table_mapping = $entity_storage->getTableMapping();
         $field_table = $table_mapping->getFieldTableName($field_name);
         $field_value_field = $table_mapping->getFieldColumnName($field_storage, 'value');
 
@@ -784,4 +784,45 @@ function metatag_post_update_v2_05_twitter_type_changes(&$sandbox) {
     }
     return $changed;
   });
+}
+
+/**
+ * Remove canonical URL, shortlink and robots from the 403/404 defaults.
+ */
+function metatag_post_update_v2_06_error_page_defaults() {
+  $updated = [];
+
+  foreach (['403', '404'] as $id) {
+    $default = MetatagDefaults::load($id);
+    if (!$default) {
+      continue;
+    }
+    $tags = $default->get('tags');
+    $changed = FALSE;
+    // Only change values that are still the previous defaults.
+    foreach (['canonical_url', 'shortlink'] as $tag) {
+      if (($tags[$tag] ?? NULL) === '[site:url]') {
+        $tags[$tag] = '<none>';
+        $changed = TRUE;
+      }
+    }
+    if ($id === '403' && ($tags['robots'] ?? NULL) === 'noindex') {
+      unset($tags['robots']);
+      $changed = TRUE;
+    }
+    if ($changed) {
+      $updated[] = $id;
+      $default->set('tags', $tags);
+      $default->save();
+    }
+  }
+
+  if ($updated) {
+    return t('The Metatag configuration for @items page(s) has been updated. Make sure to export the configuration to avoid losing the changes.', [
+      '@items' => implode(', ', $updated),
+    ]);
+  }
+  else {
+    return t('No changes needed to be made.');
+  }
 }

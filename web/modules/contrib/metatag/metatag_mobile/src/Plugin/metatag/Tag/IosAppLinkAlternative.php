@@ -2,23 +2,23 @@
 
 namespace Drupal\metatag_mobile\Plugin\metatag\Tag;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\LinkRelBase;
 
 /**
  * The iOS App link alternative for Apple mobile metatag.
- *
- * @MetatagTag(
- *   id = "ios_app_link_alternative",
- *   label = @Translation("iOS app link alternative"),
- *   description = @Translation("A custom string for deeplinking to an iOS mobile app. Should be in the format 'itunes_id/scheme/host_path', e.g. 123456/example/hello-screen'. The 'ios-app://' prefix will be included automatically."),
- *   name = "alternate",
- *   group = "apple_mobile",
- *   weight = 91,
- *   type = "uri",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'ios_app_link_alternative',
+  label: new TranslatableMarkup('iOS app link alternative'),
+  name: 'alternate',
+  group: 'apple_mobile',
+  type: MetatagType::Uri,
+  description: new TranslatableMarkup("A custom string for deeplinking to an iOS mobile app. Should be in the format 'itunes_id/scheme/host_path', e.g. '123456/example/hello-screen'. The 'ios-app://' prefix will be included automatically."),
+  weight: 91,
+)]
 class IosAppLinkAlternative extends LinkRelBase {
 
   /**

@@ -33,7 +33,8 @@ ai_translate.settings:
       constraints:
         # These are the available depth values, as defined in the settings form.
         # @see \Drupal\ai_translate\Form\AiTranslateSettingsForm::buildForm().
-        Choice: [ 0, 1, 2, 5, 10 ]
+        Choice:
+          choices: [ 0, 1, 2, 5, 10 ]
     language_settings:
       type: sequence
       label: 'Language-specific settings'
@@ -45,16 +46,18 @@ ai_translate.settings:
       description: 'Controls how the publication status of translated content is handled'
       constraints:
         Choice:
-          - keep_original
-          - create_draft
+          choices:
+            - keep_original
+            - create_draft
     redirect_after_create:
       type: string
       label: 'Action after creating a new translation'
       description: 'Where to redirect after creating a new translation.'
       constraints:
         Choice:
-          - list
-          - edit
+          choices:
+            - list
+            - edit
 
 ai_translate.language_setting.*:
   type: mapping

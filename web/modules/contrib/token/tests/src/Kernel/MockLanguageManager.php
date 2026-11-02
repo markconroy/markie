@@ -20,7 +20,7 @@ class MockLanguageManager extends ConfigurableLanguageManager {
   /**
    * {@inheritdoc}
    */
-  public function getCurrentLanguage($type = LanguageInterface::TYPE_INTERFACE) {
+  public function getCurrentLanguage($type = LanguageInterface::TYPE_INTERFACE): LanguageInterface {
     if (isset($this->currentLanguages[$type])) {
       return $this->currentLanguages[$type];
     }
@@ -35,7 +35,7 @@ class MockLanguageManager extends ConfigurableLanguageManager {
    * @param \Drupal\Core\Language\LanguageInterface $language
    *   The language.
    */
-  public function setCurrentLanguage($type, LanguageInterface $language) {
+  public function setCurrentLanguage($type, LanguageInterface $language): void {
     $this->currentLanguages[$type] = $language;
   }
 

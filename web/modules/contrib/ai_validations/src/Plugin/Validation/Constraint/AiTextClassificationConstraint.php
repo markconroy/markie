@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
 use Symfony\Component\Validator\Constraint;
 
 /**
  * Ai text classification check constraint.
- *
- * @Constraint(
- *   id = "AiTextClassification",
- *   label = @Translation("AI Text Classification Check", context = "Validation"),
- * )
  */
+#[ConstraintAttribute(
+  id: 'AiTextClassification',
+  label: new TranslatableMarkup('AI Text Classification Check', [], ['context' => 'Validation']),
+)]
 class AiTextClassificationConstraint extends Constraint {
 
   /**
@@ -21,7 +22,7 @@ class AiTextClassificationConstraint extends Constraint {
    *
    * @var string
    */
-  public $message = '';
+  public string $message = 'The text did not pass the AI classification check.';
 
   /**
    * The AI model.

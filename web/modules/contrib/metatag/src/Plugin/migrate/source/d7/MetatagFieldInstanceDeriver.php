@@ -40,7 +40,7 @@ class MetatagFieldInstanceDeriver extends DeriverBase implements ContainerDerive
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Constructs a PathRedirectDeriver instance.

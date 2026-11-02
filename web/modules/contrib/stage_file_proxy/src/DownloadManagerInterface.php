@@ -47,4 +47,15 @@ interface DownloadManagerInterface {
    */
   public function styleOriginalPath(string $uri, bool $style_only = TRUE);
 
+  /**
+   * Rewrite files that use stage file proxy.
+   *
+   * @param string $uri
+   *   The file URI.
+   *
+   * @return string|null
+   *   The rewritten URL or NULL if no rewrite is needed.
+   */
+  public function rewriteFileUrl(string $uri): ?string;
+
 }

@@ -32,7 +32,6 @@ class MetatagDefaultsTest extends MigrateDrupal7TestBase {
     $this->loadFixture(__DIR__ . '/../../../../fixtures/d7_metatag.php');
 
     $this->installConfig(static::$modules);
-    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('metatag_defaults');
 
     // Run the Metatag defaults migration.
@@ -102,9 +101,9 @@ class MetatagDefaultsTest extends MigrateDrupal7TestBase {
           'title' => '[user:name]',
         ],
       ],
-      '404' => [
+      '403' => [
         'langcode' => 'en',
-        'label' => '404 page not found',
+        'label' => '403 access denied',
       ],
       '404' => [
         'langcode' => 'en',

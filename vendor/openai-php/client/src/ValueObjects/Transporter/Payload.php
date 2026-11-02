@@ -22,12 +22,14 @@ final class Payload
      * Creates a new Request value object.
      *
      * @param  array<string, mixed>  $parameters
+     * @param  array<string, string>  $headers
      */
     private function __construct(
         private readonly ContentType $contentType,
         private readonly Method $method,
         private readonly ResourceUri $uri,
         private readonly array $parameters = [],
+        private readonly array $headers = [],
     ) {
         // ..
     }
@@ -139,6 +141,14 @@ final class Payload
     }
 
     /**
+     * Returns a copy of the payload that sends the given header with this request only.
+     */
+    public function withHeader(string $name, string $value): self
+    {
+        return new self($this->contentType, $this->method, $this->uri, $this->parameters, [...$this->headers, $name => $value]);
+    }
+
+    /**
      * Creates a new Psr 7 Request instance.
      */
     public function toRequest(BaseUri $baseUri, Headers $headers, QueryParams $queryParams): RequestInterface
@@ -158,13 +168,17 @@ final class Payload
             $uri .= '?'.http_build_query($queryParams);
         }
 
+        foreach ($this->headers as $name => $value) {
+            $headers = $headers->withCustomHeader($name, $value);
+        }
+
         $headers = $headers->withContentType($this->contentType);
 
         if ($this->method === Method::POST) {
             if ($this->contentType === ContentType::MULTIPART) {
                 $streamBuilder = new MultipartStreamBuilder($psr17Factory);
 
-                /** @var array<string, StreamInterface|string|int|float|bool|array<int, string>> $parameters */
+                /** @var array<string, StreamInterface|string|int|float|bool|array<int|string, StreamInterface|string|int|float|bool>> $parameters */
                 $parameters = $this->parameters;
 
                 foreach ($parameters as $key => $value) {
@@ -173,8 +187,12 @@ final class Payload
                     }
 
                     if (is_array($value)) {
-                        foreach ($value as $nestedValue) {
-                            $streamBuilder->addResource($key.'[]', $nestedValue);
+                        foreach ($value as $nestedKey => $nestedValue) {
+                            if (is_int($nestedValue) || is_float($nestedValue) || is_bool($nestedValue)) {
+                                $nestedValue = (string) $nestedValue;
+                            }
+
+                            $streamBuilder->addResource(is_string($nestedKey) && is_string($nestedValue) ? $key.'['.$nestedKey.']' : $key.'[]', $nestedValue);
                         }
 
                         continue;

@@ -24,7 +24,7 @@ It combines audio transcription with video scene analysis to produce rich textua
 
 - **Use text format**
   Type: `select`
-  Description: Select a specific text format for the generated content. This is required for cron jobs, since cron runs as an anonymous user.
+  Description: Select a specific text format for the generated content. If the user who saves the content may not use it, the output is stored in the first format of the field they may use. Content saved without a logged-in user, for example from cron, runs as the [fallback user](../index.md#running-without-a-logged-in-user).
   Default (if not saved): `None`
 
 - **Speech To Text Provider**

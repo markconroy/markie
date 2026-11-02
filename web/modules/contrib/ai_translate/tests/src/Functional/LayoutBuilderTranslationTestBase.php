@@ -7,8 +7,8 @@ namespace Drupal\Tests\ai_translate\Functional;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\ai_translate\Traits\BlockContentCreationTrait;
 use Drupal\Tests\ai_translate\Traits\TextTranslatorStubTrait;
-use Drupal\Tests\block_content\Traits\BlockContentCreationTrait;
 use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
 use Drupal\Tests\layout_builder\Traits\EnableLayoutBuilderTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
@@ -154,21 +154,29 @@ abstract class LayoutBuilderTranslationTestBase extends BrowserTestBase {
    *
    * @param string $title
    *   Title of the node.
+   * @param bool $with_text
+   *   FALSE to leave every translatable field of the block empty, the way an
+   *   editor does when a block only carries non-text content, such as a
+   *   Views reference. The block then yields no text metadata at all.
    *
    * @return \Drupal\node\NodeInterface
    *   The saved node, reloaded so the layout carries the saved block revision.
    */
-  protected function createNodeWithInlineBlock(string $title): NodeInterface {
-    $block = BlockContent::create([
+  protected function createNodeWithInlineBlock(string $title, bool $with_text = TRUE): NodeInterface {
+    $values = [
       'type' => static::BLOCK_TYPE,
-      'info' => 'Inline block',
+      'info' => '',
       'reusable' => FALSE,
       'langcode' => 'en',
-      'body' => [
+    ];
+    if ($with_text) {
+      $values['info'] = 'Inline block';
+      $values['body'] = [
         'value' => static::BLOCK_BODY,
         'format' => 'plain_text',
-      ],
-    ]);
+      ];
+    }
+    $block = BlockContent::create($values);
 
     $component = new SectionComponent(
       $this->container->get('uuid')->generate(),

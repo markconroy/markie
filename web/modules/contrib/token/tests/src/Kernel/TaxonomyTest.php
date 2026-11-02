@@ -6,12 +6,16 @@ use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests taxonomy tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class TaxonomyTest extends TokenKernelTestBase {
 
   protected $vocab;
@@ -84,6 +88,23 @@ class TaxonomyTest extends TokenKernelTestBase {
       'parents:keys' => implode(', ', [$root_term->id(), $parent_term->id()]),
     ];
     $this->assertTokens('term', ['term' => $term], $tokens);
+  }
+
+  /**
+   * Tests that renaming a parent term shows in [term:parents] straight away.
+   *
+   * The parent names are cached for the request, so the cache must be cleared
+   * when a term is saved, or a child read again in the same request keeps
+   * showing the old name.
+   */
+  public function testParentsTokenFollowsParentRenameInSameRequest(): void {
+    $parent_term = $this->addTerm($this->vocab, ['name' => 'Old parent name']);
+    $term = $this->addTerm($this->vocab, ['name' => 'Child term', 'parent' => $parent_term->id()]);
+    $this->assertTokens('term', ['term' => $term], ['parents' => 'Old parent name']);
+
+    $parent_term->setName('New parent name')->save();
+
+    $this->assertTokens('term', ['term' => $term], ['parents' => 'New parent name']);
   }
 
   /**

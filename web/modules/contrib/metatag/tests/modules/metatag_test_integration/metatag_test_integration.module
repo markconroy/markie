@@ -5,12 +5,15 @@
  * Contains metatag_test_integration.module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\metatag_test_integration\Hook\MetatagHooks;
+
 /**
  * Implements hook_metatags_attachments_alter().
  */
+#[LegacyHook]
 function metatag_test_integration_metatags_attachments_alter(array &$attachments) {
-  $title = "This is the title I want | [site:name] | Yeah!";
-  _metatag_test_integration_replace_tag('title', \Drupal::token()->replace($title), $attachments);
+  \Drupal::service(MetatagHooks::class)->metatagsAttachmentsAlter($attachments);
 }
 
 /**

@@ -21,17 +21,17 @@
     "docs": "https://www.drupal.org/docs/8/modules/metatag"
   },
   "require": {
-    "php": ">=8.0",
     "drupal/core": "^10.3 || ^11",
-    "drupal/token": "^1.0"
+    "drupal/token": "^1.17"
   },
   "require-dev": {
-    "drupal/forum": "1.x-dev",
+    "drupal/diff": "*",
+    "drupal/forum": "^1.0",
+    "drupal/graphql": "^3",
     "drupal/hal": "^1 || ^2 || ^9",
     "drupal/page_manager": "^4.0",
     "drupal/redirect": "^1.0",
-    "ergebnis/composer-normalize": "*",
-    "mpyw/phpunit-patch-serializable-comparison": "*"
+    "ergebnis/composer-normalize": "*"
   },
   "minimum-stability": "dev",
   "extra": {

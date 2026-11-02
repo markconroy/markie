@@ -30,3 +30,12 @@ ai_search.index.*:
           max:
             type: integer
             label: 'Maximum length'
+    results_cache_mode:
+      type: string
+      label: 'How cached search results are shared between users'
+      constraints:
+        Choice:
+          - none
+          - per_user
+          - per_role
+          - shared

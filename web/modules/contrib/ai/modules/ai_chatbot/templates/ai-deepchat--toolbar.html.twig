@@ -31,7 +31,7 @@
   </div>
 
     <deep-chat
-    {% for key, value in deepchat_settings %}{{ key }}='{{ value|raw }}'
+    {% for key, value in deepchat_settings %}{{ key }}='{{ value }}'
     {% endfor %}
     >
       <div class="chat-header">

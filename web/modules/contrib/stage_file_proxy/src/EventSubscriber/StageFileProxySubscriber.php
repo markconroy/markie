@@ -123,9 +123,15 @@ class StageFileProxySubscriber implements EventSubscriberInterface {
     $relative_path = mb_substr($request_path, mb_strlen($file_dir) + 1);
     // If file is fetched and use_imagecache_root is set, original is used.
     $paths = [$relative_path];
+    $requested_path = $relative_path;
 
-    // Image style file conversion support.
-    $unconverted_path = substr(ImageStyleDownloadController::getUriWithoutConvertedExtension('public://' . $relative_path), strlen('public://'));
+    // Image style file conversion support. Only image style derivatives can
+    // carry a converted extension; any other file keeps its own, even when its
+    // name has another dot in it (e.g. "banner_v2.6.jpg").
+    $unconverted_path = $relative_path;
+    if ($this->manager->styleOriginalPath($relative_path)) {
+      $unconverted_path = substr(ImageStyleDownloadController::getUriWithoutConvertedExtension('public://' . $relative_path), strlen('public://'));
+    }
     if ($unconverted_path !== $relative_path) {
       if ($config->get('use_imagecache_root')) {
         // Check the unconverted file path first in order to use the local
@@ -172,14 +178,17 @@ class StageFileProxySubscriber implements EventSubscriberInterface {
       ];
 
       if ($config->get('hotlink')) {
-        $relative_path = UrlHelper::encodePath($relative_path);
-        $location = Url::fromUri("$server/$remote_file_dir/$relative_path", [
+        // The origin serves the requested file, generating it if it is an
+        // image style derivative.
+        $requested_path = UrlHelper::encodePath($requested_path);
+        $location = Url::fromUri("$server/$remote_file_dir/$requested_path", [
           'query' => $query_parameters,
           'absolute' => TRUE,
         ])->toString();
         $response = new TrustedRedirectResponse($location);
         $response->addCacheableDependency($config);
         $event->setResponse($response);
+        return;
       }
       elseif ($this->manager->fetch($server, $remote_file_dir, $fetch_path, $options)) {
         // Refresh this request & let the web server work out mime type, etc.

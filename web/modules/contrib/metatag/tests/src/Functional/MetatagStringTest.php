@@ -130,7 +130,7 @@ class MetatagStringTest extends BrowserTestBase {
     $this->submitForm($edit, 'Save');
     $session->statusCodeEquals(200);
 
-    $metatag_defaults = \Drupal::config('metatag.metatag_defaults.front');
+    $metatag_defaults = $this->config('metatag.metatag_defaults.front');
     $default_title = $metatag_defaults->get('tags')['title'];
     $default_description = $metatag_defaults->get('tags')['description'];
 

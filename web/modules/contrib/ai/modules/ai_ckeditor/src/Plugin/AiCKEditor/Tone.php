@@ -269,10 +269,19 @@ final class Tone extends AiCKEditorPluginBase {
         throw new \Exception('Term could not be loaded.');
       }
 
+      // Only allow terms from the configured vocabulary that the current
+      // user is allowed to view, so unpublished terms cannot be disclosed.
+      if ($term->bundle() !== $this->configuration['tone_vocabulary'] || (!$term->isNew() && !$term->access('view', $this->account))) {
+        throw new \Exception('Term is not allowed.');
+      }
+
       if (!$term->isNew()) {
         $language = $this->languageManager->getCurrentLanguage()->getId();
         if ($term->hasTranslation($language)) {
           $term = $term->getTranslation($language);
+          if (!$term->access('view', $this->account)) {
+            throw new \Exception('Term is not allowed.');
+          }
         }
       }
 
@@ -329,8 +338,14 @@ final class Tone extends AiCKEditorPluginBase {
     $language = $this->languageManager->getCurrentLanguage()->getId();
 
     foreach ($terms as $term) {
+      if (!$term->access('view', $this->account)) {
+        continue;
+      }
       if ($term->hasTranslation($language)) {
-        $options[$term->id()] = $term->getTranslation($language)->label();
+        $translation = $term->getTranslation($language);
+        if ($translation->access('view', $this->account)) {
+          $options[$term->id()] = $translation->label();
+        }
       }
       else {
         $options[$term->id()] = $term->label();

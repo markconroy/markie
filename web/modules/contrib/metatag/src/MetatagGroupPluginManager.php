@@ -18,9 +18,10 @@ class MetatagGroupPluginManager extends DefaultPluginManager {
     $subdir = 'Plugin/metatag/Group';
 
     // The name of the annotation class that contains the plugin definition.
-    $plugin_definition_annotation_name = 'Drupal\metatag\Annotation\MetatagGroup';
+    $annotation_namespace = 'Drupal\metatag\Annotation\MetatagGroup';
+    $attribute_namespace = 'Drupal\metatag\Attribute\MetatagGroup';
 
-    parent::__construct($subdir, $namespaces, $module_handler, NULL, $plugin_definition_annotation_name);
+    parent::__construct($subdir, $namespaces, $module_handler, NULL, $attribute_namespace, $annotation_namespace);
 
     $this->alterInfo('metatag_groups');
 

@@ -3,17 +3,17 @@
 namespace Drupal\metatag\Plugin\migrate\process\d7;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 
 /**
  * Migrate default configurations from Metatag on D7.
- *
- * @MigrateProcessPlugin(
- *   id = "d7_metatag_defaults",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'd7_metatag_defaults',
+  handle_multiples: TRUE,
+)]
 class MetatagDefaults extends MetatagEntities {
 
   /**

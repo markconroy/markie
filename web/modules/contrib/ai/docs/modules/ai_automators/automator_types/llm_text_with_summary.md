@@ -18,13 +18,13 @@ The rule allows configuration of text format and joiner behavior when combining 
 ## Requirements
 
 - A configured AI chat provider (e.g., OpenAI, Azure OpenAI).
-- The cron job should specify a text format if running as an anonymous user.
+- Content saved without a logged-in user runs as the [fallback user](../index.md#running-without-a-logged-in-user), and its text format rights apply.
 
 ## Form fields required
 
 - **Use text format**
   Selects which text format to use when storing generated text.
-  Important for cron jobs where the anonymous user’s permissions apply.
+  Only used if the user who saves the content may use it.
 
 - **Joiner** (via advanced options)
   Defines how multiple generated values should be combined (e.g., line break, space, custom string).

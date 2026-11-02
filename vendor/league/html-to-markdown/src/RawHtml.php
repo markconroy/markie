@@ -29,6 +29,11 @@ final class RawHtml
      */
     public const KEEPS_ALL_CODE_AS_HTML = '__INTERNAL_keeps_all_code_as_html';
 
+    /**
+     * Set on the configuration while an element is converted: whether it's inside of inline Markdown
+     */
+    public const IS_INSIDE_INLINE_MARKDOWN = '__INTERNAL_is_inside_inline_markdown';
+
     private const TABLE_TAGS = ['caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr'];
 
     public static function isInsideTable(ElementInterface $element): bool
@@ -58,8 +63,15 @@ final class RawHtml
             return self::isInsideInlineMarkdown($element, false);
         }
 
-        return $config->getOption(self::KEEPS_ALL_CODE_AS_HTML) === true
-            || self::isInsideInlineMarkdown($element, $config->getOption(self::FLATTENS_TABLE_CELLS) === true);
+        if ($config->getOption(self::KEEPS_ALL_CODE_AS_HTML) === true) {
+            return true;
+        }
+
+        $isInsideInlineMarkdown = $config->getOption(self::IS_INSIDE_INLINE_MARKDOWN);
+
+        return \is_bool($isInsideInlineMarkdown)
+            ? $isInsideInlineMarkdown
+            : self::isInsideInlineMarkdown($element, $config->getOption(self::FLATTENS_TABLE_CELLS) === true);
     }
 
     /**
@@ -70,40 +82,48 @@ final class RawHtml
      */
     public static function isInsideInlineMarkdown(ElementInterface $element, bool $flattensTableCells): bool
     {
-        for ($node = $element->getParent(); $node !== null; $node = $parent) {
-            $parent = $node->getParent();
-            $tag    = $node->getTagName();
-
-            if (\in_array($tag, ['a', 'b', 'em', 'i', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'], true)) {
-                return true;
-            }
-
-            // As HTML, these make up a block which a blank line doesn't end
-            if (\in_array($tag, ['script', 'style', 'textarea'], true)) {
-                return true;
-            }
-
-            if ($flattensTableCells && \in_array($tag, self::TABLE_TAGS, true)) {
-                return true;
-            }
-
-            // A list item anywhere else isn't output as part of a list which starts on its own line
-            if ($tag === 'li' && ($parent === null || ! \in_array($parent->getTagName(), ['ol', 'ul'], true))) {
-                return true;
-            }
-
-            // Nor is one which follows something other than a list item
-            if ($tag === 'li' && ! self::startsLine($node)) {
-                return true;
-            }
-
-            // A list at the very start of a list item shares its line, which leaves the rest of it misaligned
-            if (($tag === 'ol' || $tag === 'ul') && self::startsListItem($node)) {
+        for ($node = $element->getParent(); $node !== null; $node = $node->getParent()) {
+            if (self::putsContentsInline($node, $flattensTableCells)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Whether the element puts its own contents on the line it starts on, regardless of what's around it
+     */
+    public static function putsContentsInline(ElementInterface $node, bool $flattensTableCells): bool
+    {
+        $parent = $node->getParent();
+        $tag    = $node->getTagName();
+
+        if (\in_array($tag, ['a', 'b', 'em', 'i', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'], true)) {
+            return true;
+        }
+
+        // As HTML, these make up a block which a blank line doesn't end
+        if (\in_array($tag, ['script', 'style', 'textarea'], true)) {
+            return true;
+        }
+
+        if ($flattensTableCells && \in_array($tag, self::TABLE_TAGS, true)) {
+            return true;
+        }
+
+        // A list item anywhere else isn't output as part of a list which starts on its own line
+        if ($tag === 'li' && ($parent === null || ! \in_array($parent->getTagName(), ['ol', 'ul'], true))) {
+            return true;
+        }
+
+        // Nor is one which follows something other than a list item
+        if ($tag === 'li' && ! self::startsLine($node)) {
+            return true;
+        }
+
+        // A list at the very start of a list item shares its line, which leaves the rest of it misaligned
+        return ($tag === 'ol' || $tag === 'ul') && self::startsListItem($node);
     }
 
     /**
@@ -155,16 +175,32 @@ final class RawHtml
 
     public static function getCode(ElementInterface $element): string
     {
-        $code = \html_entity_decode($element->getChildrenAsString());
-
-        $code = \preg_replace('/<code\b[^>]*>/', '', $code);
-        \assert($code !== null);
+        // Inside a <pre>, the code ends up as part of its content, which leaves out any nested <pre> tags as well
+        $code = self::getContentWithoutTags($element, $element->isDescendantOf('pre') ? ['code', 'pre'] : ['code']);
 
         // A carriage return alone also ends a line, and would be left out of any indentation added later
         $code = \preg_replace('/\r\n?/', "\n", $code);
         \assert($code !== null);
 
-        return \str_replace('</code>', '', $code);
+        return $code;
+    }
+
+    /**
+     * Returns the element's contents as text, without the tags of any elements with the given names, its own included
+     *
+     * @param string[] $tagNames
+     */
+    public static function getContentWithoutTags(ElementInterface $element, array $tagNames): string
+    {
+        // Text is still escaped here, so only actual tags match, whose attributes are always written as name="value"
+        $html = \preg_replace(
+            '~</?(?:' . \implode('|', $tagNames) . ')(?:\s++[^\s=>]++="[^"]*+")*+\s*+>~',
+            '',
+            $element->getChildrenAsString()
+        );
+        \assert($html !== null);
+
+        return \html_entity_decode($html);
     }
 
     /**

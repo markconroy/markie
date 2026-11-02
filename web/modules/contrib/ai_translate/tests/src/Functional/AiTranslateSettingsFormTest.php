@@ -33,6 +33,7 @@ class AiTranslateSettingsFormTest extends BrowserTestBase {
     'language',
     'content_translation',
     'help',
+    'ai_translate_test',
   ];
 
   /**
@@ -102,6 +103,32 @@ class AiTranslateSettingsFormTest extends BrowserTestBase {
     // Create a user with permission to manage ai translation prompts.
     $this->adminUser = $this->drupalCreateUser(['manage ai translation prompts']);
     $this->drupalLogin($this->adminUser);
+  }
+
+  /**
+   * Every chat model the site offers is selectable per language.
+   *
+   * The empty option is offered alongside them, so a language can defer to the
+   * AI module's chat default.
+   */
+  public function testPerLanguageModelListIsComplete(): void {
+    $this->drupalGet(Url::fromRoute('ai_translate.settings_form'));
+
+    $select = $this->assertSession()
+      ->selectExists('language_settings[fr][model]');
+
+    // Every model of every chat provider, so the assertion does not depend on
+    // which provider discovery happens to put first.
+    $expected = [
+      'ai_translate_counting_chat__chat-1',
+      'ai_translate_counting_chat__chat-2',
+      'ai_translate_second_chat__second-1',
+    ];
+    foreach ($expected as $option) {
+      $this->assertSession()->optionExists('language_settings[fr][model]', $option);
+    }
+    $this->assertNotEmpty($select->find('named', ['option', '- Default from AI module (chat) -']),
+      'The empty option is still offered, so a language can defer to the AI module default.');
   }
 
   /**

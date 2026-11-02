@@ -9,6 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
 use Drupal\ai_automators\PluginBaseClasses\ComplexTextChat;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
+use Drupal\ai_automators\Traits\TextFormatAccessTrait;
 use Drupal\ai_automators\Traits\RichTextImageDescriptionTrait;
 
 /**
@@ -23,6 +24,7 @@ use Drupal\ai_automators\Traits\RichTextImageDescriptionTrait;
 class LlmTextWithSummary extends ComplexTextChat implements AiAutomatorTypeInterface {
 
   use RichTextImageDescriptionTrait;
+  use TextFormatAccessTrait;
 
   /**
    * {@inheritDoc}
@@ -38,7 +40,7 @@ class LlmTextWithSummary extends ComplexTextChat implements AiAutomatorTypeInter
     $form['automator_use_text_format'] = [
       '#type' => 'select',
       '#title' => $this->t('Use text format'),
-      '#description' => $this->t('If you want to use a specific text format, select it here. Otherwise a text format will be used based on user rights. Always pick one for cron jobs since the cron job runs anonymous.'),
+      '#description' => $this->t('If you want to use a specific text format, select it here. Otherwise a text format will be used based on user rights. If the user who saves the content may not use the selected format, the output is stored in the first format of the field they may use instead, or skipped if there is none. Queued automators run as that user too. Content saved without a logged-in user, for example from cron, runs as the fallback user from the AI Automators settings, or as anonymous.'),
       '#options' => $this->getGeneralHelper()->getTextFormatsOptions(),
       '#default_value' => $defaultValues['automator_use_text_format'] ?? NULL,
     ];
@@ -51,7 +53,7 @@ class LlmTextWithSummary extends ComplexTextChat implements AiAutomatorTypeInter
    */
   public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Get text format.
-    $textFormat = $automatorConfig['use_text_format'] ?? $this->getGeneralHelper()->calculateTextFormat($fieldDefinition);
+    $textFormat = $this->textFormatForCurrentUser($entity, $fieldDefinition, $automatorConfig['use_text_format'] ?? NULL) ?? $this->getGeneralHelper()->calculateTextFormat($fieldDefinition);
 
     // Then set the value.
     $cleanedValues = [];
@@ -69,6 +71,9 @@ class LlmTextWithSummary extends ComplexTextChat implements AiAutomatorTypeInter
    * {@inheritDoc}
    */
   public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+    if (!$this->currentUserCanUseConfiguredTextFormat($entity, $fieldDefinition, $automatorConfig)) {
+      return [];
+    }
     $this->initializeImageDescriptionMetadata();
     return parent::generate($entity, $fieldDefinition, $automatorConfig);
   }

@@ -49,8 +49,8 @@ class DefaultTagsTest extends BrowserTestBase {
 
     // Set the front page to the main /node page, so that the front page is not
     // just the login page.
-    \Drupal::configFactory()
-      ->getEditable('system.site')
+    $config_factory = $this->container->get('config.factory');
+    $config_factory->getEditable('system.site')
       ->set('page.front', '/node')
       ->save(TRUE);
   }

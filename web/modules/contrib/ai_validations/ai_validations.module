@@ -2,14 +2,42 @@
 
 /**
  * @file
- * AI Validations module hooks.
+ * AI Validations module procedural helpers.
+ *
+ * The hook_form_FORM_ID_alter() implementation lives in the OOP hook class
+ * \Drupal\ai_validations\Hook\AiValidationsHooks. The submit handler below
+ * remains a plain procedural function because it is referenced by name from
+ * $form['#submit'], and forms containing an AJAX-driven element get cached
+ * and unserialized across requests (see the docblock on the handler itself);
+ * storing an object callable would expose it to the same serialization
+ * hazard this workaround exists to avoid.
+ *
+ * @see \Drupal\ai_validations\Hook\AiValidationsHooks::formFieldValidationRuleFormAlter()
  */
 
+use Drupal\ai_validations\Hook\AiValidationsHooks;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\field_validation\Form\FieldValidationRuleFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_form_FORM_ID_alter() for field_validation_rule_form.
+ *
+ * BC shim for core versions before 11.1 (per
+ * https://www.drupal.org/node/3442349), where #[Hook] attributes are not
+ * auto-discovered. The #[LegacyHook] attribute stops core 11.1+ from
+ * calling this procedural function, so the OOP implementation registered
+ * in ai_validations.services.yml runs exactly once either way.
+ *
+ * @see \Drupal\ai_validations\Hook\AiValidationsHooks::formFieldValidationRuleFormAlter()
+ */
+#[LegacyHook]
+function ai_validations_form_field_validation_rule_form_alter(array &$form, FormStateInterface $form_state): void {
+  \Drupal::service(AiValidationsHooks::class)->formFieldValidationRuleFormAlter($form, $form_state);
+}
+
+/**
+ * Submit handler that syncs the modified rule back into the plugin collection.
  *
  * Works around a latent field_validation bug exposed once the rule form
  * contains an AJAX-driven element (e.g. the ai_provider_configuration element
@@ -30,18 +58,11 @@ use Drupal\Core\Form\FormStateInterface;
  *      configuration from the collection's instance, so the user's edits are
  *      silently dropped.
  *
- * The submit handler below pushes the form's modified instance back into the
- * collection before the second save so preSave() picks up the right object.
+ * This handler pushes the form's modified instance back into the collection
+ * before the second save so preSave() picks up the right object.
  *
  * @todo Remove this workaround once the upstream bug is fixed.
  * @see https://www.drupal.org/project/field_validation/issues/3587461
- */
-function ai_validations_form_field_validation_rule_form_alter(array &$form, FormStateInterface $form_state): void {
-  $form['#submit'][] = '_ai_validations_sync_rule_to_collection';
-}
-
-/**
- * Submit handler that syncs the modified rule back into the plugin collection.
  */
 function _ai_validations_sync_rule_to_collection(array &$form, FormStateInterface $form_state): void {
   $form_object = $form_state->getFormObject();

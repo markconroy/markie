@@ -1,4 +1,18 @@
+# @file
+# Custom services for the Metatag Routes module.
+
 services:
   metatag_routes.helper:
     class: Drupal\metatag_routes\Helper\MetatagRoutesHelper
     arguments: ['@current_route_match']
+  Drupal\metatag_routes\Helper\MetatagRoutesHelperInterface:
+    alias: metatag_routes.helper
+
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_routes\Hook\HelpHooks:
+    class: Drupal\metatag_routes\Hook\HelpHooks
+    autowire: true
+  Drupal\metatag_routes\Hook\MetatagHooks:
+    class: Drupal\metatag_routes\Hook\MetatagHooks
+    autowire: true

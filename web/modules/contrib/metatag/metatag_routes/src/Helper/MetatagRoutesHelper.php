@@ -14,7 +14,7 @@ class MetatagRoutesHelper implements MetatagRoutesHelperInterface {
    *
    * @var \Drupal\Core\Routing\CurrentRouteMatch
    */
-  protected $currentRouteMatch;
+  protected CurrentRouteMatch $currentRouteMatch;
 
   /**
    * Constructs a MetatagRoutesHelper object.

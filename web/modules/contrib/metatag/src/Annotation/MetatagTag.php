@@ -92,6 +92,6 @@ class MetatagTag extends Plugin {
    *
    * @var bool
    */
-  protected $absoluteUrl;
+  public $absolute_url;
 
 }

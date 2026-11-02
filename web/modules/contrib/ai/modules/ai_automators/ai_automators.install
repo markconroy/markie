@@ -7,6 +7,57 @@
 
 use Drupal\ai_automators\AiAutomatorStatusField;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_requirements().
+ */
+function ai_automators_requirements($phase): array {
+  if ($phase !== 'runtime') {
+    return [];
+  }
+
+  $title = t('AI Automators fallback user');
+  $args = [':url' => Url::fromRoute('ai_automators.settings')->toString()];
+  $uid = \Drupal::service('ai_automator.fallback_user')->getUid();
+  if (!$uid) {
+    return [
+      'ai_automators_fallback_user' => [
+        'title' => $title,
+        'value' => t('Anonymous'),
+        'description' => t('Automators for content saved without a logged-in user, for example from cron or drush, run as anonymous. Choose a <a href=":url">fallback user</a>: a dedicated account with only the text formats that content should get, not an administrator.', $args),
+        'severity' => REQUIREMENT_WARNING,
+      ],
+    ];
+  }
+
+  /** @var \Drupal\user\UserInterface|null $account */
+  $account = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+  if (!$account || !$account->isActive()) {
+    return [
+      'ai_automators_fallback_user' => [
+        'title' => $title,
+        'value' => t('Missing or blocked'),
+        'description' => t('The <a href=":url">fallback user</a> is missing or blocked, so automators without a logged-in user run as anonymous.', $args),
+        'severity' => REQUIREMENT_WARNING,
+      ],
+    ];
+  }
+
+  $is_admin = (int) $account->id() === 1;
+  foreach (Role::loadMultiple($account->getRoles(TRUE)) as $role) {
+    $is_admin = $is_admin || $role->isAdmin();
+  }
+  return [
+    'ai_automators_fallback_user' => [
+      'title' => $title,
+      'value' => $account->getDisplayName(),
+      'description' => $is_admin ? t('The <a href=":url">fallback user</a> is an administrator. Output for any content saved without a logged-in user, whoever wrote it, can be stored in formats such as Full HTML. Choose a dedicated account with fewer rights.', $args) : NULL,
+      'severity' => $is_admin ? REQUIREMENT_WARNING : REQUIREMENT_OK,
+    ],
+  ];
+}
 
 /**
  * Implements hook_install().

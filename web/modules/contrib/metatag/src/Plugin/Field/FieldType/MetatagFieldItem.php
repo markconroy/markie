@@ -6,6 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -91,6 +92,18 @@ class MetatagFieldItem extends FieldItemBase {
 
     // Update the value to only save overridden tags.
     $this->setValue(['value' => Json::encode($tags_to_save)]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
+    if (isset($form['cardinality_container'])) {
+      // Hide the cardinality field.
+      $form['cardinality_container']['#access'] = FALSE;
+      $form['cardinality_container']['#disabled'] = TRUE;
+    }
+    return [];
   }
 
 }

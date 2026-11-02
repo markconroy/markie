@@ -89,7 +89,9 @@ Field UI module enabled**.
            after the entity is saved. This prevents issues from large numbers of
            processes running at save, but can cause large delays between save and
            field population, particularly if there are large numbers of AI
-           Automators waiting to be processed across the site.
+           Automators waiting to be processed across the site. Queued items
+           run as the user who saved the content, see
+           [Running without a logged-in user](#running-without-a-logged-in-user).
         4. Field Widget: processes the automator when triggered from a
            Field Widget Action button in the content edit form. This allows
            content creators to manually trigger AI generation on-demand via
@@ -335,6 +337,32 @@ attempts, so a permanently failing item cannot block the queue.
 
 If you use Ultimate Cron, target the `ai_automators_cron` hook rather than the
 `ai_automator_field_modifier` queue worker.
+
+## Running without a logged-in user
+
+Automators run with the access of the user who saved the content, including
+the text formats that user may use. Queued items keep that user, so they run
+as the same user on cron, whoever runs cron.
+
+Content can also be saved without a logged-in user, for example by cron, drush,
+a migration or a scheduled publish. Those automators run as the **fallback
+user**:
+
+- Go to **Administration » Configuration » AI » AI Automators**
+  (`/admin/config/ai/ai-automators/settings`).
+- **Run automators without a logged-in user as**: choose a user. Leave it empty
+  to run as anonymous, which is the default.
+- Only users with the *Administer users* permission can see and change it.
+- It is stored in state, not in configuration, so set it on each environment.
+  A missing or blocked user is ignored with a log warning, and the automator
+  runs as anonymous.
+
+Choose a dedicated account with only the text formats automated content should
+get. Do not choose an administrator: output for any content saved this way,
+whoever wrote it, would then be stored in formats such as Full HTML.
+
+The status report (`/admin/reports/status`) shows a warning while no fallback
+user is set, the chosen user is missing or blocked, or it is an administrator.
 
 ## Developer documentation
 Check the [developers guide](../../developers/writing_an_ai_automators_plugin.md) for

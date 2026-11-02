@@ -6,30 +6,12 @@ namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
 use Drupal\ai\OperationType\Moderation\ModerationInput;
 use Drupal\ai_validations\AiConstraintValidatorBase;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 
 /**
  * AiModeration constraint validator.
  */
 final class AiModerationConstraintValidator extends AiConstraintValidatorBase {
-
-  /**
-   * Logger channel.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected LoggerInterface $logger;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    $instance = parent::create($container);
-    $instance->logger = $container->get('logger.factory')->get('ai_validations');
-    return $instance;
-  }
 
   /**
    * {@inheritdoc}

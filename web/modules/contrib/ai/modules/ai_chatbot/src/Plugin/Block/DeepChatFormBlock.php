@@ -621,6 +621,56 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
   /**
    * {@inheritdoc}
    */
+  public function blockValidate($form, FormStateInterface $form_state) {
+    $styling = $form_state->getValue('styling');
+    // The toolbar placement forces its own width and height on submit.
+    if (($styling['placement'] ?? '') === 'toolbar') {
+      return;
+    }
+    // Width and height are written into the inline style of the chat
+    // element, so only accept a plain CSS length.
+    foreach (['width' => $this->t('Width'), 'height' => $this->t('Height')] as $key => $label) {
+      if (!self::isValidCssLength((string) ($styling[$key] ?? ''))) {
+        $form_state->setErrorByName('styling][' . $key, $this->t('@label must be a CSS length such as 500px, 50%, 30rem or auto.', [
+          '@label' => $label,
+        ]));
+      }
+    }
+  }
+
+  /**
+   * Checks whether a value is a plain CSS length.
+   *
+   * @param string $value
+   *   The value to check.
+   *
+   * @return bool
+   *   TRUE if the value is a number with a CSS unit, or auto.
+   */
+  public static function isValidCssLength(string $value): bool {
+    return (bool) preg_match('/^(auto|\d+(\.\d+)?(px|%|em|rem|vh|vw|dvh|dvw|svh|svw|lvh|lvw|vmin|vmax|ch))$/D', $value);
+  }
+
+  /**
+   * Gets a configured width or height that is safe to put in a style.
+   *
+   * Config can be imported without passing blockValidate(), so an invalid
+   * value falls back to the default instead of reaching the markup.
+   *
+   * @param string $key
+   *   Either 'width' or 'height'.
+   *
+   * @return string
+   *   The configured CSS length, or the default one.
+   */
+  protected function getCssLength(string $key): string {
+    $value = (string) ($this->configuration[$key] ?? '');
+    return self::isValidCssLength($value) ? $value : $this->defaultConfiguration()[$key];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['bot_name'] = $form_state->getValue('messages')['bot_name'];
     $this->configuration['bot_image'] = $form_state->getValue('messages')['bot_image'];
@@ -670,6 +720,8 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $runtime_settings = $this->configuration;
     $runtime_settings['default_username'] = $user_data['username'];
     $runtime_settings['default_avatar'] = $user_data['avatar'];
+    $runtime_settings['width'] = $this->getCssLength('width');
+    $runtime_settings['height'] = $this->getCssLength('height');
     /** @var \Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface $plugin_instance */
     $plugin_instance = $this->chatProcessorManager->createInstance($this->configuration['chat_processor_plugin'], $this->configuration['plugin_configuration'] ?? []);
 
@@ -694,8 +746,8 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $block['#attached']['drupalSettings']['ai_deepchat']['default_username'] = $user_data['username'];
     $block['#attached']['drupalSettings']['ai_deepchat']['default_avatar'] = $user_data['avatar'];
     $block['#attached']['drupalSettings']['ai_deepchat']['toggle_state'] = $this->configuration['toggle_state'];
-    $block['#attached']['drupalSettings']['ai_deepchat']['width'] = $this->configuration['placement'] === 'toolbar' ? '100%' : $this->configuration['width'];
-    $block['#attached']['drupalSettings']['ai_deepchat']['height'] = $this->configuration['placement'] === 'toolbar' ? 'auto' : $this->configuration['height'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['width'] = $this->configuration['placement'] === 'toolbar' ? '100%' : $runtime_settings['width'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['height'] = $this->configuration['placement'] === 'toolbar' ? 'auto' : $runtime_settings['height'];
     $block['#attached']['drupalSettings']['ai_deepchat']['first_message'] = $this->configuration['first_message'];
     $block['#attached']['drupalSettings']['ai_deepchat']['placement'] = $this->configuration['placement'];
     $block['#attached']['drupalSettings']['ai_deepchat']['collapse_minimal'] = $this->configuration['collapse_minimal'];
@@ -752,8 +804,8 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     if ($style && !str_ends_with($style, ';')) {
       $style .= '; ';
     }
-    $height = $this->configuration['placement'] === 'toolbar' ? '100%' : $this->configuration['height'];
-    $width = $this->configuration['placement'] === 'toolbar' ? 'auto' : $this->configuration['width'];
+    $height = $this->configuration['placement'] === 'toolbar' ? '100%' : $this->getCssLength('height');
+    $width = $this->configuration['placement'] === 'toolbar' ? 'auto' : $this->getCssLength('width');
     $style .= 'height: ' . $height . '; width: ' . $width . ';';
 
     if ($style_parameters) {

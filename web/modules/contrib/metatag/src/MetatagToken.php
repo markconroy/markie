@@ -19,14 +19,14 @@ class MetatagToken {
    *
    * @var \Drupal\Core\Utility\Token
    */
-  protected $token;
+  protected Token $token;
 
   /**
    * Token entity type mapper service.
    *
    * @var \Drupal\token\TokenEntityMapperInterface
    */
-  protected $tokenEntityMapper;
+  protected TokenEntityMapperInterface $tokenEntityMapper;
 
   /**
    * Constructs a new MetatagToken object.

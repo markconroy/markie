@@ -9,6 +9,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Queue\DatabaseQueue;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ai_automators\AutomatorFallbackUser;
 use Drupal\ai_automators\Plugin\AiAutomatorProcess\QueueWorkerProcessor;
 
 /**
@@ -56,7 +57,8 @@ class QueueWorkerProcessorTest extends KernelTestBase {
     $queueFactory = $this->createMock(QueueFactory::class);
     $queueFactory->method('get')->willReturn($this->dbQueue);
 
-    $this->processor = new QueueWorkerProcessor($queueFactory, $connection);
+    $fallbackUser = new AutomatorFallbackUser($this->container->get('state'), $this->container->get('entity_type.manager'), $this->container->get('logger.factory'));
+    $this->processor = new QueueWorkerProcessor($queueFactory, $connection, $this->container->get('current_user'), $fallbackUser);
   }
 
   /**

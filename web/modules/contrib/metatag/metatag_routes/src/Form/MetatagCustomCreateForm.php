@@ -19,39 +19,39 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class MetatagCustomCreateForm extends FormBase {
 
   /**
-   * Drupal\Core\Entity\EntityTypeManagerInterface definition.
+   * The entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
-   * Drupal\Core\Routing\RouteProvider definition.
+   * Route provider service.
    *
-   * @var \Drupal\Core\Routing\RouteProvider
+   * @var \Drupal\Core\Routing\RouteProviderInterface
    */
-  protected $routeProvider;
+  protected RouteProviderInterface $routeProvider;
 
   /**
-   * Drupal\Core\Path\PathValidator definition.
+   * Path validator service.
    *
-   * @var \Drupal\Core\Path\PathValidator
+   * @var \Drupal\Core\Path\PathValidatorInterface
    */
-  protected $pathValidator;
+  protected PathValidatorInterface $pathValidator;
 
   /**
-   * Drupal\Core\Routing\AdminContext definition.
+   * The admin context.
    *
    * @var \Drupal\Core\Routing\AdminContext
    */
-  protected $adminContext;
+  protected AdminContext $adminContext;
 
   /**
-   * Drupal\metatag_routes\Helper\MetatagRoutesHelperInterface definition.
+   * The routes helper service.
    *
    * @var \Drupal\metatag_routes\Helper\MetatagRoutesHelperInterface
    */
-  protected $metatagRoutesHelper;
+  protected MetatagRoutesHelperInterface $metatagRoutesHelper;
 
   /**
    * {@inheritdoc}

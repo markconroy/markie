@@ -99,9 +99,7 @@ class AiTranslateSettingsForm extends ConfigFormBase {
     // Load config.
     $config = $this->config(static::CONFIG_NAME);
 
-    $chat_models = $this->providerManager->getSimpleProviderModelOptions('chat');
-    array_shift($chat_models);
-    array_splice($chat_models, 0, 1);
+    $chat_models = $this->providerManager->getSimpleProviderModelOptions('chat', FALSE);
     $form['#tree'] = TRUE;
 
     // Allow site builders to opt-out of using this module to override the

@@ -164,7 +164,7 @@ class AiValidationsProviderConfigurationFormElementTest extends WebDriverTestBas
    * rather than "provider"; this guards against accidental renames.
    */
   public function testImageClassificationRulePersistsSelectedModel(): void {
-    $this->visitAddRule('ai_image_classification%20constraint_rule', 'field_test_image');
+    $this->visitAddRule('ai_image_classification_constraint_rule', 'field_test_image');
 
     $this->assertProviderElementRenders('data[model][provider_model]');
 
@@ -174,7 +174,7 @@ class AiValidationsProviderConfigurationFormElementTest extends WebDriverTestBas
     $this->getSession()->getPage()->pressButton('Add Rule');
     $this->assertSession()->pageTextContains('The rule was successfully applied.');
 
-    $rule = $this->loadSavedRule('ai_image_classification constraint_rule');
+    $rule = $this->loadSavedRule('ai_image_classification_constraint_rule');
     $this->assertSame(self::TEST_PROVIDER_MODEL, $rule['data']['model']);
   }
 

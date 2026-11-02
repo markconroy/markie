@@ -2,11 +2,16 @@
 
 namespace Drupal\Tests\token\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Test basic, low-level token functions.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class UnitTest extends TokenKernelTestBase {
 
   /**

@@ -18,13 +18,13 @@ Supports automatic text format selection and value joining when multiple prompts
 ## Requirements
 
 - A configured AI chat provider (e.g., OpenAI, Azure OpenAI).
-- Text format must be selected or determinable by user rights, especially for cron jobs.
+- Text format must be selected or determinable by user rights. Content saved without a logged-in user runs as the [fallback user](../index.md#running-without-a-logged-in-user).
 
 ## Form fields required
 
 - **Use text format**
   Allows the administrator to select a specific text format for output.
-  Essential for cron jobs where the anonymous user’s permissions apply.
+  Only used if the user who saves the content may use it.
 
 - **Joiner** (via advanced options)
   Lets you specify how multiple generated text values should be combined (e.g., newline, space, custom delimiter).

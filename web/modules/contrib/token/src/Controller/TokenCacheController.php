@@ -13,7 +13,7 @@ class TokenCacheController extends ControllerBase {
    * Clear caches and redirect back to the frontpage.
    */
   public function flush() {
-    token_clear_cache();
+    \Drupal::token()->resetInfo();
     $this->messenger()->addMessage($this->t('Token registry caches cleared.'));
     return $this->redirect('<front>');
   }

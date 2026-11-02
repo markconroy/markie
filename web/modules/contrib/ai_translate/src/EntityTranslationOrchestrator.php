@@ -119,10 +119,18 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
       }
     }
 
-    // Decodes HTML entities in translation.
-    // Because of sanitation in StringFormatter/Markup, this should be safe.
     foreach ($translatedText as &$translatedTextItem) {
-      $translatedTextItem = html_entity_decode($translatedTextItem);
+      if (empty($singleField['format'])) {
+        // Plain-text columns are escaped at display, so entities must be
+        // decoded: node title, image alt and title, link title and file
+        // description.
+        $translatedTextItem = html_entity_decode($translatedTextItem);
+      }
+      // A real "<" means the markup is genuine and the entities are content.
+      elseif (str_contains($translatedTextItem, '&lt;')
+        && !str_contains($translatedTextItem, '<')) {
+        $translatedTextItem = html_entity_decode($translatedTextItem);
+      }
     }
     unset($translatedTextItem);
 

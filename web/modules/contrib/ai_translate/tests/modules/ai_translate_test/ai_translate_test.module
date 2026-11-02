@@ -28,3 +28,12 @@ function ai_translate_test_entity_base_field_info_alter(array &$fields, EntityTy
   \Drupal::service(AiTranslateTestHooks::class)
     ->entityBaseFieldInfoAlter($fields, $entity_type);
 }
+
+/**
+ * Implements hook_ai_translate_translation_alter().
+ */
+#[LegacyHook]
+function ai_translate_test_ai_translate_translation_alter(&$messages, &$provider_id, &$model_id): void {
+  \Drupal::service(AiTranslateTestHooks::class)
+    ->aiTranslateTranslationAlter($messages, $provider_id, $model_id);
+}

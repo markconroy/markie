@@ -1,3 +1,6 @@
+parameters:
+  ai_translate.skip_procedural_hook_scan: true
+
 services:
   ai_translate.subscriber:
     class: Drupal\ai_translate\Routing\AiTranslateRouteSubscriber
@@ -21,6 +24,10 @@ services:
       - '@module_handler'
       - '@cache.ai_translate'
   Drupal\ai_translate\TextTranslatorInterface: '@ai_translate.text_translator'
+  ai_translate.chat_model_resolver:
+    class: Drupal\ai_translate\ChatModelResolver
+    autowire: true
+  Drupal\ai_translate\ChatModelResolver: '@ai_translate.chat_model_resolver'
   ai_translate.translation_orchestrator:
     class: Drupal\ai_translate\EntityTranslationOrchestrator
     autowire: true
@@ -34,3 +41,9 @@ services:
       - { name: cache.bin }
     factory: ['@cache_factory', 'get']
     arguments: [ai_translate]
+  Drupal\ai_translate\Hook\FormHooks:
+    autowire: true
+  Drupal\ai_translate\Hook\HelpHooks:
+    autowire: true
+  Drupal\ai_translate\Hook\RequirementsHooks:
+    autowire: true

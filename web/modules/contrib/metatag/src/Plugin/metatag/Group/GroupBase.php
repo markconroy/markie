@@ -3,6 +3,7 @@
 namespace Drupal\metatag\Plugin\metatag\Group;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Annotation\Translation;
 
 /**
  * Each group will extend this base.
@@ -19,7 +20,7 @@ abstract class GroupBase extends PluginBase {
   /**
    * The name of the group.
    *
-   * @var \Drupal\Core\Annotation\Translation
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup|string
    *
    * @ingroup plugin_translatable
    */
@@ -28,7 +29,7 @@ abstract class GroupBase extends PluginBase {
   /**
    * Description of the group.
    *
-   * @var string
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup|string
    */
   protected $description;
 
@@ -41,8 +42,21 @@ abstract class GroupBase extends PluginBase {
     // Set the properties from the annotation.
     // @todo Should we have setProperty() methods for each of these?
     $this->id = $plugin_definition['id'];
-    $this->label = $plugin_definition['label'];
-    $this->description = $plugin_definition['description'] ?? '';
+    // If we got here via an Annotation, unwrap the Translation object.
+    // Otherwise we got here via an Attribute, so label is already a
+    // TranslatableMarkup.
+    $this->label = $plugin_definition['label'] instanceof Translation
+      ? $plugin_definition['label']->get()
+      : $plugin_definition['label'];
+    // Now do the same for description, if it was set.
+    if (!empty($plugin_definition['description'])) {
+      $this->description = $plugin_definition['description'] instanceof Translation
+        ? $plugin_definition['description']->get()
+        : $plugin_definition['description'];
+    }
+    else {
+      $this->description = '';
+    }
   }
 
   /**
@@ -58,7 +72,7 @@ abstract class GroupBase extends PluginBase {
   /**
    * Get this group's human-friendly name.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
    *   This group's human-friendly name.
    */
   public function label(): string {
@@ -68,8 +82,8 @@ abstract class GroupBase extends PluginBase {
   /**
    * This group object's description.
    *
-   * @return string
-   *   This group's ID.
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   *   This group's description.
    */
   public function description(): string {
     return $this->description;

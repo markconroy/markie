@@ -323,6 +323,12 @@ final class Translate extends AiCKEditorPluginBase {
           throw new \Exception('Language term could not be loaded.');
         }
 
+        // Only allow terms from the configured vocabulary that the current
+        // user is allowed to view, so unpublished terms cannot be disclosed.
+        if ($term->bundle() !== $this->configuration['translate_vocabulary'] || (!$term->isNew() && !$term->access('view', $this->account))) {
+          throw new \Exception('Language term is not allowed.');
+        }
+
         if ($term->isNew() && $this->configuration['autocreate'] && $this->account->hasPermission('create terms in ' . $this->configuration['translate_vocabulary'])) {
           $term->save();
         }
@@ -373,11 +379,13 @@ final class Translate extends AiCKEditorPluginBase {
   protected function getTermOptions(string $vid): array {
     /** @var \Drupal\taxonomy\TermStorageInterface $voc */
     $voc = $this->entityTypeManager->getStorage('taxonomy_term');
-    $terms = $voc->loadTree($vid);
+    $terms = $voc->loadTree($vid, 0, NULL, TRUE);
     $options = [];
 
     foreach ($terms as $term) {
-      $options[$term->tid] = $term->name;
+      if ($term->access('view', $this->account)) {
+        $options[$term->id()] = $term->label();
+      }
     }
 
     return $options;

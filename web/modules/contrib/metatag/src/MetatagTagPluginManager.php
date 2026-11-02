@@ -18,9 +18,10 @@ class MetatagTagPluginManager extends DefaultPluginManager {
     $subdir = 'Plugin/metatag/Tag';
 
     // The name of the annotation class that contains the plugin definition.
-    $plugin_definition_annotation_name = 'Drupal\metatag\Annotation\MetatagTag';
+    $annotation_namespace = 'Drupal\metatag\Annotation\MetatagTag';
+    $attribute_namespace = 'Drupal\metatag\Attribute\MetatagTag';
 
-    parent::__construct($subdir, $namespaces, $module_handler, NULL, $plugin_definition_annotation_name);
+    parent::__construct($subdir, $namespaces, $module_handler, NULL, $attribute_namespace, $annotation_namespace);
 
     $this->alterInfo('metatag_tags');
 

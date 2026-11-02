@@ -3,11 +3,16 @@
 namespace Drupal\Tests\token\Kernel;
 
 use Drupal\file\Entity\File;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests file tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class FileTest extends TokenKernelTestBase {
 
   /**

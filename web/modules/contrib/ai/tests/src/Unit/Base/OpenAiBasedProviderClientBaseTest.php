@@ -12,11 +12,16 @@ use Drupal\Core\Site\Settings;
 use Drupal\ai\Base\OpenAiBasedProviderClientBase;
 use Drupal\ai\Exception\AiQuotaException;
 use Drupal\ai\Exception\AiRateLimitException;
+use Drupal\ai\Exception\AiRequestErrorException;
 use Drupal\ai\Exception\AiResponseErrorException;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\GenericType\AudioFile;
+use Drupal\ai\OperationType\SpeechToText\SpeechToTextInput;
 use Drupal\ai\OperationType\TextToImage\TextToImageInput;
 use Drupal\ai\Service\HostnameFilter;
+use GuzzleHttp\Psr7\HttpFactory;
+use Http\Message\MultipartStream\MultipartStreamBuilder;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -397,6 +402,225 @@ class OpenAiBasedProviderClientBaseTest extends TestCase {
     $this->expectExceptionMessage('The API returned an image with an unsupported mime type.');
 
     $provider->textToImage('a red square', 'stub-model');
+  }
+
+  /**
+   * Tests that speechToText() hands the audio over in memory.
+   *
+   * The audio must never be written to disk, where other requests or local
+   * users could read it, yet the API still needs a filename to derive the
+   * audio format from.
+   *
+   * @covers ::speechToText
+   */
+  public function testSpeechToTextKeepsTheAudioInMemory(): void {
+    $client = $this->createSpeechToTextClient();
+    $provider = $this->createSpeechToTextProvider($client);
+
+    $this->assertSame('first', $provider->speechToText('first-audio', 'stub-model')->getNormalized());
+    $this->assertSame('second', $provider->speechToText('second-audio', 'stub-model')->getNormalized());
+
+    $this->assertCount(2, $client->calls);
+    [$first, $second] = $client->calls;
+    $this->assertSame('first-audio', $first['contents']);
+    $this->assertSame('second-audio', $second['contents']);
+    foreach ($client->calls as $call) {
+      $this->assertSame('MEMORY', $call['stream_type']);
+      $this->assertStringContainsString('filename="audio.mp3"', $call['part']);
+      $this->assertStringContainsString('Content-Type: audio/mpeg', $call['part']);
+      // The stream is closed once the call returns.
+      $this->assertFalse($call['file']->isReadable());
+    }
+  }
+
+  /**
+   * Tests that the audio stream is closed when the API call fails.
+   *
+   * @covers ::speechToText
+   */
+  public function testSpeechToTextClosesTheStreamWhenTheCallFails(): void {
+    $client = $this->createSpeechToTextClient(fail: TRUE);
+    $provider = $this->createSpeechToTextProvider($client);
+
+    try {
+      $provider->speechToText('failing-audio', 'stub-model');
+      $this->fail('The failing API call was not reported.');
+    }
+    catch (AiResponseErrorException) {
+    }
+
+    $this->assertCount(1, $client->calls);
+    $this->assertSame('failing-audio', $client->calls[0]['contents']);
+    $this->assertFalse($client->calls[0]['file']->isReadable());
+  }
+
+  /**
+   * Tests that speechToText() uploads the audio under the input's filename.
+   *
+   * The API derives the audio format from the extension, so a filename
+   * without one gets .mp3 appended.
+   *
+   * @covers ::speechToText
+   * @dataProvider providerSpeechToTextFilename
+   */
+  public function testSpeechToTextUsesTheInputFilename(string $filename, string $expected_filename, string $expected_type): void {
+    $client = $this->createSpeechToTextClient();
+    $provider = $this->createSpeechToTextProvider($client);
+
+    $input = new SpeechToTextInput(new AudioFile('clip-audio', 'audio/mp4', $filename));
+    $provider->speechToText($input, 'stub-model');
+
+    $this->assertCount(1, $client->calls);
+    $this->assertSame('clip-audio', $client->calls[0]['contents']);
+    $this->assertStringContainsString('filename="' . $expected_filename . '"', $client->calls[0]['part']);
+    $this->assertStringContainsString('Content-Type: ' . $expected_type, $client->calls[0]['part']);
+  }
+
+  /**
+   * Data provider for testSpeechToTextUsesTheInputFilename().
+   *
+   * @return array
+   *   The input filename, the uploaded filename and its content type.
+   */
+  public static function providerSpeechToTextFilename(): array {
+    return [
+      'with extension' => ['clip.m4a', 'clip.m4a', 'audio/mp4'],
+      'without extension' => ['recording', 'recording.mp3', 'audio/mpeg'],
+      'empty' => ['', 'audio.mp3', 'audio/mpeg'],
+    ];
+  }
+
+  /**
+   * Tests that audio too large for the memory limit is refused.
+   *
+   * Copying it into memory would otherwise end the request with a fatal
+   * error instead of an exception the caller can handle.
+   *
+   * @covers ::speechToText
+   */
+  public function testSpeechToTextRefusesAudioLargerThanTheMemoryLimit(): void {
+    $client = $this->createSpeechToTextClient();
+    $provider = $this->createSpeechToTextProvider($client);
+    $audio = str_repeat('a', 2 * 1024 * 1024);
+
+    // Leave less free memory than the audio needs for its copy.
+    $memory_limit = ini_get('memory_limit');
+    ini_set('memory_limit', (string) (memory_get_usage(TRUE) + 1024 * 1024));
+    try {
+      $provider->speechToText($audio, 'stub-model');
+      $this->fail('Audio larger than the free memory was not refused.');
+    }
+    catch (AiRequestErrorException $e) {
+      $this->assertSame('The audio file is too large to be processed in memory.', $e->getMessage());
+    }
+    finally {
+      ini_set('memory_limit', $memory_limit);
+    }
+
+    $this->assertSame([], $client->calls);
+  }
+
+  /**
+   * Builds a provider whose client is the given speech-to-text stub.
+   *
+   * @param object $client
+   *   The stand-in for the SDK client.
+   *
+   * @return \Drupal\ai\Base\OpenAiBasedProviderClientBase
+   *   The provider, with its client already loaded.
+   */
+  protected function createSpeechToTextProvider(object $client): OpenAiBasedProviderClientBase {
+    $provider = $this->createPartialMock(OpenAiBasedProviderClientBase::class, [
+      'getModelSettings',
+      'getSupportedOperationTypes',
+    ]);
+    (new \ReflectionProperty(OpenAiBasedProviderClientBase::class, 'client'))->setValue($provider, $client);
+    (new \ReflectionProperty(OpenAiBasedProviderClientBase::class, 'configuration'))->setValue($provider, []);
+    return $provider;
+  }
+
+  /**
+   * Builds a stand-in for the SDK client's audio()->transcribe() chain.
+   *
+   * The SDK classes are final, so they cannot be mocked. The stub records
+   * what it was handed, including the multipart part the SDK would send.
+   *
+   * @param bool $fail
+   *   Whether the transcribe call throws.
+   *
+   * @return object
+   *   The stub client.
+   */
+  protected function createSpeechToTextClient(bool $fail = FALSE): object {
+    return new class($fail) {
+
+      /**
+       * The recorded calls.
+       *
+       * @var array<int, array{file: \Psr\Http\Message\StreamInterface, contents: string, stream_type: string, part: string}>
+       */
+      public array $calls = [];
+
+      /**
+       * The text returned by the current call.
+       */
+      protected string $text = '';
+
+      public function __construct(
+        protected bool $fail,
+      ) {}
+
+      /**
+       * Stands in for the audio resource.
+       *
+       * @return static
+       *   The stub itself.
+       */
+      public function audio(): static {
+        return $this;
+      }
+
+      /**
+       * Records the uploaded file.
+       *
+       * @param array $payload
+       *   The request payload.
+       *
+       * @return static
+       *   The stub itself.
+       */
+      public function transcribe(array $payload): static {
+        $file = $payload['file'];
+        $contents = (string) $file;
+        // Build the multipart body the way the SDK does, to see the
+        // headers the API would receive for the file.
+        $builder = new MultipartStreamBuilder(new HttpFactory());
+        $builder->addResource('file', $file);
+        $body = (string) $builder->build();
+        $this->calls[] = [
+          'file' => $file,
+          'contents' => $contents,
+          'stream_type' => $file->getMetadata('stream_type'),
+          'part' => substr($body, 0, (int) strpos($body, "\r\n\r\n", strpos($body, 'name="file"'))),
+        ];
+        if ($this->fail) {
+          throw new \TypeError('Transcription failed.');
+        }
+        $this->text = explode('-', $contents)[0];
+        return $this;
+      }
+
+      /**
+       * Serves the transcription.
+       *
+       * @return array
+       *   The raw response data.
+       */
+      public function toArray(): array {
+        return ['text' => $this->text];
+      }
+
+    };
   }
 
   /**

@@ -4,5 +4,5 @@ dependencies: {  }
 id: '404'
 label: '404 page not found'
 tags:
-  canonical_url: '[site:url]'
-  shortlink: '[site:url]'
+  canonical_url: '<none>'
+  shortlink: '<none>'

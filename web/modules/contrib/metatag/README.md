@@ -77,27 +77,48 @@ This module requires the following modules:
 ## Recommended / related modules
 
 Some modules are available that extend Metatag with additional or complimentary
-functionality:
+functionality. Many related modules are available from the [Metatag ecosystem
+page](https://www.drupal.org/project/metatag/ecosystem) and that is the
+best place to find them.
 
-- [Token OR](https://www.drupal.org/project/token_or):
-  Provides a means to output a second token if the first one is empty, which can
-  be very useful for complex content architectures.
-- [Schema.org Metatag](https://www.drupal.org/project/schema_metatag):
-  Extensive solution for adding schema.org / JSON-LD support to Metatag.
+The following are a noteworthy additions to Metatag's main functionality:
+
 - [Context Metadata](https://www.drupal.org/project/context_metadata):
   Allow assignment of meta tags based upon different system contexts, e.g. per
   path.
-- [Real-time SEO for Drupal](https://www.drupal.org/project/yoast_seo):
-  Uses the [YoastSEO.js library and service](https://yoast.com/) to provide
-  realtime feedback on the meta tags.
-- [Metatag Cxense](https://www.drupal.org/project/metatag_cxense):
-  Adds support for the Cxense meta tags used by their DMP and Insight services.
-- [Metatag Google Scholar](https://www.drupal.org/project/metatag_google_scholar):
-  Adds support for a number of meta tags used with the Google Scholar system.
+- [ECA Metatag](https://www.drupal.org/project/eca_metatag):
+  Use Event-Condition-Action rules to dynamically set meta tags.
 - [Maxlength](https://www.drupal.org/project/maxlength):
   If this module is installed, meta tags that have a maximum length defined in
   the settings will have that maximum length enforced; this may be disabled in
   the settings if it proves to be problematic.
+- [Metatag AI](https://www.drupal.org/project/metatag_ai):
+  AI-powered metadata generation and suggestions.
+- [Metatag Async Widget](https://www.drupal.org/project/metatag_async_widget):
+  Provides an asynchronous widget for editing meta tags.
+- [Metatag Page Heading](https://www.drupal.org/project/metatag_page_heading):
+  Automatically generates meta tags using page headings.
+- [Metatag Webform](https://www.drupal.org/project/metatag_webform):
+  Adds meta tag support to Webform pages.
+- [Real-time SEO for Drupal](https://www.drupal.org/project/yoast_seo):
+  Uses the [YoastSEO.js library and service](https://yoast.com/) to provide
+  realtime feedback on the meta tags.
+- [Token Custom](https://www.drupal.org/project/token_custom):
+  Allows creation of custom tokens without writing code.
+- [Token Modifier](https://www.drupal.org/project/token_modifier):
+  Modify or transform token output before being used in metadata.
+- [Token OR](https://www.drupal.org/project/token_or):
+  Provides a means to output a second token if the first one is empty, which can
+  be very useful for complex content architectures.
+
+The following modules make additional meta tags available:
+
+- [Metatag Cxense](https://www.drupal.org/project/metatag_cxense):
+  Adds support for the Cxense meta tags used by their DMP and Insight services.
+- [Metatag Google Scholar](https://www.drupal.org/project/metatag_google_scholar):
+  Adds support for a number of meta tags used with the Google Scholar system.
+- [Schema.org Metatag](https://www.drupal.org/project/schema_metatag):
+  Extensive solution for adding schema.org / JSON-LD support to Metatag.
 
 
 ## Installation

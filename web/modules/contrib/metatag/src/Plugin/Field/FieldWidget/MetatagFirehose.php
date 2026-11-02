@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'metatag_firehose',
   label: new TranslatableMarkup('Advanced meta tags form'),
   field_types: [
-    'metatag'
+    'metatag',
   ]
 )]
 class MetatagFirehose extends WidgetBase implements ContainerFactoryPluginInterface {
@@ -35,21 +35,21 @@ class MetatagFirehose extends WidgetBase implements ContainerFactoryPluginInterf
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * Instance of MetatagTagPluginManager service.
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $metatagPluginManager;
+  protected MetatagTagPluginManager $metatagPluginManager;
 
   /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * {@inheritdoc}

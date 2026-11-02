@@ -2,7 +2,9 @@
 
 namespace Drupal\ai_translate\Plugin\AiProvider;
 
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -18,14 +20,25 @@ use Drupal\ai\OperationType\TranslateText\TranslateTextInput;
 use Drupal\ai\OperationType\TranslateText\TranslateTextInterface;
 use Drupal\ai\OperationType\TranslateText\TranslateTextOutput;
 use Drupal\ai\Plugin\ProviderProxy;
+use Drupal\ai_translate\ChatModelResolver;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'chat_translation' provider.
  *
- * The purpose is to implement 'translate_text' operation
- * using more generic 'chat' operation supported by many LLM providers.
+ * Most AI providers implement the 'chat' operation but never declare support
+ * for 'translate_text', even though the model behind them translates perfectly
+ * well. Without an adapter, none of them could be selected as AI Translate's
+ * provider, and the module would only work on sites running a dedicated
+ * translation service such as DeepL or Google Cloud Translation.
+ *
+ * This provider is that adapter. It declares 'translate_text' and nothing else,
+ * and fulfills it by rendering the configured translation prompt and sending it
+ * to a chat provider. Any chat model thus becomes a translator.
+ *
+ * Which chat provider and model that is depends on the target language; see
+ * \Drupal\ai_translate\ChatModelResolver.
  */
 #[AiProvider(
   id: 'chat_translation',
@@ -60,11 +73,25 @@ class ChatTranslationProvider extends AiProviderClientBase implements
   protected ProviderProxy $realTranslator;
 
   /**
+   * Provider and model $realTranslator was built for.
+   *
+   * @var string
+   */
+  protected string $resolvedKey = '';
+
+  /**
    * The Twig engine.
    *
    * @var \Drupal\Core\Template\TwigEnvironment
    */
   protected TwigEnvironment $twig;
+
+  /**
+   * Resolves which chat provider and model actually translate.
+   *
+   * @var \Drupal\ai_translate\ChatModelResolver
+   */
+  protected ChatModelResolver $chatModelResolver;
 
   /**
    * The Entity Type Manager.
@@ -82,6 +109,7 @@ class ChatTranslationProvider extends AiProviderClientBase implements
     $instance->twig = $container->get('twig');
     $instance->configFactory = $container->get('config.factory');
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->chatModelResolver = $container->get('ai_translate.chat_model_resolver');
     return $instance;
   }
 
@@ -228,7 +256,7 @@ class ChatTranslationProvider extends AiProviderClientBase implements
       ]);
       $messages->setSystemPrompt('You are a helpful translator.');
 
-      $this->loadTranslator($messages);
+      $this->loadTranslator($messages, $model_id, $targetLanguage);
       /** @var /Drupal\ai\OperationType\Chat\ChatOutput $message */
       $message = $this->realTranslator->chat($messages, $this->chatConfiguration['model_id'], ['ai_translate']);
     }
@@ -246,24 +274,48 @@ class ChatTranslationProvider extends AiProviderClientBase implements
   /**
    * Load real translator and its configuration.
    *
+   * @param \Drupal\ai\OperationType\Chat\ChatInput $messages
+   *   The chat request, passed to hook_ai_translate_translation_alter().
+   * @param string $requestedModelId
+   *   Model selected for the translate_text operation, if any. Relayed to the
+   *   resolver as an input; it is not necessarily the model that ends up
+   *   running.
+   * @param \Drupal\Core\Language\LanguageInterface|null $langTo
+   *   Target language, used to look up a language-specific provider and model.
+   *
    * @return \Drupal\ai\Plugin\ProviderProxy|null
    *   Real provider or NULL on failure.
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  protected function loadTranslator(ChatInput $messages) :? ProviderProxy {
-    if (isset($this->realTranslator)) {
+  protected function loadTranslator(
+    ChatInput $messages,
+    string $requestedModelId = '',
+    ?LanguageInterface $langTo = NULL,
+  ) :? ProviderProxy {
+    $selection = $this->chatModelResolver->resolve($requestedModelId, $langTo);
+    if ($selection === NULL) {
+      throw new PluginException('No chat provider is available to translate with: set a default chat provider, or one for the target language.');
+    }
+
+    // One provider instance per resolved provider and model. Memoizing on the
+    // instance alone would pin the first target language's choice for every
+    // later language in the same request.
+    $key = $selection->providerId . '__' . $selection->modelId;
+    if (isset($this->realTranslator) && $this->resolvedKey === $key) {
       return $this->realTranslator;
     }
-    $chatConfig = $this->manager->getDefaultProviderForOperationType('chat');
 
-    // Allow other modules to take over.
+    // Allow other modules to take over. The hook takes the IDs by reference,
+    // so it is handed copies and what it leaves in them is what runs.
+    $chatConfig = $selection->toArray();
     $this->moduleHandler->alter('ai_translate_translation', $messages,
       $chatConfig['provider_id'], $chatConfig['model_id']);
 
     $this->realTranslator = $this->manager->createInstance($chatConfig['provider_id'],
       $chatConfig);
     $this->chatConfiguration = $chatConfig;
+    $this->resolvedKey = $key;
     return $this->realTranslator;
   }
 

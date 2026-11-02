@@ -5,6 +5,9 @@ namespace Drupal\metatag_views\Plugin\views\display_extender;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\MetatagManagerInterface;
+use Drupal\metatag\MetatagTagPluginManager;
+use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
 use Drupal\views\Plugin\views\style\StylePluginBase;
 use Drupal\views\ViewExecutable;
@@ -14,14 +17,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Metatag display extender plugin.
  *
  * @ingroup views_display_extender_plugins
- *
- * @ViewsDisplayExtender(
- *   id = "metatag_display_extender",
- *   title = @Translation("Metatag display extender"),
- *   help = @Translation("Metatag settings for this view."),
- *   no_ui = FALSE
- * )
  */
+#[ViewsDisplayExtender(
+  id: 'metatag_display_extender',
+  title: new TranslatableMarkup('Metatag display extender'),
+  help: new TranslatableMarkup('Metatag settings for this view.'),
+  no_ui: FALSE,
+)]
 class MetatagDisplayExtender extends DisplayExtenderPluginBase {
 
   use StringTranslationTrait;
@@ -31,14 +33,14 @@ class MetatagDisplayExtender extends DisplayExtenderPluginBase {
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * The plugin manager for metatag tags.
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $metatagTagManager;
+  protected MetatagTagPluginManager $metatagTagManager;
 
   /**
    * The first row tokens on the style plugin.
@@ -111,7 +113,10 @@ class MetatagDisplayExtender extends DisplayExtenderPluginBase {
         // Hence, we set it and then get it.
         $tag = $this->metatagTagManager->createInstance($tag_id);
         $tag->setValue($tag_value);
-        if (!empty($tag->value())) {
+        // Use a strict check against an empty string rather than empty() so
+        // that a legitimate value of "0" (e.g. an Expires value of 0) is not
+        // treated as empty and dropped.
+        if ($tag->value() !== '') {
           $tag_values[$tag_id] = $tag->value();
         }
       }
@@ -312,7 +317,6 @@ class MetatagDisplayExtender extends DisplayExtenderPluginBase {
   protected static function getFirstRowTokensReflection(StylePluginBase $style): \ReflectionProperty {
     $r = new \ReflectionObject($style);
     $p = $r->getProperty('rowTokens');
-    $p->setAccessible(TRUE);
     return $p;
   }
 

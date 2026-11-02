@@ -16,6 +16,9 @@ variables:
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 0
   OPT_IN_TEST_MAX_PHP: 1
+  # Run the previous major variant automatically instead of as a manual job,
+  # so code that only works on recent core versions gets caught.
+  _AUTORUN_PREVIOUS_MAJOR: 'push-and-mr'
   # Use runtests.sh which gives better output.
   _PHPUNIT_CONCURRENT: 1
   # Configured skipped tests.
@@ -28,30 +31,15 @@ phpunit (previous major):
   allow_failure: true
   needs:
     - composer (previous major)
-  before_script:
-    # We need to build 8.1 with the FFI extension enabled.
-    # Install dependencies.
-    - apt-get update
-    - apt-get install -y --no-install-recommends $PHPIZE_DEPS libffi-dev
-    # Download and extract PHP source.
-    - curl -LS -o /usr/src/php.tar.xz "https://php.net/distributions/php-$(php -r 'echo PHP_VERSION;').tar.xz"
-    - docker-php-source extract
-    # Compile the FFI module.
-    - |-
-      (
-        cd /usr/src/php/ext/ffi
-        phpize
-        ./configure
-        make
-        make install
-      )
-    # Enable the FFI module.
-    - echo "extension=ffi.so" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
-    - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
-    # Show the configuration for debugging purposes.
-    - php -i | grep ffi
 
 composer (previous major):
+  variables:
+    # The default PHP 8.1 image is Debian bullseye, which moved to
+    # archive.debian.org, and lacks FFI. Use the highest PHP version for the
+    # previous major instead, in the same Ubuntu image as the other jobs, which
+    # ships FFI. The jobs that need this one inherit both values.
+    PHP_VERSION: $CORE_PREVIOUS_PHP_MAX
+    PHP_IMAGE_VARIANT: 'ubuntu-apache'
   before_script:
     # We need doctrine/instantiator to still be on 2.0 for previous major.
     - composer require doctrine/instantiator:"2.0.0" --no-update
@@ -62,6 +50,11 @@ phpcs:
   allow_failure: false
 phpstan:
   allow_failure: false
+# On the previous major, ignore the APIs that only exist on newer versions.
+phpstan (previous major):
+  allow_failure: true
+  variables:
+    _PHPSTAN_EXTRA: '--configuration=phpstan-previous-major.neon'
 
 .phpunit-base:
   before_script:

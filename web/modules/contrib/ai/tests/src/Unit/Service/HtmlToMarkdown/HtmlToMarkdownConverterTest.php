@@ -115,8 +115,13 @@ class HtmlToMarkdownConverterTest extends UnitTestCase {
    */
   public function testStripWhitespaceDisabledKeepsRawOutput(): void {
     $converter = $this->createConverter(['strip_whitespace' => FALSE]);
-    $markdown = $converter->convert('<h1>Title</h1><br><br><br><p>Next</p>');
-    $this->assertSame("Title\n=====\n\n  \n  \n  \nNext", $markdown);
+    $html = '<h1>Title</h1><br><br><br><p>Next</p>';
+    $markdown = $converter->convert($html);
+    $normalized = $this->createConverter([])->convert($html);
+
+    $this->assertNotSame($normalized, $markdown);
+    $this->assertStringContainsString("  \n", $markdown);
+    $this->assertStringEndsWith('Next', $markdown);
   }
 
 }

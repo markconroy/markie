@@ -8,7 +8,6 @@
 use Drupal\ai_api_explorer\Hook\AiApiExplorer;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\LegacyHook;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
 
 /**
  * Implements hook_menu_links_discovered_alter().
@@ -42,24 +41,13 @@ function ai_api_explorer_menu_links_discovered_alter(&$links): void {
 }
 
 /**
- * Allows access to files in temporary://ai-explorers/.
+ * Implements hook_file_download().
  *
- * @param string $uri
- *   The URI being accessed.
- *
- * @return string[]|null
- *   A file header if the file is in the correct folder. NULL if not.
+ * Denies explorer output files to users who may not use the explorers. The
+ * file module serves them, and only to the user who generated them.
  */
-function ai_api_explorer_file_download(string $uri): ?array {
-  if (StreamWrapperManager::getScheme($uri) == 'temporary') {
-    if (str_starts_with(StreamWrapperManager::getTarget($uri), 'ai-explorers')) {
-      return [
-        'Content-disposition' => 'inline; filename="' . basename($uri) . '"',
-      ];
-    }
-  }
-
-  return NULL;
+function ai_api_explorer_file_download(string $uri): ?int {
+  return \Drupal::service('ai_api_explorer.output_files')->checkDownloadAccess($uri);
 }
 
 /**

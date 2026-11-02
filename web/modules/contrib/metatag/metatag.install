@@ -5,6 +5,8 @@
  * Requirements and update functions for the Metatag module.
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
@@ -18,7 +20,7 @@ function metatag_requirements($phase) {
     // mode.
     if (\Drupal::state()->get('system.maintenance_mode')) {
       $requirements['metatag_maintenance_mode'] = [
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Warning, fn() => REQUIREMENT_WARNING),
         'title' => 'Metatag',
         'value' => new TranslatableMarkup('Not enabled while in maintenance mode'),
         'description' => new TranslatableMarkup('Please note that while the site is in maintenance mode none of the usual meta tags will be output.'),
@@ -28,7 +30,7 @@ function metatag_requirements($phase) {
     // Recommend the Schema.org Metatag module.
     if (!\Drupal::moduleHandler()->moduleExists('schema_metatag')) {
       $requirements['metatag_schema'] = [
-        'severity' => REQUIREMENT_INFO,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Info, fn() => REQUIREMENT_INFO),
         'title' => 'Metatag',
         'value' => new TranslatableMarkup('Schema.org Metatag is recommended'),
         'description' => new TranslatableMarkup('The <a href="@module">Schema.org Metatag</a> module is highly recommended to add <a href="@jsonld">JSON-LD</a> -formatted <a href="@schema">schema.org</a> compatible data structures to the site.', [
@@ -40,7 +42,7 @@ function metatag_requirements($phase) {
     }
     else {
       $requirements['metatag_schema'] = [
-        'severity' => REQUIREMENT_OK,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::OK, fn() => REQUIREMENT_OK),
         'title' => 'Metatag',
         'value' => new TranslatableMarkup('Schema.org Metatag is installed'),
         'description' => new TranslatableMarkup('The <a href="@module">Schema.org Metatag</a> module is installed.', [
@@ -52,7 +54,7 @@ function metatag_requirements($phase) {
     // Suggest the Token OR module.
     if (!\Drupal::moduleHandler()->moduleExists('token_or')) {
       $requirements['metatag_token_or'] = [
-        'severity' => REQUIREMENT_INFO,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Info, fn() => REQUIREMENT_INFO),
         'title' => 'Metatag',
         'value' => new TranslatableMarkup('Token Or'),
         'description' => new TranslatableMarkup('The <a href="@module">Token OR module</a> is suggested for when the basic content tokens are not flexible enough, e.g. to make a meta tag show the contents of one field if it is filled in or another if the first one is empty.', [
@@ -124,11 +126,11 @@ function metatag_update_8109(&$sandbox) {
         $bundle = $field->getTargetBundle();
 
         // Determine the table and "value" field names.
-        // @todo The class path to getTableMapping() seems to be invalid?
+        /** @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage $entity_storage */
+        $entity_storage = \Drupal::entityTypeManager()
+          ->getStorage($field->getTargetEntityTypeId());
         /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
-        $table_mapping = \Drupal::entityTypeManager()
-          ->getStorage($field->getTargetEntityTypeId())
-          ->getTableMapping();
+        $table_mapping = $entity_storage->getTableMapping();
         $field_table = $table_mapping->getFieldTableName($field_name);
         $field_value_field = $table_mapping->getFieldColumnName($field_storage, 'value');
 
@@ -240,4 +242,11 @@ function metatag_update_9401() {
   $config = $config_factory->getEditable('metatag.settings');
   $config->set('tag_trim_end', "|.,-:;/+&([{\"'");
   $config->save();
+}
+
+/**
+ * Empty update script to force a cache rebuild for the new services.
+ */
+function metatag_update_9402() {
+  // Nothing to do besides rebuild the caches.
 }

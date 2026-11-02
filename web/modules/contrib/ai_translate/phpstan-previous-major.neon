@@ -1,0 +1,19 @@
+# PHPStan settings for the "phpstan (previous major)" CI job only, see
+# .gitlab-ci.yml. Extends the regular configuration.
+#
+# On the previous major (Drupal 10), the hook attributes, PHPUnit's attributes
+# and RequirementSeverity don't exist yet. The code is written to work without
+# them, so those errors are expected there. Anything else is a real problem.
+#
+# @todo Remove once support for Drupal 10 is dropped.
+includes:
+  - phpstan.neon
+
+parameters:
+  ignoreErrors:
+    -
+      message: '#^Attribute class (Drupal\\Core\\Hook\\Attribute|PHPUnit\\Framework\\Attributes)\\\w+ does not exist\.$#'
+      identifier: attribute.notFound
+    -
+      message: '#^Access to constant \w+ on an unknown class Drupal\\Core\\Extension\\Requirement\\RequirementSeverity\.$#'
+      identifier: class.notFound

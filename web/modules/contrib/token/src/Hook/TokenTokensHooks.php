@@ -2,14 +2,15 @@
 
 namespace Drupal\token\Hook;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\TitleResolverInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Image\ImageFactory;
@@ -24,7 +25,9 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Token;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\image\Plugin\Field\FieldType\ImageItem;
 use Drupal\menu_link_content\MenuLinkContentInterface;
+use Drupal\menu_ui\MenuUiUtility;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -32,8 +35,11 @@ use Drupal\path_alias\AliasManagerInterface;
 use Drupal\system\Entity\Menu;
 use Drupal\token\TokenEntityMapperInterface;
 use Drupal\token\TokenModuleProvider;
+use Drupal\token\TokenMenuLinkHelper;
+use Drupal\token\TokenTermHelper;
 use Drupal\user\UserInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -62,6 +68,10 @@ final class TokenTokensHooks {
     protected ?AliasManagerInterface $aliasManager,
     protected TitleResolverInterface $titleResolver,
     protected CurrentPathStack $currentPathStack,
+    #[AutowireServiceClosure(TokenMenuLinkHelper::class)]
+    protected \Closure $menuLinkHelper,
+    #[AutowireServiceClosure(TokenTermHelper::class)]
+    protected \Closure $termHelper,
   ) {
   }
 
@@ -72,7 +82,7 @@ final class TokenTokensHooks {
   public function tokens($type, array $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
     $replacements = [];
     // Call proxy implementations.
-    if ($this->moduleHandler->moduleExists('book')) {
+    if ($this->moduleHandler->moduleExists('book') && !$this->moduleHandler->hasImplementations('tokens', 'book')) {
       $replacements += $this->bookTokens($type, $tokens, $data, $options, $bubbleable_metadata);
     }
     if ($this->moduleHandler->moduleExists('menu_ui')) {
@@ -96,9 +106,9 @@ final class TokenTokensHooks {
     if ($type == 'date') {
       $date = !empty($data['date']) ? $data['date'] : $this->time->getRequestTime();
       // @todo Remove when http://drupal.org/node/1173706 is fixed.
-      $date_format_types = $this->entityTypeManager->getStorage('date_format')->loadMultiple();
+      $date_format_storage = $this->entityTypeManager->getStorage('date_format');
       foreach ($tokens as $name => $original) {
-        if (isset($date_format_types[$name]) && $this->tokenModuleProvider->getTokenModule('date', $name) == 'token') {
+        if ($this->tokenModuleProvider->getTokenModule('date', $name) == 'token' && $date_format_storage->load($name)) {
           $replacements[$original] = $this->dateFormatter->format($date, $name, '', NULL, $langcode);
         }
       }
@@ -151,7 +161,7 @@ final class TokenTokensHooks {
           'node_type' => $node_type,
         ], $options, $bubbleable_metadata);
       }
-      if ($url_tokens = $this->token->findWithPrefix($tokens, 'url')) {
+      if (($url_tokens = $this->token->findWithPrefix($tokens, 'url')) && $node->id() !== NULL) {
         $replacements += $this->token->generate('url', $url_tokens, [
           'url' => $node->toUrl(),
         ], $options, $bubbleable_metadata);
@@ -205,7 +215,7 @@ final class TokenTokensHooks {
             break;
 
           case 'parents':
-            if ($parents = token_taxonomy_term_load_all_parents($term->id(), $langcode)) {
+            if ($parents = ($this->termHelper)()->loadParents((int) $term->id(), $langcode)) {
               $replacements[$original] = token_render_array($parents, $options);
             }
             break;
@@ -235,7 +245,7 @@ final class TokenTokensHooks {
       }
       // [term:parents:*] chained tokens.
       if ($parents_tokens = $this->token->findWithPrefix($tokens, 'parents')) {
-        if ($parents = token_taxonomy_term_load_all_parents($term->id(), $langcode)) {
+        if ($parents = ($this->termHelper)()->loadParents((int) $term->id(), $langcode)) {
           $replacements += $this->token->generate('array', $parents_tokens, [
             'array' => $parents,
           ], $options, $bubbleable_metadata);
@@ -358,7 +368,7 @@ final class TokenTokensHooks {
             break;
 
           case 'title':
-            $replacements[$original] = token_menu_link_translated_title($link, $langcode);
+            $replacements[$original] = ($this->menuLinkHelper)()->getTranslatedTitle($link, $langcode);
             break;
 
           case 'url':
@@ -370,20 +380,20 @@ final class TokenTokensHooks {
           case 'parent':
             /** @var \Drupal\Core\Menu\MenuLinkInterface $parent */
             if ($link->getParent() && $parent = $this->menuLinkManager->createInstance($link->getParent())) {
-              $replacements[$original] = token_menu_link_translated_title($parent, $langcode);
+              $replacements[$original] = ($this->menuLinkHelper)()->getTranslatedTitle($parent, $langcode);
             }
             break;
 
           case 'parents':
-            if ($parents = token_menu_link_load_all_parents($link->getPluginId(), $langcode)) {
+            if ($parents = ($this->menuLinkHelper)()->loadParents($link->getPluginId(), $langcode)) {
               $replacements[$original] = token_render_array($parents, $options);
             }
             break;
 
           case 'root':
-            if ($link->getParent() && $parent_ids = array_keys(token_menu_link_load_all_parents($link->getPluginId(), $langcode))) {
+            if ($link->getParent() && $parent_ids = array_keys(($this->menuLinkHelper)()->loadParents($link->getPluginId(), $langcode))) {
               $root = $this->menuLinkManager->createInstance(array_shift($parent_ids));
-              $replacements[$original] = token_menu_link_translated_title($root, $langcode);
+              $replacements[$original] = ($this->menuLinkHelper)()->getTranslatedTitle($root, $langcode);
             }
             break;
         }
@@ -397,13 +407,13 @@ final class TokenTokensHooks {
       }
       // [menu-link:parents:*] chained tokens.
       if ($parents_tokens = $this->token->findWithPrefix($tokens, 'parents')) {
-        if ($parents = token_menu_link_load_all_parents($link->getPluginId(), $langcode)) {
+        if ($parents = ($this->menuLinkHelper)()->loadParents($link->getPluginId(), $langcode)) {
           $replacements += $this->token->generate('array', $parents_tokens, [
             'array' => $parents,
           ], $options, $bubbleable_metadata);
         }
       }
-      if (($root_tokens = $this->token->findWithPrefix($tokens, 'root')) && $link->getParent() && $parent_ids = array_keys(token_menu_link_load_all_parents($link->getPluginId(), $langcode))) {
+      if (($root_tokens = $this->token->findWithPrefix($tokens, 'root')) && $link->getParent() && $parent_ids = array_keys(($this->menuLinkHelper)()->loadParents($link->getPluginId(), $langcode))) {
         $root = $this->menuLinkManager->createInstance(array_shift($parent_ids));
         $replacements += $this->token->generate('menu-link', $root_tokens, [
           'menu-link' => $root,
@@ -655,8 +665,8 @@ final class TokenTokensHooks {
             break;
 
           case 'original':
-            if ($this->tokenModuleProvider->getTokenModule($type, 'original') == 'token' && !empty($entity->original)) {
-              $label = $entity->original->label();
+            if ($this->tokenModuleProvider->getTokenModule($type, 'original') == 'token' && $this->getOriginalEntity($entity)) {
+              $label = $this->getOriginalEntity($entity)->label();
               $replacements[$original] = $label;
             }
             break;
@@ -669,9 +679,9 @@ final class TokenTokensHooks {
         ], $options, $bubbleable_metadata);
       }
       // [entity:original:*] chained tokens.
-      if (($original_tokens = $this->token->findWithPrefix($tokens, 'original')) && $this->tokenModuleProvider->getTokenModule($type, 'original') == 'token' && !empty($entity->original)) {
+      if (($original_tokens = $this->token->findWithPrefix($tokens, 'original')) && $this->tokenModuleProvider->getTokenModule($type, 'original') == 'token' && $this->getOriginalEntity($entity)) {
         $replacements += $this->token->generate($type, $original_tokens, [
-          $type => $entity->original,
+          $type => $this->getOriginalEntity($entity),
         ], $options, $bubbleable_metadata);
       }
       // [entity:language:*] chained tokens.
@@ -846,6 +856,7 @@ final class TokenTokensHooks {
               break;
 
             case 'parents':
+              // @phpstan-ignore function.deprecated (only used while Book does not provide its own tokens)
               if ($parents = token_book_load_all_parents($book)) {
                 $replacements[$original] = token_render_array($parents, $options);
               }
@@ -864,6 +875,7 @@ final class TokenTokensHooks {
           $replacements += $this->token->generate('node', $book_tokens, ['node' => $parent_node], $options, $bubbleable_metadata);
         }
         if ($book_tokens = $this->token->findWithPrefix($tokens, 'parents')) {
+          // @phpstan-ignore function.deprecated (only used while Book does not provide its own tokens)
           $parents = token_book_load_all_parents($book);
           $replacements += $this->token->generate('array', $book_tokens, ['array' => $parents], $options, $bubbleable_metadata);
         }
@@ -907,7 +919,7 @@ final class TokenTokensHooks {
               $url = $node->toUrl();
               if ($links = $this->menuLinkManager->loadLinksByRoute($url->getRouteName(), $url->getRouteParameters())) {
                 $link = $this->menuLinkBestMatch($node, $links);
-                $replacements[$original] = token_menu_link_translated_title($link, $langcode);
+                $replacements[$original] = ($this->menuLinkHelper)()->getTranslatedTitle($link, $langcode);
               }
             }
             break;
@@ -1022,7 +1034,8 @@ final class TokenTokensHooks {
     // to the menu via the node UI, we use that as a default. If it
     // was not added via the node UI then grab the first in the
     // retrieved array.
-    $defaults = menu_ui_get_menu_link_defaults($node);
+    // @phpstan-ignore-next-line
+    $defaults = class_exists(MenuUiUtility::class) ? \Drupal::service(MenuUiUtility::class)->getMenuLinkDefaults($node) : menu_ui_get_menu_link_defaults($node);
     if (isset($defaults['id']) && isset($links[$defaults['id']])) {
       $link = $links[$defaults['id']];
     }
@@ -1181,7 +1194,7 @@ final class TokenTokensHooks {
           continue;
         }
 
-        if (isset($field_item->$property_name) && ($field_item->$property_name instanceof FieldableEntityInterface)) {
+        if ($field_item->$property_name instanceof EntityInterface) {
           // Entity reference field.
           $entity = $field_item->$property_name;
           // Obtain the referenced entity with the correct language.
@@ -1196,7 +1209,7 @@ final class TokenTokensHooks {
             $replacements[$original] = $entity->label();
           }
         }
-        elseif (($field_item->getFieldDefinition()->getType() == 'image') && ($style = ImageStyle::load($property_name))) {
+        elseif ($field_item instanceof ImageItem && ($style = ImageStyle::load($property_name))) {
           // Handle [node:field_name:image_style:property] tokens and multivalued
           // [node:field_name:delta:image_style:property] tokens. If the token is
           // of the form [node:field_name:image_style], provide the URL as a
@@ -1267,11 +1280,38 @@ final class TokenTokensHooks {
           }
         }
         else {
-          $replacements[$original] = $field_item->$property_name;
+          $value = $field_item->$property_name;
+          if (is_object($value)) {
+            // Best effort to stringify safely while providing a fallback that
+            // with information to help debug wrong tokens.
+            $value = $value instanceof \Stringable ? (string) $value : get_class($value);
+          }
+          $replacements[$original] = $value;
         }
       }
     }
     return $replacements;
+  }
+
+  /**
+   * Returns the unchanged version of an entity, if there is one.
+   *
+   * EntityInterface::getOriginal() was added in drupal:11.2.0 and replaces
+   * reading the $original property directly.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity being saved.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The original entity, or NULL if this is not an update.
+   */
+  protected function getOriginalEntity(EntityInterface $entity): ?EntityInterface {
+    return DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2.0',
+      fn() => $entity->getOriginal(),
+      fn() => $entity->original ?? NULL,
+    );
   }
 
 }

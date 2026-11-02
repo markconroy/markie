@@ -3,12 +3,16 @@
 namespace Drupal\Tests\token\Functional\Tree;
 
 use Drupal\Tests\token\Functional\TokenTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests token tree on help page.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class HelpPageTest extends TokenTestBase {
 
   use TokenTreeTestTrait;

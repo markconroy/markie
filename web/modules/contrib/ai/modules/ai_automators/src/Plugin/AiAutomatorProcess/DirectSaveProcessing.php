@@ -7,10 +7,13 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\AiAutomatorRuleRunner;
 use Drupal\ai_automators\AiAutomatorStatusField;
 use Drupal\ai_automators\Attribute\AiAutomatorProcessRule;
+use Drupal\ai_automators\AutomatorFallbackUser;
 use Drupal\ai_automators\Exceptions\AiAutomatorRequestErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorRuleNotFoundException;
@@ -43,12 +46,30 @@ class DirectSaveProcessing implements AiAutomatorFieldProcessInterface, Containe
   protected MessengerInterface $messenger;
 
   /**
+   * The current user.
+   */
+  protected AccountProxyInterface $currentUser;
+
+  /**
+   * The account switcher.
+   */
+  protected AccountSwitcherInterface $accountSwitcher;
+
+  /**
+   * The user to run as when there is no current user.
+   */
+  protected AutomatorFallbackUser $fallbackUser;
+
+  /**
    * Constructor.
    */
-  final public function __construct(AiAutomatorRuleRunner $aiRunner, LoggerChannelFactoryInterface $logger, MessengerInterface $messenger) {
+  final public function __construct(AiAutomatorRuleRunner $aiRunner, LoggerChannelFactoryInterface $logger, MessengerInterface $messenger, AccountProxyInterface $currentUser, AccountSwitcherInterface $accountSwitcher, AutomatorFallbackUser $fallbackUser) {
     $this->aiRunner = $aiRunner;
     $this->loggerFactory = $logger;
     $this->messenger = $messenger;
+    $this->currentUser = $currentUser;
+    $this->accountSwitcher = $accountSwitcher;
+    $this->fallbackUser = $fallbackUser;
   }
 
   /**
@@ -59,6 +80,9 @@ class DirectSaveProcessing implements AiAutomatorFieldProcessInterface, Containe
       $container->get('ai_automator.rule_runner'),
       $container->get('logger.factory'),
       $container->get('messenger'),
+      $container->get('current_user'),
+      $container->get('account_switcher'),
+      $container->get('ai_automator.fallback_user'),
     );
   }
 
@@ -66,6 +90,35 @@ class DirectSaveProcessing implements AiAutomatorFieldProcessInterface, Containe
    * {@inheritDoc}
    */
   public function modify(EntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+    // Saves without a current user, for example from cron or drush, run as the
+    // fallback user from the settings, the same as queued automators.
+    $account = $this->currentUser->isAnonymous() ? $this->fallbackUser->getAccount() : NULL;
+    if (!$account) {
+      return $this->generateResponse($entity, $fieldDefinition, $automatorConfig);
+    }
+    $this->accountSwitcher->switchTo($account);
+    try {
+      return $this->generateResponse($entity, $fieldDefinition, $automatorConfig);
+    }
+    finally {
+      $this->accountSwitcher->switchBack();
+    }
+  }
+
+  /**
+   * Generates the response as the current user.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $fieldDefinition
+   *   The field definition.
+   * @param array $automatorConfig
+   *   The automator config.
+   *
+   * @return bool
+   *   The result of the runner, or FALSE on failure.
+   */
+  protected function generateResponse(EntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     try {
       return $this->aiRunner->generateResponse($entity, $fieldDefinition, $automatorConfig);
     }

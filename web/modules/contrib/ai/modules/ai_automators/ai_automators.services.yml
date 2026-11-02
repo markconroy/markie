@@ -17,6 +17,9 @@ services:
   ai_automator.rule_runner:
     class: Drupal\ai_automators\AiAutomatorRuleRunner
     arguments: ['@entity_type.manager', '@ai_automator.field_rules', '@event_dispatcher']
+  ai_automator.fallback_user:
+    class: Drupal\ai_automators\AutomatorFallbackUser
+    arguments: ['@state', '@entity_type.manager', '@logger.factory']
   ai_automator.prompt_helper:
     class: Drupal\ai_automators\AiPromptHelper
     arguments: ['@twig', '@current_user', '@token']

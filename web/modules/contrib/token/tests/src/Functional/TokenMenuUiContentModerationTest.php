@@ -3,8 +3,11 @@
 namespace Drupal\Tests\token\Functional;
 
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\menu_ui\MenuUiUtility;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Menu UI and Content Moderation integration.
@@ -16,6 +19,8 @@ use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class TokenMenuUiContentModerationTest extends BrowserTestBase {
 
   use ContentModerationTestTrait;
@@ -232,7 +237,9 @@ class TokenMenuUiContentModerationTest extends BrowserTestBase {
     $this->assertTrue($node->access('view', $editor_with_unpublished_content_access));
     $this->assertEquals($edit['title[0][value]'], $node->getTitle());
     $this->drupalGet('node/add/page');
-    $link_id = menu_ui_get_menu_link_defaults($node)['entity_id'];
+    // @phpstan-ignore-next-line
+    $link = class_exists(MenuUiUtility::class) ? \Drupal::service(MenuUiUtility::class)->getMenuLinkDefaults($node) : menu_ui_get_menu_link_defaults($node);
+    $link_id = $link['entity_id'];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $link */
     $link = MenuLinkContent::load($link_id);
     $this->assertSession()->optionExists('edit-menu-menu-parent', 'main:' . $link->getPluginId());

@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
 use Drupal\ai_automators\PluginBaseClasses\VideoToText;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
+use Drupal\ai_automators\Traits\TextFormatAccessTrait;
 
 /**
  * The rules for a video to image field.
@@ -23,6 +24,8 @@ use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
   target: '',
 )]
 class LlmVideoToHtml extends VideoToText implements AiAutomatorTypeInterface {
+
+  use TextFormatAccessTrait;
 
   /**
    * {@inheritDoc}
@@ -90,6 +93,11 @@ class LlmVideoToHtml extends VideoToText implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+    // The output is stored in the first allowed format, see storeValues().
+    $format = $fieldDefinition->getConfig($entity->bundle())->getSettings()['allowed_formats'][0] ?? NULL;
+    if (!$this->currentUserCanUseTextFormat($entity, $fieldDefinition, $format)) {
+      return [];
+    }
     // Tokenize prompt.
     $cutPrompt = $this->renderTokenPrompt($automatorConfig['generating_prompt'], $entity);
 
@@ -152,7 +160,7 @@ class LlmVideoToHtml extends VideoToText implements AiAutomatorTypeInterface {
     $this->createTempDirectory();
     // Get the text format.
     $config = $fieldDefinition->getConfig($entity->bundle());
-    $format = $config->getSettings()['allowed_formats'][0] ?? '';
+    $format = $this->textFormatForCurrentUser($entity, $fieldDefinition, $config->getSettings()['allowed_formats'][0] ?? NULL) ?? '';
 
     $newValues = [];
     $baseField = $automatorConfig['base_field'] ?? '';

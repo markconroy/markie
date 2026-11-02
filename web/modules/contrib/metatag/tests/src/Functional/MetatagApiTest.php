@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 
@@ -59,6 +60,13 @@ class MetatagApiTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
    * Permissions to grant admin user.
    *
    * @var array
@@ -76,6 +84,9 @@ class MetatagApiTest extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+
     $this->adminUser = $this->drupalCreateUser($this->permissions);
     $this->drupalLogin($this->adminUser);
 
@@ -152,7 +163,7 @@ class MetatagApiTest extends BrowserTestBase {
   public function testContactForm() {
     // Test a route where the entity for that route does not implement
     // ContentEntityInterface.
-    $controller = \Drupal::entityTypeManager()->getStorage('contact_form');
+    $controller = $this->entityTypeManager->getStorage('contact_form');
     $controller->create([
       'id' => 'test_contact_form',
     ])->save();

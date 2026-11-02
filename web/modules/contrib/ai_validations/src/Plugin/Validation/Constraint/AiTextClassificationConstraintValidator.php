@@ -55,6 +55,7 @@ final class AiTextClassificationConstraintValidator extends AiConstraintValidato
       );
       if ($matchesTag && $classification->getConfidenceScore() >= $constraint->minimum) {
         $this->context->addViolation($constraint->message, []);
+        return;
       }
     }
   }

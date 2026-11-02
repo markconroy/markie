@@ -16,6 +16,7 @@ use Drupal\ai_translate\TextExtractorInterface;
 use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate\TranslationException;
 use Drupal\content_translation\ContentTranslationManagerInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @coversDefaultClass \Drupal\ai_translate\EntityTranslationOrchestrator
@@ -130,27 +131,73 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   }
 
   /**
+   * Tests entity handling using the metadata supplied by field extractors.
+   *
+   * @dataProvider translatedValueProvider
    * @covers ::translateTextMetadataItem
    */
-  public function testTranslateTextMetadataItemDecodesHtmlEntities(): void {
+  #[DataProvider('translatedValueProvider')]
+  public function testTranslatedValues(array $metadata, string $response, string $expected): void {
     $sourceLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'en']);
     $targetLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'fr']);
-
-    $singleField = [
-      '_columns' => ['value'],
-      'value' => 'Hello',
-      'parents' => ['body', 0],
-      'field_name' => 'body',
-    ];
+    $column = $metadata['_columns'][0];
 
     $this->textTranslator->expects($this->once())
       ->method('translateContent')
-      ->with('Hello', $targetLanguage, $sourceLanguage)
-      ->willReturn('Bonjour &amp; monde');
+      ->with($metadata[$column], $targetLanguage, $sourceLanguage)
+      ->willReturn($response);
 
-    $translated = $this->orchestrator->translateTextMetadataItem($singleField, $sourceLanguage, $targetLanguage);
+    $translated = $this->orchestrator->translateTextMetadataItem($metadata, $sourceLanguage, $targetLanguage);
+    $this->assertSame($expected, $translated['translated'][$column]);
+    unset($translated['translated']);
+    $this->assertSame($metadata, $translated);
+  }
 
-    $this->assertSame('Bonjour & monde', $translated['translated']['value']);
+  /**
+   * Provides plain-text columns and a formatted field with ambiguous HTML.
+   */
+  public static function translatedValueProvider(): iterable {
+    $probes = [
+      'named entity is decoded' => ['Tom &amp; Jerry', 'Tom & Jerry'],
+      'escaped tag is decoded' => ['&lt;p&gt;Hello&lt;/p&gt;', '<p>Hello</p>'],
+    ];
+    $columns = [
+      'string' => ['field_string', 'value'],
+      'string_long' => ['field_string_long', 'value'],
+      'node title' => ['title', 'value'],
+      'image alt' => ['field_image', 'alt'],
+      'image title' => ['field_image', 'title'],
+      'link title' => ['field_link', 'title'],
+      'file description' => ['field_file', 'description'],
+    ];
+    foreach ($columns as $category => [$field, $column]) {
+      foreach ($probes as $case => [$response, $expected]) {
+        yield "$category: $case" => [
+          [
+            '_columns' => [$column],
+            $column => 'Source text',
+            'field_name' => $field,
+          ],
+          $response,
+          $expected,
+        ];
+      }
+    }
+
+    // A formatted response is decoded only when it holds "&lt;" and no real
+    // "<": that means the whole document round-tripped through the provider
+    // escaped (issue #3476038). A real "<" means the markup is genuine, so
+    // the response is preserved verbatim.
+    yield 'formatted field preserves html entities' => [
+      ['_columns' => ['value'], 'value' => 'Source', 'format' => 'basic_html'],
+      'Bonjour &amp; monde',
+      'Bonjour &amp; monde',
+    ];
+    yield 'formatted field decodes a fully escaped value' => [
+      ['_columns' => ['value'], 'value' => 'Source', 'format' => 'basic_html'],
+      '&lt;p&gt;Bonjour&lt;/p&gt;',
+      '<p>Bonjour</p>',
+    ];
   }
 
   /**

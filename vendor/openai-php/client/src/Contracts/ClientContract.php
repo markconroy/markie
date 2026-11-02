@@ -2,6 +2,7 @@
 
 namespace OpenAI\Contracts;
 
+use OpenAI\Contracts\Resources\AgentsContract;
 use OpenAI\Contracts\Resources\AssistantsContract;
 use OpenAI\Contracts\Resources\AudioContract;
 use OpenAI\Contracts\Resources\BatchesContract;
@@ -9,6 +10,7 @@ use OpenAI\Contracts\Resources\ChatContract;
 use OpenAI\Contracts\Resources\CompletionsContract;
 use OpenAI\Contracts\Resources\ContainersContract;
 use OpenAI\Contracts\Resources\ConversationsContract;
+use OpenAI\Contracts\Resources\DecisionsContract;
 use OpenAI\Contracts\Resources\EditsContract;
 use OpenAI\Contracts\Resources\EmbeddingsContract;
 use OpenAI\Contracts\Resources\FilesContract;
@@ -19,7 +21,9 @@ use OpenAI\Contracts\Resources\ModelsContract;
 use OpenAI\Contracts\Resources\ModerationsContract;
 use OpenAI\Contracts\Resources\RealtimeContract;
 use OpenAI\Contracts\Resources\ResponsesContract;
+use OpenAI\Contracts\Resources\SkillsContract;
 use OpenAI\Contracts\Resources\ThreadsContract;
+use OpenAI\Contracts\Resources\VaultsContract;
 use OpenAI\Contracts\Resources\VectorStoresContract;
 
 interface ClientContract
@@ -66,6 +70,34 @@ interface ClientContract
      * @see https://platform.openai.com/docs/api-reference/containers
      */
     public function containers(): ContainersContract;
+
+    /**
+     * Create and manage skills for use with the Responses API shell tools.
+     *
+     * @see https://developers.openai.com/api/reference/resources/skills
+     */
+    public function skills(): SkillsContract;
+
+    /**
+     * Create and manage reusable agents.
+     *
+     * @see https://developers.openai.com/api/reference/resources/beta/subresources/agents
+     */
+    public function agents(): AgentsContract;
+
+    /**
+     * Store credentials for MCP servers and OpenAI-hosted environments.
+     *
+     * @see https://developers.openai.com/api/reference/resources/beta/subresources/agents/subresources/vaults
+     */
+    public function vaults(): VaultsContract;
+
+    /**
+     * Evaluate text, images, or both against a list of questions.
+     *
+     * @see https://developers.openai.com/api/docs/guides/decisions
+     */
+    public function decisions(): DecisionsContract;
 
     /**
      * Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.

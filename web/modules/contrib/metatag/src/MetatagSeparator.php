@@ -25,9 +25,7 @@ trait MetatagSeparator {
    */
   public function getSeparator(): string {
     // Load the separator saved in configuration.
-    /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
-    $config_factory = \Drupal::configFactory();
-    $config = $config_factory->get('metatag.settings');
+    $config = $this->configFactory->get('metatag.settings');
 
     // @todo This extra check shouldn't be needed.
     if ($config) {

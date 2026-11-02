@@ -2,7 +2,9 @@
 
 namespace Drupal\Tests\metatag\Kernel;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\metatag\MetatagManagerInterface;
 
 /**
  * Test the Metatag settings.
@@ -27,14 +29,14 @@ class MetatagSettingsTest extends KernelTestBase {
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
-  protected $metatagManager;
+  protected MetatagManagerInterface $metatagManager;
 
   /**
    * The configuration factory service.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * {@inheritdoc}

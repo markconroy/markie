@@ -3,6 +3,8 @@
 namespace Drupal\Tests\token\Kernel;
 
 use Drupal\Core\Url;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -10,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class UrlTest extends TokenKernelTestBase {
 
   /**
@@ -53,7 +57,7 @@ class UrlTest extends TokenKernelTestBase {
    */
   public function testCurrentRequestUrls() {
     foreach ($this->expectedCurrentRequestUrlResults() as $data_set) {
-      list ($request, $text, $data, $options, $expected_output) = $data_set;
+      [$request, $text, $data, $options, $expected_output] = $data_set;
       // Set the request as the current one.
       $this->requestStack->push($request);
       $this->currentRouteMatch->resetRouteMatch();

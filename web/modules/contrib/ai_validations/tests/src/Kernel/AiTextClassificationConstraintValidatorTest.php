@@ -43,6 +43,33 @@ class AiTextClassificationConstraintValidatorTest extends KernelTestBase {
   protected const OPTION = 'classifier_test__gpt-test';
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    // The ai_validations namespace exists in two locations: this git clone
+    // and the bundled copy inside ai/modules/ai_validations. Prepend our own
+    // PSR-4 loader so it wins before Drupal's own module class loader is
+    // consulted. This matches the pattern used in
+    // \Drupal\Tests\ai_validations\Unit\AiConstraintValidatorBaseTest.
+    // @todo Remove this workaround once ai_validations is no longer bundled
+    //   inside the ai package. See
+    //   https://git.drupalcode.org/project/ai/-/work_items/3586538
+    $module_root = dirname(__DIR__, 3);
+    spl_autoload_register(static function (string $class) use ($module_root): void {
+      $prefix = 'Drupal\\ai_validations\\';
+      if (str_starts_with($class, $prefix)) {
+        $relative = str_replace('\\', '/', substr($class, strlen($prefix)));
+        $file = $module_root . '/src/' . $relative . '.php';
+        if (file_exists($file)) {
+          require_once $file;
+        }
+      }
+    }, TRUE, TRUE);
+
+    parent::setUp();
+  }
+
+  /**
    * Sets the classifications the test provider should return.
    */
   protected function setClassifications(array $classifications): void {
@@ -176,6 +203,26 @@ class AiTextClassificationConstraintValidatorTest extends KernelTestBase {
 
     $this->buildValidator($context)
       ->validate('some text', $this->buildConstraint(['na' => 'skip']));
+  }
+
+  /**
+   * Multiple matching classifications only add a single violation.
+   *
+   * Regression test: the loop used to keep iterating after a match and
+   * could add the same violation once per matching classification.
+   */
+  public function testMultipleMatchesAddOnlyOneViolation(): void {
+    $this->setClassifications([
+      ['label' => 'positive', 'confidence' => 0.9],
+      ['label' => 'positive', 'confidence' => 0.95],
+    ]);
+
+    $context = $this->createMock(ExecutionContextInterface::class);
+    $context->expects($this->once())
+      ->method('addViolation')
+      ->with('This value is not valid.', []);
+
+    $this->buildValidator($context)->validate('some text', $this->buildConstraint());
   }
 
 }

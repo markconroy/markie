@@ -6,7 +6,7 @@ configure: stage_file_proxy.admin_form
 core_version_requirement: ^10.3 || ^11
 dependencies:
   - drupal:image
-# Information added by Drupal.org packaging script on 2025-09-11
-version: '3.1.6'
+# Information added by Drupal.org packaging script on 2026-10-28
+version: '3.1.7'
 project: 'stage_file_proxy'
-datestamp: 1757610589
+datestamp: 1793196279

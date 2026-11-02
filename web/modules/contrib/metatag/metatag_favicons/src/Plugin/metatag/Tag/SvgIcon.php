@@ -2,23 +2,23 @@
 
 namespace Drupal\metatag_favicons\Plugin\metatag\Tag;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\LinkRelBase;
 
 /**
  * The SVG Favicon meta tag.
- *
- * @MetatagTag(
- *   id = "svg_icon",
- *   label = @Translation("SVG icon"),
- *   description = @Translation("A scalable vector graphic (SVG) file."),
- *   name = "icon",
- *   group = "favicons",
- *   weight = 2,
- *   type = "image",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'svg_icon',
+  label: new TranslatableMarkup('SVG icon'),
+  name: 'icon',
+  group: 'favicons',
+  type: MetatagType::Image,
+  description: new TranslatableMarkup('A scalable vector graphic (SVG) file.'),
+  weight: 2,
+)]
 class SvgIcon extends LinkRelBase {
 
   /**

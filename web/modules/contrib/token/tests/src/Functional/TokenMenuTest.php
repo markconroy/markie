@@ -6,15 +6,20 @@ use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\menu_ui\MenuUiUtility;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Entity\Menu;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests menu tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class TokenMenuTest extends TokenTestBase {
 
   /**
@@ -174,7 +179,8 @@ class TokenMenuTest extends TokenTestBase {
 
     // Disable the menu link, save the node and verify that the menu link is
     // no longer displayed.
-    $link = menu_ui_get_menu_link_defaults($node);
+    // @phpstan-ignore-next-line
+    $link = class_exists(MenuUiUtility::class) ? \Drupal::service(MenuUiUtility::class)->getMenuLinkDefaults($node) : menu_ui_get_menu_link_defaults($node);
     $this->drupalGet('admin/structure/menu/manage/main-menu');
     $this->submitForm(['links[menu_plugin_id:' . $link['id'] . '][enabled]' => FALSE], 'Save');
     $this->assertSession()->pageTextContains('Menu Main menu has been updated.');
@@ -250,7 +256,8 @@ class TokenMenuTest extends TokenTestBase {
     $node = $this->drupalGetNodeByTitle('Node menu adding menu later test', TRUE);
     $this->assertEquals('This is a /admin/config token to the menu link parent', $node->body->value);
     // And make sure the menu link exists with the right URI.
-    $link = menu_ui_get_menu_link_defaults($node);
+    // @phpstan-ignore-next-line
+    $link = class_exists(MenuUiUtility::class) ? \Drupal::service(MenuUiUtility::class)->getMenuLinkDefaults($node) : menu_ui_get_menu_link_defaults($node);
     $this->assertNotEmpty($link['entity_id']);
     $query = \Drupal::entityQuery('menu_link_content')
       ->condition('link.uri', 'entity:node/' . $node->id())

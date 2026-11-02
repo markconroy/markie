@@ -12,13 +12,6 @@ use Drupal\Core\Url;
 class MetatagDefaultsRevertForm extends EntityConfirmFormBase {
 
   /**
-   * The Metatag defaults object being reverted.
-   *
-   * @var \Drupal\metatag\Entity\MetatagDefaults
-   */
-  protected $entity;
-
-  /**
    * {@inheritdoc}
    */
   public function getQuestion() {
@@ -43,7 +36,9 @@ class MetatagDefaultsRevertForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->entity->revert();
+    /** @var \Drupal\metatag\Entity\MetatagDefaults $entity */
+    $entity = $this->entity;
+    $entity->revert();
 
     $this->messenger()->addMessage(
       $this->t('Reverted @label defaults.',

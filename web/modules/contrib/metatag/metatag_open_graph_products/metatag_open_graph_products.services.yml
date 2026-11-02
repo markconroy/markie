@@ -1,0 +1,9 @@
+# @file
+# Custom services for the Metatag OpenGraph Products module.
+
+services:
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_open_graph_products\Hook\HelpHooks:
+    class: Drupal\metatag_open_graph_products\Hook\HelpHooks
+    autowire: true

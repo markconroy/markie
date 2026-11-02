@@ -2,10 +2,12 @@
 
 namespace Drupal\metatag_views\Form;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\views\ViewEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -16,16 +18,16 @@ class MetatagViewsRevertForm extends ConfirmFormBase {
   /**
    * Entity manager for views entities.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $viewsManager;
+  protected EntityStorageInterface $viewsManager;
 
   /**
    * The view entity to revert meta tags on.
    *
    * @var \Drupal\views\ViewEntityInterface
    */
-  protected $view;
+  protected ViewEntityInterface $view;
 
   /**
    * The view's display id.
@@ -102,8 +104,9 @@ class MetatagViewsRevertForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $view_id = NULL, $display_id = NULL) {
-    // @todo This method doesn't exist.
-    $this->view = $this->viewsManager->load($view_id);
+    /** @var \Drupal\views\ViewExecutable $executable */
+    $executable = $this->viewsManager->load($view_id);
+    $this->view = $executable;
     $this->displayId = $display_id;
 
     return parent::buildForm($form, $form_state);

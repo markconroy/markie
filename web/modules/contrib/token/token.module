@@ -17,12 +17,15 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\menu_link_content\MenuLinkContentInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\taxonomy\TermInterface;
 use Drupal\token\Hook\TokenEntityHooks;
 use Drupal\token\Hook\TokenFormHooks;
 use Drupal\token\Hook\TokenHooks;
 use Drupal\token\Hook\TokenThemeHooks;
 use Drupal\token\Hook\TokenTokenInfoHooks;
 use Drupal\token\Hook\TokenTokensHooks;
+use Drupal\token\TokenMenuLinkHelper;
+use Drupal\token\TokenTermHelper;
 
 /**
  * Implements hook_help().
@@ -98,12 +101,17 @@ function token_field_config_delete($instance) {
 
 /**
  * Clear token caches and static variables.
+ *
+ * @deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use
+ *   \Drupal::token()->resetInfo() instead.
+ *
+ * @see https://www.drupal.org/project/token/issues/3627991
  */
 function token_clear_cache() {
+  @trigger_error('token_clear_cache() is deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use \Drupal::token()->resetInfo() instead. See https://www.drupal.org/project/token/issues/3627991', E_USER_DEPRECATED);
   \Drupal::token()->resetInfo();
   \Drupal::service('token.entity_mapper')->resetInfo();
-  drupal_static_reset('token_menu_link_load_all_parents');
-  drupal_static_reset('token_book_link_load');
+  \Drupal::service(TokenMenuLinkHelper::class)->resetParents();
 }
 
 /**
@@ -274,24 +282,15 @@ function token_render_array_value($value, array $options = []) {
  *
  * @return string[]
  *   List of menu link parent titles.
+ *
+ * @deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use
+ *   \Drupal\token\TokenMenuLinkHelper::loadParents() instead.
+ *
+ * @see https://www.drupal.org/project/token/issues/3627991
  */
 function token_menu_link_load_all_parents($plugin_id, $langcode) {
-  $cache = &drupal_static(__FUNCTION__, []);
-
-  if (!isset($cache[$plugin_id][$langcode])) {
-    $cache[$plugin_id][$langcode] = [];
-    /** @var \Drupal\Core\Menu\MenuLinkManagerInterface $menu_link_manager */
-    $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
-    $parent_ids = $menu_link_manager->getParentIds($plugin_id);
-    // Remove the current plugin ID from the parents.
-    unset($parent_ids[$plugin_id]);
-    foreach ($parent_ids as $parent_id) {
-      $parent = $menu_link_manager->createInstance($parent_id);
-      $cache[$plugin_id][$langcode] = [$parent_id => token_menu_link_translated_title($parent, $langcode)] + $cache[$plugin_id][$langcode];
-    }
-  }
-
-  return $cache[$plugin_id][$langcode];
+  @trigger_error('token_menu_link_load_all_parents() is deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use \Drupal\token\TokenMenuLinkHelper::loadParents() instead. See https://www.drupal.org/project/token/issues/3627991', E_USER_DEPRECATED);
+  return \Drupal::service(TokenMenuLinkHelper::class)->loadParents((string) $plugin_id, (string) $langcode);
 }
 
 /**
@@ -310,18 +309,15 @@ function token_menu_link_load_all_parents($plugin_id, $langcode) {
  *
  * @return string
  *   The menu link title.
+ *
+ * @deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use
+ *   \Drupal\token\TokenMenuLinkHelper::getTranslatedTitle() instead.
+ *
+ * @see https://www.drupal.org/project/token/issues/3627991
  */
 function token_menu_link_translated_title(MenuLinkInterface $menu_link, $langcode = NULL) {
-  $metadata = $menu_link->getMetaData();
-  if (isset($metadata['entity_id']) && $menu_link->getProvider() == 'menu_link_content') {
-    /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
-    $entity = \Drupal::entityTypeManager()->getStorage('menu_link_content')->load($metadata['entity_id']);
-    if (!empty($entity)) {
-      $entity = \Drupal::service('entity.repository')->getTranslationFromContext($entity, $langcode);
-      return $entity->getTitle();
-    }
-  }
-  return $menu_link->getTitle();
+  @trigger_error('token_menu_link_translated_title() is deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use \Drupal\token\TokenMenuLinkHelper::getTranslatedTitle() instead. See https://www.drupal.org/project/token/issues/3627991', E_USER_DEPRECATED);
+  return \Drupal::service(TokenMenuLinkHelper::class)->getTranslatedTitle($menu_link, isset($langcode) ? (string) $langcode : NULL);
 }
 
 /**
@@ -334,29 +330,18 @@ function token_menu_link_translated_title(MenuLinkInterface $menu_link, $langcod
  *
  * @return string[]
  *   The term parents collection.
+ *
+ * @deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use
+ *   \Drupal\token\TokenTermHelper::loadParents() instead.
+ *
+ * @see https://www.drupal.org/project/token/issues/3627991
  */
 function token_taxonomy_term_load_all_parents($tid, $langcode) {
-  $cache = &drupal_static(__FUNCTION__, []);
-
+  @trigger_error('token_taxonomy_term_load_all_parents() is deprecated in token:8.x-1.18 and is removed from token:2.0.0. Use \Drupal\token\TokenTermHelper::loadParents() instead. See https://www.drupal.org/project/token/issues/3627991', E_USER_DEPRECATED);
   if (!is_numeric($tid)) {
     return [];
   }
-
-  if (!isset($cache[$langcode][$tid])) {
-    $cache[$langcode][$tid] = [];
-    /** @var \Drupal\taxonomy\TermStorageInterface $term_storage */
-    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-    $parents = $term_storage->loadAllParents($tid);
-    // Remove this term from the array.
-    array_shift($parents);
-    $parents = array_reverse($parents);
-    foreach ($parents as $term) {
-      $translation = \Drupal::service('entity.repository')->getTranslationFromContext($term, $langcode);
-      $cache[$langcode][$tid][$term->id()] = $translation->label();
-    }
-  }
-
-  return $cache[$langcode][$tid];
+  return \Drupal::service(TokenTermHelper::class)->loadParents((int) $tid, (string) $langcode);
 }
 
 /**
@@ -403,6 +388,11 @@ function token_element_children(&$elements, $sort = FALSE) {
  *
  * @return string[]
  *   List of node titles of the book parents.
+ *
+ * @deprecated in token:8.x-1.18 and is removed from token:2.0.0. The Book
+ *   module provides its own book tokens.
+ *
+ * @see https://www.drupal.org/project/token/issues/3588324
  */
 function token_book_load_all_parents(array $book) {
   $cache = &drupal_static(__FUNCTION__, []);
@@ -583,6 +573,14 @@ function token_node_insert(NodeInterface $node) {
 #[LegacyHook]
 function token_menu_link_content_presave(MenuLinkContentInterface $menu_link_content) {
   Drupal::service(TokenEntityHooks::class)->menuLinkContentPresave($menu_link_content);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for taxonomy_term.
+ */
+#[LegacyHook]
+function token_taxonomy_term_presave(TermInterface $term) {
+  Drupal::service(TokenEntityHooks::class)->taxonomyTermPresave($term);
 }
 
 /**

@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
 use Symfony\Component\Validator\Constraint;
 
 /**
  * AI moderation constraint.
- *
- * @Constraint(
- *   id = "AiModeration",
- *   label = @Translation("AI Moderation Check", context = "Validation"),
- * )
  */
+#[ConstraintAttribute(
+  id: 'AiModeration',
+  label: new TranslatableMarkup('AI Moderation Check', [], ['context' => 'Validation']),
+)]
 class AiModerationConstraint extends Constraint {
 
   /**
@@ -30,7 +31,7 @@ class AiModerationConstraint extends Constraint {
    *
    * @var string
    */
-  public string $message = '';
+  public string $message = 'The content did not pass the AI moderation check.';
 
   /**
    * Provider/model string in "provider__model" format.

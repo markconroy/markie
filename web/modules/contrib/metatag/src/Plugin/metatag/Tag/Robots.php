@@ -4,22 +4,22 @@ namespace Drupal\metatag\Plugin\metatag\Tag;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 
 /**
  * The basic "Robots" meta tag.
- *
- * @MetatagTag(
- *   id = "robots",
- *   label = @Translation("Robots"),
- *   description = @Translation("Provides search engines with specific directions for what to do when this page is indexed."),
- *   name = "robots",
- *   group = "advanced",
- *   weight = 1,
- *   type = "string",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'robots',
+  label: new TranslatableMarkup('Robots'),
+  name: 'robots',
+  group: 'advanced',
+  type: MetatagType::String,
+  description: new TranslatableMarkup('Provides search engines with specific directions for what to do when this page is indexed.'),
+  weight: 1,
+)]
 class Robots extends MetaNameBase {
 
   use StringTranslationTrait;

@@ -7,12 +7,17 @@ use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests language tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class LanguageTest extends TokenKernelTestBase {
 
   /**
@@ -68,7 +73,7 @@ class LanguageTest extends TokenKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
 
     // Use Portuguese as the default language during the test. We're not using
@@ -128,6 +133,7 @@ class LanguageTest extends TokenKernelTestBase {
    *
    * @dataProvider languageTokenReplacementDataProvider
    */
+  #[DataProvider('languageTokenReplacementDataProvider')]
   public function testLanguageTokenReplacement($token, $langcode, $expected_result) {
     $bubbleable_metadata = new BubbleableMetadata();
     $options = $langcode ? ['langcode' => $langcode] : [];
@@ -144,6 +150,7 @@ class LanguageTest extends TokenKernelTestBase {
    *
    * @dataProvider currentPageLanguageTokenReplacementDataProvider
    */
+  #[DataProvider('currentPageLanguageTokenReplacementDataProvider')]
   public function testCurrentPageLanguageTokenReplacement($token, $langcode, $expected_result) {
     // Set the interface language to Dutch.
     $this->languageManager->setCurrentLanguage(LanguageInterface::TYPE_INTERFACE, $this->languages['nl']);

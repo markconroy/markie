@@ -127,7 +127,7 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
       'keywords' => 'current revision',
       'robots' => 'noindex, nofollow',
     ];
-    $this->assertSame(Json::encode($expected), $node->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $node->get('field_metatag')->value);
 
     $node_storage_manager = \Drupal::entityTypeManager()
       ->getStorage('node');
@@ -141,7 +141,7 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
       'keywords' => 'old revision',
       'robots' => 'noindex, nofollow',
     ];
-    $this->assertSame(Json::encode($expected), $node->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $node->get('field_metatag')->value);
 
     /** @var \Drupal\user\Entity\User $user */
     $user = User::load(2);
@@ -153,7 +153,7 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
       'description' => 'Drupal™ user',
       'keywords' => 'a user',
     ];
-    $this->assertSame(Json::encode($expected), $user->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $user->get('field_metatag')->value);
 
     /** @var \Drupal\taxonomy\Entity\Term $term */
     $term = Term::load(152);
@@ -163,7 +163,7 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
       'canonical_url' => 'the-term',
       'keywords' => 'a taxonomy',
     ];
-    $this->assertSame(Json::encode($expected), $term->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $term->get('field_metatag')->value);
   }
 
 }

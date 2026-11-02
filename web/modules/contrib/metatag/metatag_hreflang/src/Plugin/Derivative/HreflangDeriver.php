@@ -5,21 +5,50 @@ namespace Drupal\metatag_hreflang\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Create a new hreflang tag plugin for each enabled language.
  */
-class HreflangDeriver extends DeriverBase {
+class HreflangDeriver extends DeriverBase implements ContainerDeriverInterface {
 
   use StringTranslationTrait;
+
+  /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
+   * Constructs a HreflangDeriver instance.
+   *
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
+   */
+  public function __construct(LanguageManagerInterface $language_manager) {
+    $this->languageManager = $language_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, $base_plugin_id) {
+    return new static(
+      $container->get('language_manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition): array {
     // Get a list of all defined languages.
-    $languages = \Drupal::languageManager()
+    $languages = $this->languageManager
       ->getLanguages(LanguageInterface::STATE_ALL);
 
     // Now we loop over them and declare the derivatives.

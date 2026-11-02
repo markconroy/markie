@@ -13,9 +13,11 @@ use PHPUnit\Framework\Attributes\Group;
  * Tests caching when translate_text is handled by the chat proxy.
  *
  * This is the configuration docs/installation.md points anyone without a
- * dedicated translation provider at, and the one the cache ID has to get right:
- * the proxy discards the model it is handed and uses the default chat model
- * instead, so the chat default is what decides the output.
+ * dedicated translation provider at, and the one the cache ID has to get right.
+ * The proxy picks its chat provider and model per target language, so every
+ * input to that choice has to reach the cache key.
+ *
+ * @see \Drupal\ai_translate\ChatModelResolver::resolve()
  *
  * @group ai_translate
  */
@@ -58,6 +60,14 @@ class ChatProxyTranslationCacheTest extends KernelTestBase {
     $this->setProviders('chat-1');
     CountingChatProvider::$calls = [];
     $this->german = \Drupal::languageManager()->getLanguage('de');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown(): void {
+    unset($GLOBALS['config']['ai_translate.settings']);
+    parent::tearDown();
   }
 
   /**
@@ -110,6 +120,97 @@ class ChatProxyTranslationCacheTest extends KernelTestBase {
   }
 
   /**
+   * Changing the translate_text model produces a fresh translation.
+   */
+  public function testChangingTheTranslateTextModelForcesRetranslation(): void {
+    $translator = $this->container->get('ai_translate.text_translator');
+
+    $this->setTranslateTextModel('chat-1');
+    $this->assertSame('translated by chat-1',
+      $translator->translateContent('Our services', $this->german));
+
+    $this->setTranslateTextModel('chat-2');
+    $this->assertSame('translated by chat-2',
+      $translator->translateContent('Our services', $this->german),
+      'The newly selected model translated, rather than the stored entry being served.');
+
+    $this->assertSame(['chat-1', 'chat-2'], CountingChatProvider::$calls);
+  }
+
+  /**
+   * Changing the per-language model produces a fresh translation.
+   */
+  public function testChangingThePerLanguageModelForcesRetranslation(): void {
+    $translator = $this->container->get('ai_translate.text_translator');
+
+    $this->setLanguageModel('ai_translate_counting_chat__chat-1');
+    $this->assertSame('translated by chat-1',
+      $translator->translateContent('Our services', $this->german));
+
+    $this->setLanguageModel('ai_translate_counting_chat__chat-2');
+    $this->assertSame('translated by chat-2',
+      $translator->translateContent('Our services', $this->german),
+      'The newly selected model translated, rather than the stored entry being served.');
+
+    $this->assertSame(['chat-1', 'chat-2'], CountingChatProvider::$calls);
+  }
+
+  /**
+   * A per-language model set in settings.php produces a fresh translation.
+   *
+   * Saving the setting, as the test above does, invalidates the
+   * ai_translate.settings cache tag, which forces retranslation whatever the
+   * cache ID holds. An override in settings.php is never saved, so nothing is
+   * invalidated and only the per-language model in the cache ID tells the two
+   * apart.
+   *
+   * @see \Drupal\ai_translate\TextTranslator::providerSignature()
+   */
+  public function testOverridingThePerLanguageModelForcesRetranslation(): void {
+    $translator = $this->container->get('ai_translate.text_translator');
+
+    $this->setLanguageModel('ai_translate_counting_chat__chat-1');
+    $this->assertSame('translated by chat-1',
+      $translator->translateContent('Our services', $this->german));
+
+    $GLOBALS['config']['ai_translate.settings']['language_settings']['de']['model'] = 'ai_translate_counting_chat__chat-2';
+    $this->container->get('config.factory')->reset('ai_translate.settings');
+
+    $this->assertSame('translated by chat-2',
+      $translator->translateContent('Our services', $this->german),
+      'The per-language model is part of the cache ID.');
+
+    $this->assertSame(['chat-1', 'chat-2'], CountingChatProvider::$calls);
+  }
+
+  /**
+   * Sets the model for the translate_text operation.
+   *
+   * @param string $model
+   *   Model ID.
+   */
+  protected function setTranslateTextModel(string $model): void {
+    $this->config('ai.settings')
+      ->set('default_providers.translate_text', [
+        'provider_id' => 'chat_translation',
+        'model_id' => $model,
+      ])
+      ->save();
+  }
+
+  /**
+   * Sets the per-language provider and model for German.
+   *
+   * @param string $value
+   *   Value as the settings form stores it, "provider_id__model_id".
+   */
+  protected function setLanguageModel(string $value): void {
+    $this->config('ai_translate.settings')
+      ->set('language_settings.de.model', $value)
+      ->save();
+  }
+
+  /**
    * Points translate_text at the proxy and the proxy at a chat model.
    *
    * @param string $chatModel
@@ -117,12 +218,12 @@ class ChatProxyTranslationCacheTest extends KernelTestBase {
    */
   protected function setProviders(string $chatModel): void {
     $this->config('ai.settings')
-      // The model_id here is deliberately left on chat-1 throughout. The proxy
-      // ignores it, so a test that changed it too could not tell whether the
-      // fix reads the chat default or merely the translate_text default.
+      // No model for the translation operation, so the chat default is what
+      // decides. Setting one here would take precedence and leave these tests
+      // varying nothing.
       ->set('default_providers.translate_text', [
         'provider_id' => 'chat_translation',
-        'model_id' => 'chat-1',
+        'model_id' => '',
       ])
       ->set('default_providers.chat', [
         'provider_id' => 'ai_translate_counting_chat',

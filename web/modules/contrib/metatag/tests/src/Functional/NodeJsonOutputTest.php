@@ -3,6 +3,8 @@
 namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheTagsInvalidator;
+use Drupal\Core\ProxyClass\Routing\RouteBuilder;
 use Drupal\rest\RestResourceConfigInterface;
 use Drupal\Tests\BrowserTestBase;
 
@@ -44,6 +46,30 @@ class NodeJsonOutputTest extends BrowserTestBase {
   protected $defaultTheme = 'claro';
 
   /**
+   * The cachetags invalidator service.
+   *
+   * @var \Drupal\Core\Cache\CacheTagsInvalidator
+   */
+  protected CacheTagsInvalidator $cachetagsInvalidator;
+
+  /**
+   * The router builder service.
+   *
+   * @var \Drupal\Core\ProxyClass\Routing\RouteBuilder
+   */
+  protected RouteBuilder $routerBuilder;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    $this->cachetagsInvalidator = $this->container->get('cache_tags.invalidator');
+    $this->routerBuilder = $this->container->get('router.builder');
+  }
+
+  /**
    * Create an entity, view its JSON output, confirm Metatag data exists.
    */
   public function testNode() {
@@ -61,7 +87,7 @@ class NodeJsonOutputTest extends BrowserTestBase {
 
     // Load the JSON output.
     $url->setOption('query', ['_format' => 'json']);
-    $response = $this->drupalGet($url);
+    $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
 
     // Decode the JSON output.
@@ -141,7 +167,7 @@ class NodeJsonOutputTest extends BrowserTestBase {
     // Ensure that the cache tags invalidator has its internal values reset.
     // Otherwise the http_response cache tag invalidation won't work.
     // Clear the tag cache.
-    \Drupal::service('cache_tags.invalidator')->resetChecksums();
+    $this->cachetagsInvalidator->resetChecksums();
     foreach (Cache::getBins() as $backend) {
       if (is_callable([$backend, 'reset'])) {
         $backend->reset();
@@ -153,7 +179,7 @@ class NodeJsonOutputTest extends BrowserTestBase {
     // Tests using this base class may trigger route rebuilds due to changes to
     // RestResourceConfig entities or 'rest.settings'. Ensure the test generates
     // routes using an up-to-date router.
-    \Drupal::service('router.builder')->rebuildIfNeeded();
+    $this->routerBuilder->rebuildIfNeeded();
   }
 
 }

@@ -4,12 +4,16 @@ namespace Drupal\Tests\token\Kernel;
 
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the views tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class ViewsTest extends TokenKernelTestBase {
 
   /**

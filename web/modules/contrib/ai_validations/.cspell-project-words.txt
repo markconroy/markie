@@ -5,3 +5,9 @@ XFALSE
 xtrue
 xfalse
 echoai
+XSAFE
+XWARN
+XBLOCK
+xsafe
+xwarn
+xblock

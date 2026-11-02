@@ -193,8 +193,8 @@ class PermissionsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function createContentType(array $values = []): NodeType {
-    $type = parent::createContentType(['type' => 'page']);
+  protected function createContentType(array $values = [], bool $create_body = TRUE): NodeType {
+    $type = parent::createContentType(['type' => 'page'], $create_body);
 
     // Load a node form.
     $this->drupalGet('node/add/page');

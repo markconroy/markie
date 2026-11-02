@@ -4,12 +4,16 @@ namespace Drupal\Tests\token\Functional\Tree;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Tests\token\Functional\TokenTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests token tree page.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class TreeTest extends TokenTestBase {
 
   use TokenTreeTestTrait;
@@ -22,7 +26,7 @@ class TreeTest extends TokenTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['node'];
+  protected static $modules = ['node', 'dynamic_page_cache'];
 
   public function setUp(): void {
     parent::setUp();

@@ -18,7 +18,9 @@
         popover.classList.add('ai-tooltip');
         popover.setAttribute('popover', 'hint');
         popover.setAttribute('id', popoverId);
-        popover.innerHTML = popoverTrigger.dataset.aiTooltip;
+        // Plain text only: data-* attributes survive Xss::filter(), so the
+        // value may come from untrusted users and must never be parsed as HTML.
+        popover.textContent = popoverTrigger.dataset.aiTooltip;
         document.body.appendChild(popover);
 
         const showTooltip = () => {

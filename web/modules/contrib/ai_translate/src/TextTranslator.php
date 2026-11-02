@@ -100,9 +100,7 @@ class TextTranslator implements TextTranslatorInterface {
         $providerConfig['model_id']
       );
 
-      $cleaned = str_replace('```html', '', $translation->getNormalized());
-      $cleaned = trim(trim($cleaned, '```'), ' ');
-      $cleaned = trim($cleaned, '"');
+      $cleaned = $this->normalizeResponse($translation->getNormalized());
     }
     catch (\Throwable $e) {
       $this->getLogger('ai_translate')->warning($e->getMessage());
@@ -118,6 +116,61 @@ class TextTranslator implements TextTranslatorInterface {
     }
 
     return $cleaned;
+  }
+
+  /**
+   * Removes response wrappers without trimming content quotes or backticks.
+   *
+   * @param string $response
+   *   The provider's normalized response.
+   *
+   * @return string
+   *   The response with at most one fence and one pair of quotes removed.
+   */
+  protected function normalizeResponse(string $response): string {
+    // Keep whitespace in the content, especially after an unclosed fence.
+    $candidate = ltrim($response);
+    if (preg_match('/\A(`{3,})([^`<>\r\n]*)\R/', $candidate, $opening)) {
+      $content = substr($candidate, strlen($opening[0]));
+      $length = strlen($opening[1]);
+      // The first closing fence may also sit right after the text on the last
+      // line and must be at least as long as the opener. Inline backticks and
+      // shorter runs belong to the content.
+      $closingPattern = '/(?:\R[ \t]*)?`{' . $length . ',}[ \t]*(?=\R|\z)/';
+      if (preg_match($closingPattern, $content, $closing, PREG_OFFSET_CAPTURE)) {
+        [$fence, $offset] = $closing[0];
+        if (trim(substr($content, $offset + strlen($fence))) === '') {
+          $response = substr($content, 0, $offset);
+        }
+        // Otherwise the response contains prose or another block after the
+        // first closing fence: it is not wrapped in a single fence.
+      }
+      else {
+        $response = $content;
+      }
+    }
+    // Retain the compact triple-backtick wrappers supported by older releases.
+    // Without a line break, only html directly before a tag is unambiguous.
+    elseif (str_starts_with($candidate, '```') && !str_starts_with($candidate, '````')) {
+      $content = substr($candidate, 3);
+      $closing = strpos($content, '```');
+      if ($closing !== FALSE && trim(substr($content, $closing + 3)) === '') {
+        $response = substr($content, 0, $closing);
+        if (str_starts_with($response, 'html<')) {
+          $response = substr($response, 4);
+        }
+      }
+      elseif ($closing === FALSE && str_starts_with($content, 'html<')) {
+        $response = substr($content, 4);
+      }
+    }
+
+    $candidate = trim($response);
+    if (strlen($candidate) >= 2 && $candidate[0] === '"' && str_ends_with($candidate, '"')
+      && substr_count($candidate, '"') === 2) {
+      $response = substr($candidate, 1, -1);
+    }
+    return $response;
   }
 
   /**
@@ -220,7 +273,7 @@ class TextTranslator implements TextTranslatorInterface {
   ) : string {
     return implode(':', array_merge(
       ['ai_translate'],
-      $this->providerSignature($providerConfig),
+      $this->providerSignature($providerConfig, $langTo),
       [
         $langFrom?->getId() ?? 'auto',
         $langTo->getId(),
@@ -233,23 +286,35 @@ class TextTranslator implements TextTranslatorInterface {
    * Names the provider and model that will really produce the translation.
    *
    * The translate_text default is not always the whole answer. This module's
-   * own chat_translation provider is a proxy:
-   * ChatTranslationProvider::translateText() discards the model_id it is
-   * handed and runs the chat operation with whatever default_providers.chat
-   * names. That is the model whose output gets cached, so keying on
-   * translate_text alone kept serving one model's translations after the site
-   * had switched to another.
+   * own chat_translation provider is a proxy: it runs the chat operation, and
+   * which chat provider and model it picks depends on the target language.
+   * See \Drupal\ai_translate\ChatModelResolver.
    *
-   * Both lookups are plain ai.settings reads. No provider plugin is built here.
+   * Every input to that decision goes in, rather than the decision itself.
+   * Resolving it here would mean building provider plugins on the cheap path
+   * that runs before every cache lookup, and the key only has to change when
+   * the answer could have changed, not name it.
+   *
+   * The per-language model looks redundant next to the cache tag on
+   * ai_translate.settings, which already drops every entry when that
+   * configuration is saved. It is not. A value set as a configuration
+   * override in settings.php changes which model runs without ever being
+   * saved, so no tag is invalidated and only this component notices. It also
+   * keeps entries usable across a switch away and back, which a tag cannot.
    *
    * @param array $providerConfig
    *   The resolved default provider for the translate_text operation, from
    *   AiProviderPluginManager::getDefaultProviderForOperationType().
+   * @param \Drupal\Core\Language\LanguageInterface $langTo
+   *   Destination language, whose per-language model is one of those inputs.
    *
    * @return string[]
    *   Provider and model IDs, outermost first, for use in the cache ID.
    */
-  protected function providerSignature(array $providerConfig) : array {
+  protected function providerSignature(
+    array $providerConfig,
+    LanguageInterface $langTo,
+  ) : array {
     $signature = [
       $providerConfig['provider_id'] ?? '',
       $providerConfig['model_id'] ?? '',
@@ -260,6 +325,8 @@ class TextTranslator implements TextTranslatorInterface {
         ->getDefaultProviderForOperationType('chat') ?? [];
       $signature[] = $chatConfig['provider_id'] ?? '';
       $signature[] = $chatConfig['model_id'] ?? '';
+      $signature[] = (string) $this->configFactory->get('ai_translate.settings')
+        ->get('language_settings.' . $langTo->getId() . '.model');
     }
 
     return $signature;

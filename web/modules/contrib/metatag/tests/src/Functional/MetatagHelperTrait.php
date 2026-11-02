@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Random;
 use Drupal\node\NodeInterface;
@@ -65,7 +67,7 @@ trait MetatagHelperTrait {
       'body' => [
         [
           'value' => $body,
-          'format' => filter_default_format(),
+          'format' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getDefaultFormat()->id(), fn() => filter_default_format()),
         ],
       ],
       'title' => $title,
@@ -123,7 +125,7 @@ trait MetatagHelperTrait {
       'description' => [
         [
           'value' => $this->randomMachineName(32),
-          'format' => filter_default_format(),
+          'format' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getDefaultFormat()->id(), fn() => filter_default_format()),
         ],
       ],
       'name' => $this->randomMachineName(8),

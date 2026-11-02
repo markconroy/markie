@@ -26,7 +26,7 @@ class MetatagFieldDeriver extends DeriverBase implements ContainerDeriverInterfa
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Constructs a MetatagFieldDeriver instance.

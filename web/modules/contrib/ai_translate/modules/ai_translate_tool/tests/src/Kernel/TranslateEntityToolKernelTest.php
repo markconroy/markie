@@ -162,7 +162,7 @@ class TranslateEntityToolKernelTest extends EntityTranslationOrchestratorKernelT
 
     $tool->execute();
     $this->assertFalse($tool->getResultStatus());
-    $this->assertStringContainsString('invalid input', (string) $tool->getResultMessage());
+    $this->assertStringContainsStringIgnoringCase('invalid input', (string) $tool->getResultMessage());
   }
 
 }

@@ -2,8 +2,6 @@
 
 namespace Drupal\metatag;
 
-use PHPUnit\Framework\Exception;
-
 /**
  * MetatagTrimmer service class for trimming metatags.
  */
@@ -136,7 +134,7 @@ class MetatagTrimmer {
         break;
 
       default:
-        throw new Exception('Unknown trimming method: ' . $method);
+        throw new \Exception('Unknown trimming method: ' . $method);
     }
 
     // Do additional cleanup trimming, append the suffix.

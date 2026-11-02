@@ -4,34 +4,29 @@ declare(strict_types=1);
 
 namespace Drupal\metatag_custom_tags\Plugin\metatag\Tag;
 
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Render\PlainTextOutput;
-use Drupal\Component\Utility\Random;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag_custom_tags\Plugin\Derivative\MetaTagCustomTagDeriver;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Custom configured meta tags will be available.
  *
  * The meta tag's values will be based upon this annotation.
- *
- * @MetatagTag(
- *   id = "metatag_custom_tag",
- *   deriver = "Drupal\metatag_custom_tags\Plugin\Derivative\MetaTagCustomTagDeriver",
- *   label = @Translation("Custom Tag"),
- *   description = @Translation("This plugin will be cloned from these settings for each custom tag."),
- *   name = "metatag_custom_tag",
- *   weight = 1,
- *   group = "metatag_custom_tags",
- *   type = "string",
- *   secure = FALSE,
- *   multiple = TRUE
- * )
  */
+#[MetatagTag(
+  id: 'metatag_custom_tag',
+  label: new TranslatableMarkup('Custom Tag'),
+  name: 'metatag_custom_tag',
+  group: 'metatag_custom_tags',
+  type: MetatagType::String,
+  description: new TranslatableMarkup('This plugin will be cloned from these settings for each custom tag.'),
+  weight: 1,
+  multiple: TRUE,
+  deriver: MetaTagCustomTagDeriver::class,
+)]
 class MetaTagCustomTag extends MetaNameBase {
 
   /**

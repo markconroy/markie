@@ -2,23 +2,26 @@
 
 namespace Drupal\metatag_mobile\Plugin\metatag\Tag;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\LinkRelBase;
 
 /**
  * The Web Manifest for Progressive Web Apps.
- *
- * @MetatagTag(
- *   id = "web_manifest",
- *   label = @Translation("Web Manifest"),
- *   description = @Translation("A URL to a manifest.json file that describes the application. The <a href='https://developer.mozilla.org/en-US/docs/Web/Manifest'>JSON-based manifest</a> provides developers with a centralized place to put metadata associated with a web application."),
- *   name = "manifest",
- *   group = "mobile",
- *   weight = 92,
- *   type = "uri",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'web_manifest',
+  label: new TranslatableMarkup('Web Manifest'),
+  name: 'manifest',
+  group: 'mobile',
+  type: MetatagType::Uri,
+  description: new TranslatableMarkup(
+    'A URL to a manifest.json file that describes the application. The <a href=":url">JSON-based manifest</a> provides developers with a centralized place to put metadata associated with a web application.',
+    [':url' => 'https://developer.mozilla.org/en-US/docs/Web/Manifest'],
+  ),
+  weight: 92,
+)]
 class WebManifest extends LinkRelBase {
 
   /**

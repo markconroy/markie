@@ -7,8 +7,13 @@
 
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\ai_search\Enum\ResultsCacheMode;
 use Drupal\ai_search\Plugin\search_api\processor\DatabaseBoostByAiSearch;
+use Drupal\search_api\Form\IndexForm;
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Query\QueryInterface;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_entity_type_alter().
@@ -26,6 +31,107 @@ function ai_search_entity_type_alter(array &$entity_types) {
  */
 function ai_search_query_search_api_db_search_alter(AlterableInterface $query) {
   DatabaseBoostByAiSearch::queryAlter($query);
+}
+
+/**
+ * Implements hook_search_api_query_alter().
+ */
+function ai_search_search_api_query_alter(QueryInterface $query) {
+  \Drupal::service('ai_search.results_cache_variation')->alterQuery($query);
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function ai_search_views_pre_render(ViewExecutable $view) {
+  \Drupal::service('ai_search.results_cache_variation')->alterViewCacheability($view);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for search_api_index_form.
+ */
+function ai_search_form_search_api_index_form_alter(array &$form, FormStateInterface $form_state) {
+  $form_object = $form_state->getFormObject();
+  if (!$form_object instanceof IndexForm) {
+    return;
+  }
+  $ai_search_server_ids = _ai_search_get_server_ids();
+  if (!$ai_search_server_ids) {
+    return;
+  }
+
+  // Only show the setting while an AI Search server is selected.
+  $server_conditions = [];
+  foreach ($ai_search_server_ids as $server_id) {
+    if ($server_conditions) {
+      $server_conditions[] = 'or';
+    }
+    $server_conditions[] = [':input[name="server"]' => ['value' => $server_id]];
+  }
+
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $form_object->getEntity();
+  $mode = $index->isNew()
+    ? ResultsCacheMode::default()
+    : \Drupal::service('ai_search.results_cache_variation')->getMode($index->id());
+  $form['ai_search_results_cache_mode'] = [
+    '#type' => 'radios',
+    '#title' => t('AI Search results caching'),
+    '#description' => t('AI Search checks access to each search result for the user searching. This setting only applies to Views of this index whose Caching setting stores results (any Search API caching option other than "None"), and to the cached output of those views. It chooses which users may share those cached results. Views with Caching set to "None", RAG tools, AI Assistant RAG actions, and custom code running Search API queries are not affected: they search again each time and only return results the current user can view.'),
+    '#options' => ResultsCacheMode::getOptions(),
+    '#default_value' => $mode->value,
+    '#states' => ['visible' => $server_conditions],
+  ];
+  foreach (ResultsCacheMode::cases() as $option) {
+    $form['ai_search_results_cache_mode'][$option->value]['#description'] = $option->getDescription();
+  }
+
+  // Store the setting before the index is saved, as submit handlers after
+  // save() may not run when saving starts a batch.
+  foreach (['submit', 'save_edit'] as $action) {
+    if (!isset($form['actions'][$action]['#submit'])) {
+      continue;
+    }
+    $submit_handlers = $form['actions'][$action]['#submit'];
+    $save_position = array_search('::save', $submit_handlers, TRUE);
+    $save_position = $save_position === FALSE ? count($submit_handlers) : $save_position;
+    array_splice($submit_handlers, $save_position, 0, ['_ai_search_index_form_submit_results_cache_mode']);
+    $form['actions'][$action]['#submit'] = $submit_handlers;
+  }
+}
+
+/**
+ * Form submission handler storing the AI Search results cache mode.
+ */
+function _ai_search_index_form_submit_results_cache_mode(array &$form, FormStateInterface $form_state) {
+  if (!in_array($form_state->getValue('server'), _ai_search_get_server_ids(), TRUE)) {
+    return;
+  }
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $form_state->getFormObject()->getEntity();
+  $mode = ResultsCacheMode::fromStoredValue($form_state->getValue('ai_search_results_cache_mode'));
+  $config = \Drupal::configFactory()->getEditable('ai_search.index.' . $index->id());
+  if ($config->isNew()) {
+    $config->set('index_id', $index->id());
+  }
+  $config->set('results_cache_mode', $mode->value);
+  $config->save();
+}
+
+/**
+ * Gets the IDs of all Search API servers using the AI Search backend.
+ *
+ * @return string[]
+ *   The server IDs.
+ */
+function _ai_search_get_server_ids(): array {
+  $server_ids = \Drupal::entityTypeManager()
+    ->getStorage('search_api_server')
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('backend', 'search_api_ai_search')
+    ->execute();
+  return array_values(array_map('strval', $server_ids));
 }
 
 /**
@@ -90,5 +196,45 @@ function ai_search_preprocess_search_api_index(array &$variables) {
       $new_row['data'][1] = t('Indexing options have been configured.');
     }
     $variables['table']['#rows'][] = $new_row;
+
+    // Show how cached results are shared, warning about the modes that are
+    // only safe for some sites.
+    $mode = ResultsCacheMode::fromStoredValue($index_config['results_cache_mode'] ?? NULL);
+    $cache_row = [
+      'data' => [
+        [
+          'header' => TRUE,
+          'data' => t('Results caching'),
+        ],
+        t('@label. @description Only applies to Views of this index that cache results; RAG tools, AI Assistant RAG actions, and custom code are not affected.', [
+          '@label' => $mode->getLabel(),
+          '@description' => $mode->getDescription(),
+        ]),
+      ],
+      'class' => [],
+    ];
+    if (in_array($mode, [ResultsCacheMode::PerRole, ResultsCacheMode::Shared], TRUE)) {
+      $cache_row['class'][] = 'warning';
+      $cache_row['class'][] = 'color-warning';
+    }
+    $variables['table']['#rows'][] = $cache_row;
+
+    // The access processors filter on fields which are not stored in the
+    // vector database, so the backend ignores their conditions.
+    $unsupported_processors = array_intersect_key($index->getProcessors(), array_flip(['content_access', 'role_access']));
+    if ($unsupported_processors) {
+      $variables['table']['#rows'][] = [
+        'data' => [
+          [
+            'header' => TRUE,
+            'data' => t('Unsupported processors'),
+          ],
+          t('The %processors processor(s) are not supported by AI Search and are ignored when searching. AI Search checks access to each result instead; use the "AI Search results caching" setting on the index edit form to control how cached results are shared. Remove these processors on the Processors tab.', [
+            '%processors' => implode(', ', array_map(fn ($processor) => $processor->label(), $unsupported_processors)),
+          ]),
+        ],
+        'class' => ['warning', 'color-warning'],
+      ];
+    }
   }
 }

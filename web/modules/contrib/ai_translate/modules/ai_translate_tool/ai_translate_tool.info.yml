@@ -11,7 +11,7 @@ dependencies:
 test_dependencies:
   - tool:tool (>=1.0.0-beta10)
 
-# Information added by Drupal.org packaging script on 2026-10-13
-version: '1.4.3'
+# Information added by Drupal.org packaging script on 2026-10-28
+version: '1.4.4'
 project: 'ai_translate'
-datestamp: 1791905982
+datestamp: 1793183969

@@ -1,0 +1,9 @@
+# @file
+# Custom services for the Metatag Dublin Core Advanced module.
+
+services:
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_dc_advanced\Hook\HelpHooks:
+    class: Drupal\metatag_dc_advanced\Hook\HelpHooks
+    autowire: true

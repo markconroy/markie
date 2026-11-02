@@ -7,8 +7,10 @@ namespace Drupal\metatag\Plugin\metatag\Tag;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Component\Utility\Random;
+use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\metatag\MetatagSeparator;
@@ -17,8 +19,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Each meta tag will extend this base.
  */
-abstract class MetaNameBase extends PluginBase {
-  // Implements ContainerFactoryPluginInterface {.
+abstract class MetaNameBase extends PluginBase implements ContainerFactoryPluginInterface {
+
   use MetatagSeparator;
   use StringTranslationTrait;
 
@@ -132,6 +134,20 @@ abstract class MetaNameBase extends PluginBase {
   protected $configFactory;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The Metatag trimmer service.
+   *
+   * @var \Drupal\metatag\MetatagTrimmer
+   */
+  protected $trimmer;
+
+  /**
    * The string this tag uses for the tag itself.
    *
    * @var string
@@ -162,8 +178,6 @@ abstract class MetaNameBase extends PluginBase {
     // @todo Should we have setProperty() methods for each of these?
     $this->id = $plugin_definition['id'];
     $this->name = $plugin_definition['name'];
-    $this->label = $plugin_definition['label'];
-    $this->description = $plugin_definition['description'] ?? '';
     $this->group = $plugin_definition['group'];
     $this->weight = $plugin_definition['weight'];
     $this->type = $plugin_definition['type'];
@@ -172,10 +186,22 @@ abstract class MetaNameBase extends PluginBase {
     $this->trimmable = !empty($plugin_definition['trimmable']);
     $this->long = !empty($plugin_definition['long']);
     $this->absoluteUrl = !empty($plugin_definition['absolute_url']);
-    $this->request = \Drupal::request();
 
-    // @todo Is there a DI-friendly way of doing this?
-    $this->configFactory = \Drupal::service('config.factory');
+    // If this was loaded via an Annotation, unwrap the Translation object.
+    // Otherwise it was an Attribute, so 'label' is already a
+    // TranslatableMarkup.
+    $this->label = $plugin_definition['label'] instanceof Translation
+      ? $plugin_definition['label']->get()
+      : $plugin_definition['label'];
+    // Now do the same for description, if it was set.
+    if (!empty($plugin_definition['description'])) {
+      $this->description = $plugin_definition['description'] instanceof Translation
+        ? $plugin_definition['description']->get()
+        : $plugin_definition['description'];
+    }
+    else {
+      $this->description = NULL;
+    }
 
     // Set an initial value.
     $this->value = '';
@@ -185,12 +211,11 @@ abstract class MetaNameBase extends PluginBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition
-    );
-    $instance->setConfigFactory($container->get('config.factory'));
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->request = $container->get('request_stack')->getCurrentRequest();
+    $instance->configFactory = $container->get('config.factory');
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->trimmer = $container->get('metatag.trimmer');
     return $instance;
   }
 
@@ -217,7 +242,7 @@ abstract class MetaNameBase extends PluginBase {
   /**
    * This meta tag's label.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
    *   The label.
    */
   public function label(): TranslatableMarkup|string {
@@ -227,10 +252,10 @@ abstract class MetaNameBase extends PluginBase {
   /**
    * The meta tag's description.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string|null
    *   This meta tag's description.
    */
-  public function description(): TranslatableMarkup|string {
+  public function description(): TranslatableMarkup|string|null {
     return $this->description;
   }
 
@@ -429,7 +454,7 @@ abstract class MetaNameBase extends PluginBase {
     // Add a final note about adding the "<none>" value.
     $form['#description'] .= ' ' . $this->t('Set to %none to disable inheritance of the parent value and prevent the output of this metatag entirely.', ['%none' => '<none>']);
 
-    $settings = \Drupal::config('metatag.settings');
+    $settings = $this->configFactory->get('metatag.settings');
     $trimlengths = $settings->get('tag_trim_maxlength') ?? [];
     if (!empty($trimlengths['metatag_maxlength_' . $this->id])) {
       $maxlength = intval($trimlengths['metatag_maxlength_' . $this->id]);
@@ -437,7 +462,7 @@ abstract class MetaNameBase extends PluginBase {
         $form['#description'] .= ' ' . $this->t('This will be truncated to a maximum of %max characters after any tokens are processed.', ['%max' => $maxlength]);
 
         // Optional support for the Maxlength module.
-        if (\Drupal::moduleHandler()->moduleExists('maxlength')) {
+        if ($this->moduleHandler->moduleExists('maxlength')) {
           if ($settings->get('use_maxlength') ?? TRUE) {
             $form['#attributes']['class'][] = 'maxlength';
             $form['#attached']['library'][] = 'maxlength/maxlength';
@@ -497,8 +522,14 @@ abstract class MetaNameBase extends PluginBase {
     }
 
     $value = str_replace(["\r\n", "\n", "\r", "\t"], ' ', $value);
-    $value = preg_replace('/\s+/u', ' ', $value);
-    return trim($value);
+
+    // Be careful with the return value from preg_replace() as it may return
+    // NULL in certain circumstances, e.g. invalid UTF-8 characters.
+    // @see https://www.php.net/preg_replace
+    // @see https://www.php.net/manual/en/reference.pcre.pattern.modifiers.php
+    $replaced_value = preg_replace('/\s+/u', ' ', $value);
+
+    return trim($replaced_value ?? $value);
   }
 
   /**
@@ -539,6 +570,15 @@ abstract class MetaNameBase extends PluginBase {
     $elements = [];
     foreach ($values as $value) {
       $value = $this->tidy($value);
+
+      // For multi-value tags, skip empty values so they don't produce empty
+      // meta tags, e.g. when one of several tokens resolves to nothing. The
+      // value "0" is not empty and must be kept, so compare strictly against
+      // the empty string rather than relying on a loose/empty() check.
+      if ($this->multiple() && $value === '') {
+        continue;
+      }
+
       if ($value != '' && $this->requiresAbsoluteUrl()) {
         // Relative URL.
         if (parse_url($value, PHP_URL_HOST) == NULL) {
@@ -655,7 +695,7 @@ abstract class MetaNameBase extends PluginBase {
    */
   protected function trimValue($value): string {
     if (TRUE === $this->trimmable) {
-      $settings = \Drupal::config('metatag.settings');
+      $settings = $this->configFactory->get('metatag.settings');
       $trimMethod = $settings->get('tag_trim_method');
       $trimMaxlengthArray = $settings->get('tag_trim_maxlength');
       $trimEndChars = $settings->get('tag_trim_end');
@@ -669,8 +709,7 @@ abstract class MetaNameBase extends PluginBase {
         }
       }
       $suffix = (string) $settings->get('trim_suffix');
-      $trimmerService = \Drupal::service('metatag.trimmer');
-      $value = $trimmerService->trimByMethod($value, $currentMaxValue, $trimMethod, $trimEndChars, $suffix);
+      $value = $this->trimmer->trimByMethod($value, $currentMaxValue, $trimMethod, $trimEndChars, $suffix);
     }
     return $value;
   }
@@ -709,34 +748,33 @@ abstract class MetaNameBase extends PluginBase {
    *   An array containing a normal string.
    */
   public function getTestFormData(): array {
-    $random = new Random();
-
     // Provide a default value.
     if ($this->isImage()) {
       // @todo Add proper validation of image meta values.
       return [
-        $this->id => 'https://www.example.com/images/' . $random->word(6) . '-' . $random->word(6) . '.png',
+        $this->id => $this->generateAbsoluteTestUrl('png'),
       ];
     }
     // Absolute URLs that are specifically secure.
     elseif ($this->isSecure()) {
       return [
-        $this->id => 'https://www.example.com/' . $random->word(6) . '-' . $random->word(6) . '.html',
+        $this->id => $this->generateAbsoluteTestUrl(),
       ];
     }
     // Absolute URLs that are not necessarily secure.
     elseif ($this->requiresAbsoluteUrl()) {
       return [
-        $this->id => 'http://www.example.com/' . $random->word(6) . '-' . $random->word(6) . '.html',
+        $this->id => $this->generateAbsoluteTestUrl('html', FALSE),
       ];
     }
     // Relative URLs.
     elseif ($this->isUrl()) {
       return [
-        $this->id => '/' . $random->word(6) . '/' . $random->word(6) . '.html',
+        $this->id => $this->generateRelativeTestUrl(),
       ];
     }
     else {
+      $random = new Random();
       return [
         // Use three alphanumeric strings joined with spaces.
         $this->id => $random->word(6) . ' ' . $random->word(6) . ' ' . $random->word(6),
@@ -769,6 +807,39 @@ abstract class MetaNameBase extends PluginBase {
       $xpath_strings[] = "//" . $this->htmlTag . "[@" . $this->htmlNameAttribute . "='{$this->name}' and @" . $this->htmlValueAttribute . "='{$value}']";
     }
     return $xpath_strings;
+  }
+
+  /**
+   * Generate a relative URL string based on certain options.
+   *
+   * @param string $extension
+   *   The file extension tho use in the URL. Defaults to 'html'.
+   *
+   * @return string
+   *   The requested URL.
+   */
+  protected function generateRelativeTestUrl($extension = 'html') {
+    $random = new Random();
+    return '/' . $random->word(6) . '/' . $random->word(6) . '.' . $extension;
+  }
+
+  /**
+   * Generate an absolute URL string based on certain options.
+   *
+   * @param string $extension
+   *   The file extension tho use in the URL. Defaults to 'html'.
+   * @param bool $secure
+   *   Whether the URL will use the https or http scheme; defaults to https.
+   *
+   * @return string
+   *   The requested URL.
+   */
+  protected function generateAbsoluteTestUrl($extension = 'html', $secure = TRUE) {
+    $random = new Random();
+    $path = $random->word(6) . '/' . $random->word(6);
+    $prefix = $secure ? 'https' : 'http';
+
+    return $prefix . '://www.example.com/' . $path . '.' . $extension;
   }
 
 }

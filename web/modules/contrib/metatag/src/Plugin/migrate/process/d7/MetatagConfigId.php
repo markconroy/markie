@@ -2,6 +2,7 @@
 
 namespace Drupal\metatag\Plugin\migrate\process\d7;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -11,12 +12,11 @@ use Drupal\migrate\Row;
  *
  * Config IDs in D7 had the format "ENTITY:BUNDLE". In D8+ they have the
  * format "ENTITY__BUNDLE".
- *
- * @MigrateProcessPlugin(
- *   id = "d7_metatag_config_id",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'd7_metatag_config_id',
+  handle_multiples: TRUE,
+)]
 class MetatagConfigId extends ProcessPluginBase {
 
   /**

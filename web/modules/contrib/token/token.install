@@ -5,35 +5,19 @@
  * Install, update and uninstall functions for the token module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use Drupal\token\Hook\TokenRequirementsHooks;
+
 /**
  * Implements hook_requirements().
  */
+#[LegacyRequirementsHook]
 function token_requirements($phase = 'runtime') {
-  $requirements = [];
-
   if ($phase == 'runtime') {
-    // Check for various token definition problems.
-    $token_problems = token_get_token_problems();
-    // Format and display each token problem.
-    foreach ($token_problems as $problem_key => $problem) {
-      if (!empty($problem['problems'])) {
-        $problems = array_unique($problem['problems']);
-
-        $build = [
-          '#theme' => 'item_list',
-          '#items' => $problems,
-        ];
-
-        $requirements['token-' . $problem_key] = [
-          'title' => $problem['label'],
-          'value' => \Drupal::service('renderer')->renderInIsolation($build),
-          'severity' => $problem['severity'],
-        ];
-      }
-    }
+    return \Drupal::service(TokenRequirementsHooks::class)->runtimeRequirements();
   }
 
-  return $requirements;
+  return [];
 }
 
 /**
@@ -63,6 +47,9 @@ function token_install() {
 
 /**
  * Get token problems.
+ *
+ * @deprecated in token:8.x-1.x and is removed from token:2.0.0, there is no
+ *   replacement.
  */
 function token_get_token_problems() {
   // @todo Improve the duplicate checking to report which modules are the offenders.

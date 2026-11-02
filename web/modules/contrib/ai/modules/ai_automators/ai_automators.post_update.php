@@ -60,3 +60,11 @@ function ai_automators_post_update_13002(&$sandbox) {
   $config_entity_updater->update($sandbox, 'field_config', $callback);
   \Drupal::state()->set('ai_automators.importing', FALSE);
 }
+
+/**
+ * Explains the new fallback user for automators without a logged-in user.
+ */
+function ai_automators_post_update_13003() {
+  // Nothing to change: an empty fallback user runs as anonymous.
+  return t('AI Automators now run with the access of the user who saved the content, including queued items on cron. Content saved without a logged-in user (cron, drush, migrations, scheduled publishing) runs as anonymous, unless you set a fallback user at Administration » Configuration » AI » AI Automators (/admin/config/ai/ai-automators/settings). Do not choose an administrator.');
+}

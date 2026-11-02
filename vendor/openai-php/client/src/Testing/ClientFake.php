@@ -8,6 +8,7 @@ use OpenAI\Contracts\ResponseContract;
 use OpenAI\Contracts\ResponseStreamContract;
 use OpenAI\Responses\StreamResponse;
 use OpenAI\Testing\Requests\TestRequest;
+use OpenAI\Testing\Resources\AgentsTestResource;
 use OpenAI\Testing\Resources\AssistantsTestResource;
 use OpenAI\Testing\Resources\AudioTestResource;
 use OpenAI\Testing\Resources\BatchesTestResource;
@@ -15,6 +16,7 @@ use OpenAI\Testing\Resources\ChatTestResource;
 use OpenAI\Testing\Resources\CompletionsTestResource;
 use OpenAI\Testing\Resources\ContainersTestResource;
 use OpenAI\Testing\Resources\ConversationsTestResource;
+use OpenAI\Testing\Resources\DecisionsTestResource;
 use OpenAI\Testing\Resources\EditsTestResource;
 use OpenAI\Testing\Resources\EmbeddingsTestResource;
 use OpenAI\Testing\Resources\FilesTestResource;
@@ -25,7 +27,9 @@ use OpenAI\Testing\Resources\ModelsTestResource;
 use OpenAI\Testing\Resources\ModerationsTestResource;
 use OpenAI\Testing\Resources\RealtimeTestResource;
 use OpenAI\Testing\Resources\ResponsesTestResource;
+use OpenAI\Testing\Resources\SkillsTestResource;
 use OpenAI\Testing\Resources\ThreadsTestResource;
+use OpenAI\Testing\Resources\VaultsTestResource;
 use OpenAI\Testing\Resources\VectorStoresTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Throwable;
@@ -166,6 +170,21 @@ class ClientFake implements ClientContract
         return new ContainersTestResource($this);
     }
 
+    public function skills(): SkillsTestResource
+    {
+        return new SkillsTestResource($this);
+    }
+
+    public function agents(): AgentsTestResource
+    {
+        return new AgentsTestResource($this);
+    }
+
+    public function vaults(): VaultsTestResource
+    {
+        return new VaultsTestResource($this);
+    }
+
     public function embeddings(): EmbeddingsTestResource
     {
         return new EmbeddingsTestResource($this);
@@ -199,6 +218,11 @@ class ClientFake implements ClientContract
     public function fineTuning(): FineTuningTestResource
     {
         return new FineTuningTestResource($this);
+    }
+
+    public function decisions(): DecisionsTestResource
+    {
+        return new DecisionsTestResource($this);
     }
 
     public function moderations(): ModerationsTestResource

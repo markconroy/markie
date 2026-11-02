@@ -1,0 +1,12 @@
+# @file
+# Custom services for the Metatag HrefLang module.
+
+services:
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_hreflang\Hook\HelpHooks:
+    class: Drupal\metatag_hreflang\Hook\HelpHooks
+    autowire: true
+  Drupal\metatag_hreflang\Hook\OutputHooks:
+    class: Drupal\metatag_hreflang\Hook\OutputHooks
+    autowire: true

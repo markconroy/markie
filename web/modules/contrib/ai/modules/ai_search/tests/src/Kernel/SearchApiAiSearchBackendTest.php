@@ -3,6 +3,9 @@
 namespace Drupal\Tests\ai_search\Kernel;
 
 use Drupal\Tests\UnitTestCase;
+use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Item\FieldInterface;
+use Drupal\search_api\Query\Query;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\ai\AiVdbProviderInterface;
 use Drupal\ai_search\Plugin\search_api\backend\SearchApiAiSearchBackend;
@@ -330,6 +333,64 @@ class SearchApiAiSearchBackendTest extends UnitTestCase {
     // the search must not retry because max_pager_iterations is 0.
     $this->assertSame('max_retries', $meta['reason']);
     $this->assertCount(2, $results);
+  }
+
+  /**
+   * Tests that conditions from unsupported access processors are dropped.
+   *
+   * @covers ::removeUnsupportedAccessConditions
+   */
+  public function testUnsupportedAccessConditionsAreRemoved(): void {
+    $index = $this->createMock(IndexInterface::class);
+    $index->method('id')->willReturn('test_index');
+    $index->method('status')->willReturn(TRUE);
+    $query = new Query($index);
+
+    // Mirror the structure added by the "Content access" processor.
+    $content_access = $query->createAndAddConditionGroup('OR', ['content_access']);
+    $content_access->addCondition('search_api_datasource', 'entity:user');
+    $query->addConditionGroup($query->createConditionGroup('OR', ['content_access_enabled'])->addCondition('status', TRUE));
+    $query->addConditionGroup($query->createConditionGroup('OR', ['content_access_grants'])->addCondition('search_api_node_grants', 'node_access__all'));
+    // Mirror the condition added by the "Role-based access" processor.
+    $query->addCondition('role_access_field', ['anonymous'], 'IN');
+    // Conditions added by anything else must be kept, including nested ones.
+    $query->addCondition('type', 'article');
+    $nested = $query->createAndAddConditionGroup('AND');
+    $nested->addCondition('langcode', 'en');
+    $nested->addCondition('role_access_field', ['editor'], 'IN');
+
+    $method = new \ReflectionMethod(SearchApiAiSearchBackend::class, 'removeUnsupportedAccessConditions');
+    $method->invoke($this->backend, $query->getConditionGroup(), ['role_access_field']);
+
+    $remaining = (string) $query->getConditionGroup();
+    $this->assertStringContainsString("type = 'article'", $remaining);
+    $this->assertStringContainsString("langcode = 'en'", $remaining);
+    foreach (['search_api_datasource', 'status', 'search_api_node_grants', 'role_access_field'] as $removed_field) {
+      $this->assertStringNotContainsString($removed_field, $remaining);
+    }
+  }
+
+  /**
+   * Tests finding the fields added by the "Role-based access" processor.
+   *
+   * @covers ::getRoleAccessFieldIds
+   */
+  public function testGetRoleAccessFieldIds(): void {
+    $build_field = function (?string $datasource_id, string $property_path): FieldInterface {
+      $field = $this->createMock(FieldInterface::class);
+      $field->method('getDatasourceId')->willReturn($datasource_id);
+      $field->method('getPropertyPath')->willReturn($property_path);
+      return $field;
+    };
+    $index = $this->createMock(IndexInterface::class);
+    $index->method('getFields')->willReturn([
+      'renamed_role_access' => $build_field(NULL, 'search_api_role_access'),
+      'title' => $build_field('entity:node', 'title'),
+      'node_role_access' => $build_field('entity:node', 'search_api_role_access'),
+    ]);
+
+    $method = new \ReflectionMethod(SearchApiAiSearchBackend::class, 'getRoleAccessFieldIds');
+    $this->assertSame(['renamed_role_access'], $method->invoke($this->backend, $index));
   }
 
 }

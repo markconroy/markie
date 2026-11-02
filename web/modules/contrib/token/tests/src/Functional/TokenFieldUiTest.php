@@ -8,12 +8,16 @@ use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests field ui.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class TokenFieldUiTest extends TokenTestBase {
 
   /**
@@ -44,7 +48,7 @@ class TokenFieldUiTest extends TokenTestBase {
     FieldStorageConfig::create([
       'field_name' => 'field_body',
       'entity_type' => 'node',
-      'type' => 'text_with_summary',
+      'type' => 'text_long',
     ])->save();
     FieldConfig::create([
       'field_name' => 'field_body',
@@ -88,10 +92,9 @@ class TokenFieldUiTest extends TokenTestBase {
 
     \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article', 'default')
       ->setComponent('field_body', [
-        'type' => 'text_textarea_with_summary',
+        'type' => 'text_textarea',
         'settings' => [
           'rows' => '9',
-          'summary_rows' => '3',
         ],
         'weight' => 5,
       ])
@@ -128,7 +131,7 @@ class TokenFieldUiTest extends TokenTestBase {
     // Generate 2 different test images.
     $file_system = \Drupal::service('file_system');
     $file_system->copy(\Drupal::root() . '/core/misc/druplicon.png', 'public://example1.png');
-    $file_system->copy(\Drupal::root() . '/core/misc/loading.gif', 'public://example2.gif');
+    $file_system->copy(\Drupal::root() . '/core/tests/fixtures/files/image-test.gif', 'public://example2.gif');
 
     // Resize the test images so that they will be scaled down during token
     // replacement.

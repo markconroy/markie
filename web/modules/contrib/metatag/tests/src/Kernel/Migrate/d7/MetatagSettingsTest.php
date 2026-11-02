@@ -38,7 +38,7 @@ class MetatagSettingsTest extends MigrateDrupal7TestBase {
    */
   public function testSettings() {
     // Load the Metatag config object.
-    $config = \Drupal::config('metatag.settings');
+    $config = $this->config('metatag.settings');
 
     // Compare the settings in the config object with what was migrated.
     $this->assertSame($config->get('separator'), '||');

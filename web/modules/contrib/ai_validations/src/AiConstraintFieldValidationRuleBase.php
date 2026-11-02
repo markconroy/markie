@@ -25,13 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class AiConstraintFieldValidationRuleBase extends ConstraintFieldValidationRuleBase {
 
   /**
-   * The AI provider plugin manager.
-   *
-   * @var \Drupal\ai\AiProviderPluginManager
-   */
-  protected AiProviderPluginManager $aiProvider;
-
-  /**
    * {@inheritdoc}
    */
   final public function __construct(
@@ -40,10 +33,9 @@ abstract class AiConstraintFieldValidationRuleBase extends ConstraintFieldValida
     $plugin_definition,
     LoggerInterface $logger,
     Token $token_service,
-    AiProviderPluginManager $aiProvider,
+    protected AiProviderPluginManager $aiProvider,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $logger, $token_service);
-    $this->aiProvider = $aiProvider;
     $this->setConfiguration($configuration);
   }
 
@@ -59,6 +51,22 @@ abstract class AiConstraintFieldValidationRuleBase extends ConstraintFieldValida
       $container->get('token'),
       $container->get('ai.provider'),
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Rules that can receive AI Context also pass their UUID, so the
+   * validator can tag the chat request for this rule.
+   */
+  public function getConstraintOptions(): array {
+    $options = parent::getConstraintOptions();
+    $uuid = $this->getUuid();
+    if ($this instanceof AiContextAwareFieldValidationRuleInterface
+      && is_string($uuid) && $uuid !== '') {
+      $options['ruleUuid'] = $uuid;
+    }
+    return $options;
   }
 
   /**

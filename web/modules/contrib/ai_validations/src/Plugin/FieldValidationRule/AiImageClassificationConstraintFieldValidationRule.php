@@ -12,7 +12,7 @@ use Drupal\image\Entity\ImageStyle;
  * Provides functionality for AI Image Classification.
  *
  * @FieldValidationRule(
- *   id = "ai_image_classification constraint_rule",
+ *   id = "ai_image_classification_constraint_rule",
  *   label = @Translation("AI image classification constraint"),
  *   description = @Translation("Uses Image classification AI to validate the field.")
  * )

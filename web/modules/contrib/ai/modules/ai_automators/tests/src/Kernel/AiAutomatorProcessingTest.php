@@ -134,6 +134,9 @@ class AiAutomatorProcessingTest extends KernelTestBase {
       $rule_runner,
       \Drupal::service('logger.factory'),
       \Drupal::service('messenger'),
+      \Drupal::service('current_user'),
+      \Drupal::service('account_switcher'),
+      \Drupal::service('ai_automator.fallback_user'),
     );
 
     $field_definition = $this->node->getFieldDefinition('body');
@@ -179,6 +182,9 @@ class AiAutomatorProcessingTest extends KernelTestBase {
       $rule_runner,
       \Drupal::service('logger.factory'),
       \Drupal::service('messenger'),
+      \Drupal::service('current_user'),
+      \Drupal::service('account_switcher'),
+      \Drupal::service('ai_automator.fallback_user'),
     );
 
     $field_definition = $this->node->getFieldDefinition('body');

@@ -2,23 +2,23 @@
 
 namespace Drupal\metatag_favicons\Plugin\metatag\Tag;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\Attribute\MetatagTag;
+use Drupal\metatag\MetatagType;
 use Drupal\metatag\Plugin\metatag\Tag\LinkRelBase;
 
 /**
  * The Favicons "shortcut icon" meta tag.
- *
- * @MetatagTag(
- *   id = "shortcut_icon",
- *   label = @Translation("Default icon"),
- *   description = @Translation("The traditional favicon, must be either a GIF, ICO, JPG/JPEG or PNG image."),
- *   name = "icon",
- *   group = "favicons",
- *   weight = 1,
- *   type = "image",
- *   secure = FALSE,
- *   multiple = FALSE
- * )
  */
+#[MetatagTag(
+  id: 'shortcut_icon',
+  label: new TranslatableMarkup('Default icon'),
+  name: 'icon',
+  group: 'favicons',
+  type: MetatagType::Image,
+  description: new TranslatableMarkup('The traditional favicon, must be either a GIF, ICO, JPG/JPEG or PNG image.'),
+  weight: 1,
+)]
 class ShortcutIcon extends LinkRelBase {
 
   /**

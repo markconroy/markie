@@ -1,0 +1,12 @@
+services:
+  Drupal\ai_validations\Hook\AiValidationsHooks:
+    class: Drupal\ai_validations\Hook\AiValidationsHooks
+    autowire: true
+
+  logger.channel.ai_validations:
+    parent: logger.channel_base
+    arguments: ['ai_validations']
+
+  ai_validations.warning_collector:
+    class: Drupal\ai_validations\WarningCollector
+    arguments: ['@messenger', '@logger.channel.ai_validations']

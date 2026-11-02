@@ -19,6 +19,8 @@ use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests inline block usage registration in asymmetric LB AI translation.
+ *
+ * @group ai_translate
  */
 #[Group('ai_translate')]
 final class LbFieldExtractorInlineBlockUsageTest extends UnitTestCase {

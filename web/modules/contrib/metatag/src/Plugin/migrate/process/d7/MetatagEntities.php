@@ -3,10 +3,14 @@
 namespace Drupal\metatag\Plugin\migrate\process\d7;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\metatag\Plugin\migrate\MigrateMetatagD7Trait;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Migrate entity data from Metatag on D7.
@@ -26,15 +30,23 @@ use Drupal\migrate\Row;
  *         - '\Drupal\Component\Serialization\Json'
  *         - 'decode'
  * @endcode
- *
- * @MigrateProcessPlugin(
- *   id = "d7_metatag_entities",
- *   handle_multiples = TRUE
- * )
  */
-class MetatagEntities extends ProcessPluginBase {
+#[MigrateProcess(
+  id: 'd7_metatag_entities',
+  handle_multiples: TRUE,
+)]
+class MetatagEntities extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
   use MigrateMetatagD7Trait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->metatagModuleHandler = $container->get('module_handler');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -49,7 +61,7 @@ class MetatagEntities extends ProcessPluginBase {
     $old_tags = $this->decodeValue($value);
 
     // Offload the transformation logic.
-    $new_tags = $this->transformTags($old_tags, FALSE);
+    $new_tags = $this->transformTags($old_tags);
 
     // For entity data this needs to be in a JSON encoded string.
     return Json::encode($new_tags);

@@ -119,7 +119,7 @@ final class DownloadManager implements DownloadManagerInterface {
       $response = $this->client->get($url, $options);
     }
     catch (ClientException $e) {
-      if ($e->getCode() == 404) {
+      if ($e->getCode() == 404 && str_starts_with($relative_path, 'styles/')) {
         // If this is a 404, it may be an image style that is converting the
         // file type.
         // @see \Drupal\image\Controller\ImageStyleDownloadController::deliver()
@@ -239,6 +239,35 @@ final class DownloadManager implements DownloadManagerInterface {
       $result = TRUE;
     }
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function rewriteFileUrl(string $uri): ?string {
+    // Calculate the base URL one time since this could be called many times in
+    // the same request.
+    $proxy_base_url = &drupal_static(__METHOD__);
+    if (!isset($proxy_base_url)) {
+      $proxy_base_url = FALSE;
+      $stage_file_proxy_config = $this->configFactory->get('stage_file_proxy.settings');
+      // Only hotlinking points a file at the origin. In download mode the file
+      // is meant to be fetched and then served from this site, and rewriting
+      // the URL bypasses that: nothing is ever downloaded, and content that has
+      // to stay same-origin - an extracted SCORM package reaching its API
+      // adapter through window.parent - breaks in the browser.
+      $origin = $stage_file_proxy_config->get('origin');
+      if ($origin && $stage_file_proxy_config->get('hotlink')) {
+        $proxy_base_url = rtrim($origin . '/' . ($stage_file_proxy_config->get('origin_dir') ?? ''), '/') . '/';
+      }
+    }
+
+    // Rewrite a public file but not an image style derivative.
+    if ($proxy_base_url && str_starts_with($uri, 'public://') && !str_starts_with($uri, 'public://styles/') && !is_file($uri)) {
+      return $proxy_base_url . str_replace('public://', '', $uri);
+    }
+
+    return NULL;
   }
 
 }

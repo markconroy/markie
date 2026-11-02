@@ -2,6 +2,7 @@
 
 namespace Drupal\token\Hook;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -152,7 +153,7 @@ final class TokenTokenInfoHooks {
   public function tokenInfo() {
     $info = [];
     // Call proxy implementations.
-    if ($this->moduleHandler->moduleExists('book')) {
+    if ($this->moduleHandler->moduleExists('book') && !$this->moduleHandler->hasImplementations('token_info', 'book')) {
       $info += $this->bookTokenInfo();
     }
     if ($this->moduleHandler->moduleExists('menu_ui')) {
@@ -691,18 +692,26 @@ final class TokenTokenInfoHooks {
           }
           elseif (($property_definition instanceof DataReferenceDefinitionInterface) && ($property_definition->getTargetDefinition() instanceof EntityDataDefinitionInterface)) {
             $referenced_entity_type = $property_definition->getTargetDefinition()->getEntityTypeId();
-            $referenced_token_type = $this->tokenEntityMapper->getTokenTypeForEntityType($referenced_entity_type);
-            $info['tokens'][$field_token_name][$property] = [
-              'name' => $property_definition->getLabel(),
-              'description' => $property_definition->getDescription(),
-              'module' => 'token',
-              'type' => $referenced_token_type,
-            ];
+            if ($referenced_entity_type) {
+              $referenced_token_type = $this->tokenEntityMapper->getTokenTypeForEntityType($referenced_entity_type);
+              $info['tokens'][$field_token_name][$property] = [
+                'name' => $property_definition->getLabel(),
+                'description' => $property_definition->getDescription(),
+                'module' => 'token',
+                'type' => $referenced_token_type,
+              ];
+            }
           }
         }
         // Provide image_with_image_style tokens for image fields.
-        if ($field->getType() == 'image') {
-          $image_styles = image_style_options(FALSE);
+        if (is_a($type_info[$field->getType()]['class'], 'Drupal\image\Plugin\Field\FieldType\ImageItem', TRUE)) {
+          $image_styles = DeprecationHelper::backwardsCompatibleCall(
+            \Drupal::VERSION,
+            '11.4.0',
+            fn() => \Drupal::service('Drupal\image\ImageDerivativeUtilities')
+              ->styleOptions(FALSE),
+            fn() => image_style_options(FALSE)
+          );
           foreach ($image_styles as $style => $description) {
             $info['tokens'][$field_token_name][$style] = [
               'name' => $description,

@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ConfigManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\metatag\Entity\MetatagDefaults;
 use Drupal\Tests\BrowserTestBase;
@@ -43,6 +46,27 @@ class MetatagConfigTranslationTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected ConfigFactoryInterface $configFactory;
+
+  /**
+   * The configuration manager.
+   *
+   * @var \Drupal\Core\Config\ConfigManagerInterface
+   */
+  protected ConfigManagerInterface $configManager;
+
+  /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
    * Permissions to grant admin user.
    *
    * @var array
@@ -66,6 +90,11 @@ class MetatagConfigTranslationTest extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
+    $this->configFactory = $this->container->get('config.factory');
+    $this->configManager = $this->container->get('config.manager');
+    $this->languageManager = $this->container->get('language_manager');
+
     $this->adminUser = $this->drupalCreateUser($this->permissions);
     $this->drupalLogin($this->adminUser);
 
@@ -90,21 +119,19 @@ class MetatagConfigTranslationTest extends BrowserTestBase {
     $session->responseContains('Metatag defaults');
 
     // Load all of the Metatag defaults.
-    $defaults = \Drupal::configFactory()->listAll('metatag.metatag_defaults');
-
-    /** @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
-    $config_manager = \Drupal::service('config.manager');
+    $defaults = $this->configFactory->listAll('metatag.metatag_defaults');
 
     // Confirm each of the configs is available on the translation form.
     foreach ($defaults as $config_name) {
-      if ($config_entity = $config_manager->loadConfigEntityByName($config_name)) {
+      $config_entity = $this->configManager->loadConfigEntityByName($config_name);
+      if ($config_entity) {
         $session->pageTextContains($config_entity->label());
       }
     }
 
     // Confirm that each config translation page can be loaded.
     foreach ($defaults as $config_name) {
-      $config_entity = $config_manager->loadConfigEntityByName($config_name);
+      $config_entity = $this->configManager->loadConfigEntityByName($config_name);
       $this->assertNotNull($config_entity);
       $this->drupalGet('admin/config/search/metatag/' . $config_entity->id() . '/translate');
       $session->statusCodeEquals(200);
@@ -164,18 +191,17 @@ class MetatagConfigTranslationTest extends BrowserTestBase {
       'langcode' => 'fr',
     ]);
 
-    $language_manager = \Drupal::languageManager();
-    $this->assertEquals('en', $language_manager->getConfigOverrideLanguage()->getId());
+    $this->assertEquals('en', $this->languageManager->getConfigOverrideLanguage()->getId());
     $fr_default_tags = metatag_get_default_tags($node);
     $this->assertEquals('Le title', $fr_default_tags['title']);
     $this->assertEquals('Le description', $fr_default_tags['description']);
-    $this->assertEquals('en', $language_manager->getConfigOverrideLanguage()->getId());
+    $this->assertEquals('en', $this->languageManager->getConfigOverrideLanguage()->getId());
 
     // Delete the default tags as well to test the early return.
     MetatagDefaults::load('global')->delete();
     $fr_default_tags = metatag_get_default_tags($node);
     $this->assertNull($fr_default_tags);
-    $this->assertEquals('en', $language_manager->getConfigOverrideLanguage()->getId());
+    $this->assertEquals('en', $this->languageManager->getConfigOverrideLanguage()->getId());
   }
 
 }

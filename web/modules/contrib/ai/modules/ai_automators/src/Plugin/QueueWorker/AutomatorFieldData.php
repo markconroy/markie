@@ -13,6 +13,9 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\Attribute\QueueWorker;
 use Drupal\Core\Queue\QueueWorkerBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountSwitcherInterface;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -46,6 +49,11 @@ class AutomatorFieldData extends QueueWorkerBase implements ContainerFactoryPlug
   protected Connection $db;
 
   /**
+   * The account switcher.
+   */
+  protected AccountSwitcherInterface $accountSwitcher;
+
+  /**
    * Constructor.
    *
    * @param array $configuration
@@ -62,13 +70,16 @@ class AutomatorFieldData extends QueueWorkerBase implements ContainerFactoryPlug
    *   The logger factory.
    * @param \Drupal\Core\Database\Connection $db
    *   The database connection.
+   * @param \Drupal\Core\Session\AccountSwitcherInterface $accountSwitcher
+   *   The account switcher.
    */
-  final public function __construct(array $configuration, $plugin_id, $plugin_definition, AiAutomatorRuleRunner $aiRunner, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerFactory, Connection $db) {
+  final public function __construct(array $configuration, $plugin_id, $plugin_definition, AiAutomatorRuleRunner $aiRunner, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerFactory, Connection $db, AccountSwitcherInterface $accountSwitcher) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->aiRunner = $aiRunner;
     $this->entityTypeManager = $entityTypeManager;
     $this->loggerFactory = $loggerFactory;
     $this->db = $db;
+    $this->accountSwitcher = $accountSwitcher;
   }
 
   /**
@@ -82,7 +93,8 @@ class AutomatorFieldData extends QueueWorkerBase implements ContainerFactoryPlug
       $container->get('ai_automator.rule_runner'),
       $container->get('entity_type.manager'),
       $container->get('logger.factory'),
-      $container->get('database')
+      $container->get('database'),
+      $container->get('account_switcher'),
     );
   }
 
@@ -90,6 +102,71 @@ class AutomatorFieldData extends QueueWorkerBase implements ContainerFactoryPlug
    * {@inheritDoc}
    */
   public function processItem($data) {
+    // Run as the user who queued the item, so the automator has the same
+    // access as when it runs directly, instead of the cron user's.
+    $account = $this->getQueueingUser($data);
+    if (!$account) {
+      return;
+    }
+    $this->accountSwitcher->switchTo($account);
+    try {
+      return $this->processItemAsCurrentUser($data);
+    }
+    finally {
+      $this->accountSwitcher->switchBack();
+    }
+  }
+
+  /**
+   * Gets the user who queued the item.
+   *
+   * The user is resolved when the item is queued, see
+   * QueueWorkerProcessor::getRunAsUid(). Items without a usable user are
+   * skipped instead of running as the user who processes the queue, who may
+   * have more access.
+   *
+   * @param array $data
+   *   The queue item data.
+   *
+   * @return \Drupal\Core\Session\AccountInterface|null
+   *   The account to run the item as, or NULL to skip it.
+   */
+  protected function getQueueingUser(array $data): ?AccountInterface {
+    $context = [
+      '%field' => $data['automatorConfig']['field_name'],
+      '%entity_type' => $data['entity_type'],
+      '%id' => $data['entity_id'],
+    ];
+    // Items queued before the user was stored in the queue item.
+    if (!array_key_exists('uid', $data)) {
+      $this->loggerFactory->get('ai_automator')->warning('Skipped the automator for field %field on entity %entity_type with id %id: the queue item has no user. Save the entity again to queue it again.', $context);
+      return NULL;
+    }
+    // Saves without a current user or fallback user, for example from cron.
+    if (empty($data['uid'])) {
+      return new AnonymousUserSession();
+    }
+    /** @var \Drupal\user\UserInterface|null $account */
+    $account = $this->entityTypeManager->getStorage('user')->load($data['uid']);
+    if (!$account || !$account->isActive()) {
+      $this->loggerFactory->get('ai_automator')->warning('Skipped the automator for field %field on entity %entity_type with id %id: the user %uid who queued it is missing or blocked.', $context + [
+        '%uid' => $data['uid'],
+      ]);
+      return NULL;
+    }
+    return $account;
+  }
+
+  /**
+   * Processes a queue item as the current user.
+   *
+   * @param array $data
+   *   The queue item data.
+   *
+   * @return mixed
+   *   The result of saving the entity, or NULL on failure.
+   */
+  protected function processItemAsCurrentUser(array $data) {
     $this->loggerFactory->get('ai_automator')->info("Queue worker starting to fill out field %field on entity %entity_type with id %id", [
       '%field' => $data['automatorConfig']['field_name'],
       '%entity_type' => $data['entity_type'],

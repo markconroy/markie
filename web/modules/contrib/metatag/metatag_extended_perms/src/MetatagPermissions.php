@@ -22,14 +22,14 @@ class MetatagPermissions implements ContainerInjectionInterface {
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $tagManager;
+  protected MetatagTagPluginManager $tagManager;
 
   /**
    * The Metatag Group Plugin Manager.
    *
    * @var \Drupal\metatag\MetatagGroupPluginManager
    */
-  protected $groupManager;
+  protected MetatagGroupPluginManager $groupManager;
 
   /**
    * Constructs a MetatagPermissions instance.

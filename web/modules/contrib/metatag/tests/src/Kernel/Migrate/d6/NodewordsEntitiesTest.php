@@ -88,7 +88,6 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
     $this->installConfig(static::$modules);
     $this->installSchema('user', ['users_data']);
     $this->installSchema('node', ['node_access']);
-    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('metatag_defaults');
 
     // Run each migration to avoid problems. No, it's not clear why.
@@ -134,7 +133,7 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
       'robots' => 'nofollow, nosnippet',
       'title' => 'Test title',
     ];
-    $this->assertSame(Json::encode($expected), $node->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $node->get('field_metatag')->value);
 
     $node_storage_manager = \Drupal::entityTypeManager()
       ->getStorage('node');
@@ -151,7 +150,7 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
       'robots' => 'nofollow, nosnippet',
       'title' => 'Test title',
     ];
-    $this->assertSame(Json::encode($expected), $node->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $node->get('field_metatag')->value);
 
     /** @var \Drupal\user\Entity\User $user */
     $user = User::load(2);
@@ -161,7 +160,7 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
       'revisit_after' => '1',
       'robots' => '',
     ];
-    $this->assertSame(Json::encode($expected), $user->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $user->get('field_metatag')->value);
 
     /** @var \Drupal\taxonomy\Entity\Term $term */
     $term = Term::load(16);
@@ -171,7 +170,7 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
       'canonical_url' => 'the-term',
       'keywords' => 'a taxonomy, term',
     ];
-    $this->assertSame(Json::encode($expected), $term->field_metatag->value);
+    $this->assertSame(Json::encode($expected), $term->get('field_metatag')->value);
   }
 
 }

@@ -7,11 +7,17 @@ namespace Drupal\ai_translate_test\Hook;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\State\StateInterface;
 
 /**
  * Hook implementations for ai_translate_test.
  */
 class AiTranslateTestHooks {
+
+  public function __construct(
+    protected StateInterface $state,
+  ) {
+  }
 
   /**
    * Implements hook_entity_base_field_info().
@@ -38,6 +44,17 @@ class AiTranslateTestHooks {
     if ($entity_type->id() === 'comment') {
       $fields['field_name']->setTranslatable(TRUE);
     }
+  }
+
+  /**
+   * Implements hook_ai_translate_translation_alter().
+   *
+   * Records what the chat proxy resolved, so a test can assert the hook is
+   * handed the provider and model that will really run.
+   */
+  #[Hook('ai_translate_translation_alter')]
+  public function aiTranslateTranslationAlter(&$messages, &$provider_id, &$model_id): void {
+    $this->state->set('ai_translate_test.alter_args', [$provider_id, $model_id]);
   }
 
 }

@@ -51,6 +51,7 @@ class MetaTagCustomTagForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+    /** @var \Drupal\metatag_custom_tags\Entity\MetaTagCustomTag $entity */
     $entity = $this->entity;
 
     $form['label'] = [
@@ -120,7 +121,7 @@ class MetaTagCustomTagForm extends EntityForm {
 
     $attributes = $form_state->get('attributes') ?? $entity->get('attributes') ?? [];
 
-    // Ensure there is always at least one attribute
+    // Ensure there is always at least one attribute.
     if (empty($attributes)) {
       $attributes[] = ['name' => '', 'value' => ''];
     }
@@ -179,7 +180,7 @@ class MetaTagCustomTagForm extends EntityForm {
       '#limit_validation_errors' => [],
     ];
 
-    // Add examples section
+    // Add examples section.
     $form['examples'] = [
       '#type' => 'details',
       '#title' => $this->t('Examples'),
@@ -206,7 +207,7 @@ class MetaTagCustomTagForm extends EntityForm {
         </ul>
       '),
     ];
- 
+
     return $form;
   }
 
@@ -234,9 +235,10 @@ class MetaTagCustomTagForm extends EntityForm {
     $trigger = $form_state->getTriggeringElement();
     $index = (int) str_replace('remove_', '', $trigger['#name']);
 
+    // Re-index the array.
     $attributes = $form_state->get('attributes') ?? [];
     unset($attributes[$index]);
-    $attributes = array_values($attributes); // Re-index array
+    $attributes = array_values($attributes);
 
     $form_state->set('attributes', $attributes);
     $form_state->setRebuild(TRUE);
@@ -250,9 +252,9 @@ class MetaTagCustomTagForm extends EntityForm {
 
     $attributes = $form_state->getValue('attributes') ?? [];
 
-    // Remove empty attributes and the add_more element
+    // Remove empty attributes and the add_more element.
     unset($attributes['add_more']);
-    $attributes = array_filter($attributes, function($attr) {
+    $attributes = array_filter($attributes, function ($attr) {
       return is_array($attr) && !empty($attr['name']) && !empty($attr['value']);
     });
 
@@ -261,12 +263,12 @@ class MetaTagCustomTagForm extends EntityForm {
       return;
     }
 
-    // Validate first attribute exists and is complete
+    // Validate first attribute exists and is complete.
     if (empty($attributes[0]['name']) || empty($attributes[0]['value'])) {
       $form_state->setError($form['attributes'][0], $this->t('The primary attribute name and value are required.'));
     }
 
-    // Set cleaned attributes back to form state
+    // Set cleaned attributes back to form state.
     $form_state->setValue('attributes', array_values($attributes));
   }
 

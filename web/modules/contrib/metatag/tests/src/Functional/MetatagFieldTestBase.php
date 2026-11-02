@@ -4,6 +4,7 @@ namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
@@ -50,6 +51,13 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Admin user.
@@ -136,6 +144,8 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Any additional configuration that's neede for this entity type.
     $this->setUpEntityType();
@@ -264,7 +274,7 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
     $session->statusCodeEquals(200);
 
     // Check both the title and the description, both of which should be links.
-    $result = DeprecationHelper::backwardsCompatibleCall(
+    DeprecationHelper::backwardsCompatibleCall(
       currentVersion: \Drupal::VERSION,
       deprecatedVersion: '11.2',
       currentCallable: fn() => $session->linkExists('Meta tags'),
@@ -326,7 +336,7 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
 
     // Create a new entity object.
     $this->submitForm($edit, $this->entitySaveButtonLabel);
-    $entities = \Drupal::entityTypeManager()
+    $entities = $this->entityTypeManager
       ->getStorage($this->entityType)
       ->loadByProperties([$this->entityTitleField => $title]);
     $this->assertCount(1, $entities, 'Entity was saved');
@@ -405,7 +415,7 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
 
     // Create a new entity object.
     $this->submitForm($edit, $this->entitySaveButtonLabel);
-    $entities = \Drupal::entityTypeManager()
+    $entities = $this->entityTypeManager
       ->getStorage($this->entityType)
       ->loadByProperties([$this->entityTitleField => $title]);
     $this->assertCount(1, $entities, 'Entity was saved');
@@ -451,7 +461,7 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
       'field_metatag[0][basic][metatag_test_tag]' => 'Kilimanjaro',
     ];
     $this->submitForm($edit, 'Save');
-    $entities = \Drupal::entityTypeManager()
+    $entities = $this->entityTypeManager
       ->getStorage('entity_test')
       ->loadByProperties([$this->entityTitleField => 'Barfoo']);
     $this->assertCount(1, $entities, 'Entity was saved');

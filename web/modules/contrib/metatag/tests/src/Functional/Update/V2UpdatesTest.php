@@ -42,6 +42,22 @@ class V2UpdatesTest extends UpdatePathTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * The database connection object.
+   *
+   * @var \Drupal\Core\Database\Connection|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    $this->database = $this->container->get('database');
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function setDatabaseDumpFiles() {
@@ -134,7 +150,7 @@ class V2UpdatesTest extends UpdatePathTestBase {
     // Perform these checks for both the main field and the revision field.
     foreach (['node__field_meta_tags', 'node_revision__field_meta_tags'] as $table_name) {
       // Confirm the data started as a serialized array.
-      $query = \Drupal::database()->select($table_name);
+      $query = $this->database->select($table_name);
       $query->addField($table_name, 'field_meta_tags_value');
       $result = $query->execute();
       $records = $result->fetchAll();
@@ -207,7 +223,7 @@ class V2UpdatesTest extends UpdatePathTestBase {
     // successfully converted to the new structure.
     // @see metatag_post_update_v2_01_change_fields_to_json()
     foreach (['node__field_meta_tags', 'node_revision__field_meta_tags'] as $table_name) {
-      $query = \Drupal::database()->select($table_name);
+      $query = $this->database->select($table_name);
       $query->addField($table_name, 'field_meta_tags_value');
       $result = $query->execute();
       $records = $result->fetchAll();

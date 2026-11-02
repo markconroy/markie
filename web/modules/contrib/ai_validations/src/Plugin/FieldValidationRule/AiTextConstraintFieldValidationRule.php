@@ -6,6 +6,7 @@ namespace Drupal\ai_validations\Plugin\FieldValidationRule;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai_validations\AiConstraintFieldValidationRuleBase;
+use Drupal\ai_validations\AiContextAwareFieldValidationRuleInterface;
 
 /**
  * Provides functionality for AiTextFieldValidationRule.
@@ -16,7 +17,7 @@ use Drupal\ai_validations\AiConstraintFieldValidationRuleBase;
  *   description = @Translation("AI text prompt constraint.")
  * )
  */
-class AiTextConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase {
+class AiTextConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase implements AiContextAwareFieldValidationRuleInterface {
 
   /**
    * {@inheritdoc}

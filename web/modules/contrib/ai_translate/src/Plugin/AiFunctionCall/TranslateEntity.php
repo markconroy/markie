@@ -89,7 +89,7 @@ class TranslateEntity extends FunctionCallBase implements StructuredExecutableFu
   /**
    * {@inheritdoc}
    */
-  public function execute(): void {
+  public function execute(?object $object = NULL): void {
     $entityType = $this->getContextValue('entity_type');
     $entityId = $this->getContextValue('entity_id');
     $targetLanguage = $this->getContextValue('target_language');

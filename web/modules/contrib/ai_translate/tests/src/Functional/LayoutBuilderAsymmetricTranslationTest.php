@@ -99,4 +99,47 @@ class LayoutBuilderAsymmetricTranslationTest extends LayoutBuilderTranslationTes
     );
   }
 
+  /**
+   * Tests that inline blocks without translatable text survive translation.
+   *
+   * Regression test for #3585531. Cloning the blocks into the translated
+   * layout happens in LbFieldExtractor::setValue(), but
+   * TextExtractor::insertTextMetadata() only calls setValue() for fields that
+   * produced text metadata. A layout whose inline blocks hold no text used to
+   * produce none, so the translation was saved without any blocks. This runs
+   * the full pipeline rather than calling setValue() directly, because the bug
+   * is in whether setValue() is reached at all.
+   */
+  public function testInlineBlockWithoutTextIsKept(): void {
+    $node = $this->createNodeWithInlineBlock('Asymmetric source', FALSE);
+    $source_block_ids = array_keys($this->getInlineBlocks($node));
+    $this->assertCount(1, $source_block_ids);
+
+    $result = $this->container->get('ai_translate.translation_orchestrator')
+      ->translateEntity($node, 'en', static::TARGET_LANGCODE);
+    $this->assertTrue($result->isSuccess(), 'The translation was saved.');
+    $this->assertSame([], $result->getFailures());
+
+    $translation = $this->reloadNode($node)->getTranslation(static::TARGET_LANGCODE);
+    $this->assertSame(
+      $this->stubTranslationOf('Asymmetric source', static::TARGET_LANGCODE),
+      $translation->label()
+    );
+
+    $translated_blocks = $this->getInlineBlocks($translation);
+    $this->assertCount(1, $translated_blocks, 'The translation kept the inline block.');
+
+    $translated_block = reset($translated_blocks);
+    $this->assertNotContains(
+      $translated_block->id(),
+      $source_block_ids,
+      'The translation references a cloned block, not the source block.'
+    );
+    $this->assertSame(
+      static::TARGET_LANGCODE,
+      $translated_block->language()->getId(),
+      'The cloned block is in the target language.'
+    );
+  }
+
 }

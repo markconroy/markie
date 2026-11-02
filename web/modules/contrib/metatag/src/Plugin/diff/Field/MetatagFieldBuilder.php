@@ -3,19 +3,20 @@
 namespace Drupal\metatag\Plugin\diff\Field;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\diff\Attribute\FieldDiffBuilder;
 use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to diff metatag fields.
  *
- * @FieldDiffBuilder(
- *   id = "metatag_field_diff_builder",
- *   label = @Translation("Metatag Field Diff"),
- *   field_types = {
- *     "metatag"
- *   },
- * )
+ * Note that this requires drupal/diff:^2.0.
  */
+#[FieldDiffBuilder(
+  id: 'metatag_field_diff_builder',
+  label: new TranslatableMarkup('Metatag Field Diff'),
+  field_types: ['metatag'],
+)]
 class MetatagFieldBuilder extends FieldDiffBuilderBase {
 
   /**

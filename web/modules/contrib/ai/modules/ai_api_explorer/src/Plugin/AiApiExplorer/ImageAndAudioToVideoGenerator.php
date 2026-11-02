@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\ai_api_explorer\Plugin\AiApiExplorer;
 
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\ImageAndAudioToVideo\ImageAndAudioToVideoInput;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai_api_explorer\AiApiExplorerPluginBase;
 use Drupal\ai_api_explorer\Attribute\AiApiExplorer;
 use Drupal\ai_api_explorer\ExplorerHelper;
+use Drupal\ai_api_explorer\ExplorerOutputFiles;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -47,10 +46,10 @@ final class ImageAndAudioToVideoGenerator extends AiApiExplorerPluginBase {
    *   The Provider Manager.
    * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
    *   The File Url Generator.
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *   The File System.
+   * @param \Drupal\ai_api_explorer\ExplorerOutputFiles $outputFiles
+   *   The explorer output files.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RequestStack $requestStack, AiProviderFormHelper $aiProviderHelper, ExplorerHelper $explorerHelper, AiProviderPluginManager $providerManager, protected FileUrlGeneratorInterface $fileUrlGenerator, protected FileSystemInterface $fileSystem) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RequestStack $requestStack, AiProviderFormHelper $aiProviderHelper, ExplorerHelper $explorerHelper, AiProviderPluginManager $providerManager, protected FileUrlGeneratorInterface $fileUrlGenerator, protected ExplorerOutputFiles $outputFiles) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $requestStack, $aiProviderHelper, $explorerHelper, $providerManager);
   }
 
@@ -67,7 +66,7 @@ final class ImageAndAudioToVideoGenerator extends AiApiExplorerPluginBase {
       $container->get('ai_api_explorer.helper'),
       $container->get('ai.provider'),
       $container->get('file_url_generator'),
-      $container->get('file_system'),
+      $container->get('ai_api_explorer.output_files'),
     );
   }
 
@@ -162,17 +161,12 @@ final class ImageAndAudioToVideoGenerator extends AiApiExplorerPluginBase {
 
       if ($video_normalized) {
         // Save the binary data to a file.
-        $destination = 'temporary://ai-explorers/';
-        $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
-        $random = (string) rand();
-        $file_url = $this->fileSystem->saveData($video_normalized, $destination . '/' . md5($random) . '.mp4');
-        $file_name = basename($file_url);
-        $url = Url::fromRoute('system.temporary', [], ['query' => ['file' => 'ai-explorers/' . $file_name]]);
+        $url = $this->outputFiles->save($video_normalized[0]->getBinary(), 'mp4');
         $form['right']['response']['#context']['ai_response']['response'] = [
           '#type' => 'inline_template',
           '#template' => '{{ player|raw }}',
           '#context' => [
-            'player' => '<video controls><source src="' . $url->toString() . '" type="video/mp4"></video>',
+            'player' => '<video controls><source src="' . $url . '" type="video/mp4"></video>',
           ],
         ];
       }

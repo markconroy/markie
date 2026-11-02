@@ -940,6 +940,16 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
       return FALSE;
     }
 
+    // Likewise hold the buffer while it ends inside Markdown link syntax: after
+    // a "]", inside an unclosed "](destination" or on a "[label]: destination"
+    // line. Flushing there would split the destination (e.g. "javas" and
+    // "cript:") across two filter passes, so neither pass sees the full URL,
+    // yet the consumer renders the joined text as a link.
+    if (preg_match('/\][ \t]*(?:\([^)\n]*|:[^\n]*)?\z/', $this->buffer)
+      && strlen($this->buffer) < self::MAX_HTML_BUFFER_SIZE) {
+      return FALSE;
+    }
+
     // Never flush while the buffer contains an incomplete or unbalanced HTML
     // structure. flushInternal() runs the buffer through the HostnameFilter,
     // which parses the text as an HTML fragment and re-serializes it. When a

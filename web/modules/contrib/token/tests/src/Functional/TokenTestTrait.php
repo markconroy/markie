@@ -34,7 +34,7 @@ trait TokenTestTrait {
         $this->assertEquals(1, preg_match('/^' . $expected . '$/', $replacements[$token]), t("Token value for @token was '@actual', matching regular expression pattern '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
       }
       else {
-        $this->assertEquals($expected, $replacements[$token], t("Token value for @token was '@actual', expected value '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
+        $this->assertEquals($expected, $replacements[$token], "Token value for $token did not match");
       }
     }
 

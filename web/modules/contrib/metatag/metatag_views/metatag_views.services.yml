@@ -1,0 +1,12 @@
+# @file
+# Custom services for the Metatag Views module.
+
+services:
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag_views\Hook\MetatagHooks:
+    class: Drupal\metatag_views\Hook\MetatagHooks
+    autowire: true
+  Drupal\metatag_views\Hook\ViewsHooks:
+    class: Drupal\metatag_views\Hook\ViewsHooks
+    autowire: true

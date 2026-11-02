@@ -3,20 +3,40 @@
 namespace Drupal\metatag\Plugin\migrate\process\d6;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Migrate entity data from Nodewords on D6.
- *
- * @MigrateProcessPlugin(
- *   id = "d6_nodewords_entities",
- *   handle_multiples = TRUE
- * )
  */
-class NodewordsEntities extends ProcessPluginBase {
+#[MigrateProcess(
+  id: 'd6_nodewords_entities',
+  handle_multiples: TRUE,
+)]
+class NodewordsEntities extends ProcessPluginBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->moduleHandler = $container->get('module_handler');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -437,7 +457,7 @@ class NodewordsEntities extends ProcessPluginBase {
 
     // Trigger hook_metatag_migrate_nodewordsd6_tags_map_alter().
     // Allow modules to override tags or the entity used for token replacements.
-    \Drupal::service('module_handler')->alter('metatag_migrate_nodewordsd6_tags_map', $map);
+    $this->moduleHandler->alter('metatag_migrate_nodewordsd6_tags_map', $map);
 
     return $map;
   }

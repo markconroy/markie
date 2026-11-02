@@ -6,6 +6,7 @@ namespace Drupal\ai_validations\Plugin\FieldValidationRule;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai_validations\AiConstraintFieldValidationRuleBase;
+use Drupal\ai_validations\AiContextAwareFieldValidationRuleInterface;
 use Drupal\image\Entity\ImageStyle;
 
 /**
@@ -17,7 +18,7 @@ use Drupal\image\Entity\ImageStyle;
  *   description = @Translation("Ai image constraint.")
  * )
  */
-class AiImageConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase {
+class AiImageConstraintFieldValidationRule extends AiConstraintFieldValidationRuleBase implements AiContextAwareFieldValidationRuleInterface {
 
   /**
    * {@inheritdoc}
@@ -54,6 +55,7 @@ class AiImageConstraintFieldValidationRule extends AiConstraintFieldValidationRu
     return [
       'prompt' => NULL,
       'message' => NULL,
+      'warningMessage' => NULL,
       'imageStyle' => NULL,
     ] + parent::defaultConfiguration();
   }
@@ -73,7 +75,7 @@ If it is answer XTRUE, if its not answer XFALSE. ';
     $form['prompt'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Prompt'),
-      '#description' => $this->t('Make sure the prompt ends in such a way that we can parse the output. eg: just respond with XTRUE if (condition) otherwise answer with XFALSE'),
+      '#description' => $this->t('Make sure the prompt ends in such a way that we can parse the output. With no warning message set below: just respond with XTRUE if (condition) otherwise answer with XFALSE. With a warning message set: respond with exactly one of XSAFE, XWARN or XBLOCK.'),
       '#default_value' => $this->configuration['prompt'],
       '#required' => TRUE,
     ];
@@ -93,6 +95,14 @@ If it is answer XTRUE, if its not answer XFALSE. ';
       '#type' => 'textfield',
       '#title' => $this->t('Message'),
       '#default_value' => $this->configuration['message'] ?? $message,
+      '#maxlength' => 255,
+    ];
+
+    $form['warning_message'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Warning message'),
+      '#description' => $this->t('Optional. Leave empty to keep the XTRUE/XFALSE protocol, where a failing answer blocks the content. When set, the prompt must instruct the AI to answer with exactly one of XSAFE, XWARN or XBLOCK: XBLOCK blocks the content with the message above, while XWARN accepts the content and shows this warning to the user.'),
+      '#default_value' => $this->configuration['warningMessage'] ?? '',
       '#maxlength' => 255,
     ];
 
@@ -119,6 +129,9 @@ If it is answer XTRUE, if its not answer XFALSE. ';
 
     $this->configuration['prompt'] = $form_state->getValue('prompt');
     $this->configuration['message'] = $form_state->getValue('message');
+
+    $warning = $form_state->getValue('warning_message');
+    $this->configuration['warningMessage'] = ($warning === '' || $warning === NULL) ? NULL : (string) $warning;
 
     $stored_provider = $this->extractStoredModel($form_state->getValue('provider'));
     $this->configuration['provider'] = $stored_provider;

@@ -1,6 +1,9 @@
 services:
   ai_api_explorer.helper:
     class: Drupal\ai_api_explorer\ExplorerHelper
+  ai_api_explorer.output_files:
+    class: Drupal\ai_api_explorer\ExplorerOutputFiles
+    arguments: ['@file_system', '@file.repository', '@current_user', '@stream_wrapper_manager', '@file_url_generator']
   ai_api_explorer.route_subscriber:
     class: Drupal\ai_api_explorer\Routing\AiApiExplorerRouteSubscriber
     arguments: ['@plugin.manager.ai_api_explorer']

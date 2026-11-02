@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\token\Kernel;
 
+use Drupal;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
-use Drupal\contact\Entity\ContactForm;
-use Drupal\contact\Entity\Message;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 use Drupal\field\Entity\FieldConfig;
@@ -18,12 +18,16 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests field tokens.
  *
  * @group token
  */
+#[Group('token')]
+#[RunTestsInSeparateProcesses]
 class FieldTest extends TokenKernelTestBase {
 
   use TaxonomyTestTrait;
@@ -55,8 +59,7 @@ class FieldTest extends TokenKernelTestBase {
     'node',
     'text',
     'field',
-    'filter',
-    'contact',
+    'entity_test',
     'options',
     'taxonomy',
     'language',
@@ -338,7 +341,8 @@ class FieldTest extends TokenKernelTestBase {
     // Test the token info of the text field of the article content type.
     $token_info = $tokenService->getTokenInfo('node', 'test_field');
     $this->assertEquals('Test field', $token_info['name'], 'The token info name is correct.');
-    $this->assertEquals('Text (formatted) field.', $token_info['description'], 'The token info description is correct.');
+    $expected_description = version_compare(Drupal::VERSION, '11.3.99', '>') ? 'Short text field.' : 'Text (formatted) field.';
+    $this->assertEquals($expected_description, $token_info['description'], 'The token info description is correct.');
     $this->assertEquals('token', $token_info['module'], 'The token info module is correct.');
 
     // Now create two more content types that share the field but the last
@@ -370,7 +374,7 @@ class FieldTest extends TokenKernelTestBase {
 
     $token_info = $tokenService->getTokenInfo('node', 'test_field');
     $this->assertEquals('Test field', $token_info['name'], 'The token info name is correct.');
-    $this->assertEquals('Text (formatted) field. Also known as <em class="placeholder">Different test field</em>.', (string) $token_info['description'], 'When a field is used in several bundles with different labels, this is noted at the token info description.');
+    $this->assertEquals($expected_description . ' Also known as <em class="placeholder">Different test field</em>.', (string) $token_info['description'], 'When a field is used in several bundles with different labels, this is noted at the token info description.');
     $this->assertEquals('token', $token_info['module'], 'The token info module is correct.');
     $this->assertEquals('node-test_field', $token_info['type'], 'The field property token info type is correct.');
 
@@ -436,41 +440,31 @@ class FieldTest extends TokenKernelTestBase {
    * Test that tokens are properly created for an entity's base fields.
    */
   public function testBaseFieldTokens() {
-    // Create a new contact_message entity and verify that tokens are generated
-    // for its base fields. The contact_message entity type is used because it
-    // provides no tokens by default.
-    $contact_form = ContactForm::create([
-      'id' => 'form_id',
-    ]);
-    $contact_form->save();
 
-    $entity = Message::create([
-      'contact_form' => 'form_id',
-      'uuid' => '123',
+    $this->installEntitySchema('entity_test');
+
+    // Create a new entity_test entity and verify that tokens are generated
+    // for its base fields. The entity_test entity type is used because it
+    // provides no tokens by default.
+    $entity = \Drupal::entityTypeManager()->getStorage('entity_test')->create([
       'langcode' => 'en',
       'name' => 'Test name',
-      'mail' => 'Test mail',
-      'subject' => 'Test subject',
-      'message' => 'Test message',
-      'copy' => FALSE,
     ]);
     $entity->save();
-    $this->assertTokens('contact_message', ['contact_message' => $entity], [
-      'uuid' => Markup::create('123'),
+    $this->assertTokens('entity_test', ['entity_test' => $entity], [
+      'uuid' => $entity->uuid(),
       'langcode' => Markup::create('English'),
       'name' => Markup::create('Test name'),
-      'mail' => Markup::create('Test mail'),
-      'subject' => Markup::create('Test subject'),
-      'message' => Markup::create('Test message'),
-      'copy' => 'Off',
+      'created' => \Drupal::service(RendererInterface::class)->renderInIsolation($entity->get('created')->view()[0]),
     ]);
 
     // Test the metadata of one of the tokens.
     $tokenService = \Drupal::service('token');
-    $token_info = $tokenService->getTokenInfo('contact_message', 'subject');
-    $this->assertEquals($token_info['name'], 'Subject');
-    $this->assertEquals($token_info['description'], 'Text (plain) field.');
-    $this->assertEquals($token_info['module'], 'token');
+    $token_info = $tokenService->getTokenInfo('entity_test', 'name');
+    $this->assertEquals('Name', $token_info['name']);
+    $expected_description = version_compare(Drupal::VERSION, '11.3.99', '>') ? 'Short text field.' : 'Text (plain) field.';
+    $this->assertEquals($expected_description, $token_info['description']);
+    $this->assertEquals('token', $token_info['module']);
 
     // Verify that node entity type doesn't have a uid token.
     $this->assertNull($tokenService->getTokenInfo('node', 'uid'));
@@ -780,6 +774,52 @@ class FieldTest extends TokenKernelTestBase {
       'field_timestamp:1:date:custom:Y' => '2018',
       'field_timestamp:1:date:html_month' => '2018-07',
       'field_timestamp:1:date' => $node->get('field_timestamp')->get(1)->value,
+    ]);
+  }
+
+  /**
+   * Tests support for entity references to non fieldable entities.
+   */
+  public function testConfigEntityReferenceTokens() {
+    FieldStorageConfig::create([
+      'field_name' => 'test_vocab_reference',
+      'type' => 'entity_reference',
+      'entity_type' => 'node',
+      'settings' => [
+        'target_type' => 'taxonomy_vocabulary',
+      ],
+      'translatable' => FALSE,
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'test_vocab_reference',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Test term vocabulary',
+      'settings' => [
+        'handler' => 'default:taxonomy_vocabulary',
+      ],
+    ])->save();
+
+    $entity = Node::create([
+      'title' => 'Test config entity reference tokens',
+      'type' => 'article',
+      'test_vocab_reference' => [
+        ['target_id' => $this->vocabulary->id()],
+      ],
+    ]);
+    $entity->save();
+
+    $this->vocabulary->set('description', "A description with special characters '&")->save();
+
+    $renderer = \Drupal::service(RendererInterface::class);
+
+    $description = ['#markup' => $this->vocabulary->getDescription()];
+    $this->assertTokens('node', ['node' => $entity], [
+      'test_vocab_reference:entity' => Html::escape($this->vocabulary->label()),
+      'test_vocab_reference:entity:name' => Html::escape($this->vocabulary->label()),
+      'test_vocab_reference:entity:description' => $renderer->renderInIsolation($description),
+      'test_vocab_reference:target_id' => $this->vocabulary->id(),
+      'test_vocab_reference:entity:vid' => $this->vocabulary->id(),
     ]);
   }
 

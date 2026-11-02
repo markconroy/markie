@@ -30,7 +30,7 @@
 
 	<div class="chat-element chat-collapsed" style="min-width: {{ settings.width }}">
 
-		<deep-chat {% for key, value in deepchat_settings %}{{ key }}='{{ value|raw }}'
+		<deep-chat {% for key, value in deepchat_settings %}{{ key }}='{{ value }}'
     {% endfor %}></deep-chat>
 
 	</div>

@@ -5,21 +5,14 @@
  * Contains metatag_dc_advanced.module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\metatag_dc_advanced\Hook\HelpHooks;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Implements hook_help().
  */
+#[LegacyHook]
 function metatag_dc_advanced_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    // Main module help for the metatag_dc_advanced module.
-    case 'help.page.metatag_dc_advanced':
-      $output = '';
-      $output .= '<h3>' . (string) new TranslatableMarkup('About') . '</h3>';
-      $output .= '<p>' . (string) new TranslatableMarkup('Provides forty additional meta tags from the <a href="https://dublincore.org/">Dublin Core Metadata Institute</a>.') . '</p>';
-      return $output;
-
-    default:
-  }
+  return \Drupal::service(HelpHooks::class)->help($route_name, $route_match);
 }

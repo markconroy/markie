@@ -1,0 +1,177 @@
+# Schema for the field validation rule plugins provided by AI Validations.
+# The "data" mapping of each rule in a field_validation.rule_set.* config
+# entity is typed field_validation.rule.[id]; without these entries it falls
+# back to the open field_validation.rule.* mapping and is not validated.
+
+field_validation.rule.ai_text_prompt_constraint_rule:
+  type: mapping
+  label: 'AI text prompt constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    prompt:
+      type: text
+      label: 'Prompt'
+    message:
+      type: string
+      label: 'Message'
+    provider:
+      type: string
+      label: 'Provider and model'
+
+field_validation.rule.ai_image_constraint_rule:
+  type: mapping
+  label: 'AI image constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    prompt:
+      type: text
+      label: 'Prompt'
+    message:
+      type: string
+      label: 'Message'
+    warningMessage:
+      type: string
+      label: 'Warning message'
+    provider:
+      type: string
+      label: 'Provider and model'
+    imageStyle:
+      type: string
+      label: 'Image style'
+
+field_validation.rule.ai_image_classification_constraint_rule:
+  type: mapping
+  label: 'AI image classification constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    tag:
+      type: string
+      label: 'Tag'
+    finder:
+      type: string
+      label: 'Finder'
+    model:
+      type: string
+      label: 'Provider and model'
+    minimum:
+      type: float
+      label: 'Minimum confidence'
+    na:
+      type: string
+      label: 'If model is not available'
+    message:
+      type: string
+      label: 'Message'
+    imageStyle:
+      type: string
+      label: 'Image style'
+
+field_validation.rule.ai_object_detection_constraint_rule:
+  type: mapping
+  label: 'AI object detection constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    model:
+      type: string
+      label: 'Provider and model'
+    keywords:
+      type: sequence
+      label: 'Keywords'
+      sequence:
+        type: string
+        label: 'Keyword'
+    finder:
+      type: string
+      label: 'Finder'
+    minimum:
+      type: float
+      label: 'Minimum confidence'
+    keywordFilter:
+      type: string
+      label: 'Keyword filter'
+    ruleMode:
+      type: string
+      label: 'Rule mode'
+    na:
+      type: string
+      label: 'If model is not available'
+    message:
+      type: string
+      label: 'Message'
+    imageStyle:
+      type: string
+      label: 'Image style'
+
+field_validation.rule.ai_moderation_constraint_rule:
+  type: mapping
+  label: 'AI moderation constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    provider:
+      type: string
+      label: 'Provider and model'
+    categories:
+      type: string
+      label: 'Categories'
+    threshold:
+      type: float
+      label: 'Threshold'
+    message:
+      type: string
+      label: 'Message'
+
+field_validation.rule.ai_text_classification_constraint_rule:
+  type: mapping
+  label: 'AI text classification constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    tag:
+      type: string
+      label: 'Tag'
+    finder:
+      type: string
+      label: 'Finder'
+    model:
+      type: string
+      label: 'Provider and model'
+    minimum:
+      type: float
+      label: 'Minimum confidence'
+    na:
+      type: string
+      label: 'If model is not available'
+    message:
+      type: string
+      label: 'Message'
+
+field_validation.rule.ai_audio_constraint_rule:
+  type: mapping
+  label: 'AI audio constraint validation rule'
+  mapping:
+    validate_mode:
+      type: string
+      label: 'Validate mode'
+    prompt:
+      type: text
+      label: 'Prompt'
+    message:
+      type: string
+      label: 'Message'
+    provider:
+      type: string
+      label: 'Speech-to-text provider and model'
+    chat_provider:
+      type: string
+      label: 'Chat provider and model'

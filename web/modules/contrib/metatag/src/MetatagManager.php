@@ -4,10 +4,13 @@ namespace Drupal\metatag;
 
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Render\BubbleableMetadata;
@@ -32,70 +35,70 @@ class MetatagManager implements MetatagManagerInterface {
    *
    * @var \Drupal\metatag\MetatagGroupPluginManager
    */
-  protected $groupPluginManager;
+  protected MetatagGroupPluginManager $groupPluginManager;
 
   /**
    * The tag plugin manager.
    *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
-  protected $tagPluginManager;
+  protected MetatagTagPluginManager $tagPluginManager;
 
   /**
-   * The Metatag defaults.
+   * The Metatag defaults storage system.
    *
-   * @var \Drupal\metatag\Entity\MetatagDefaults
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $metatagDefaults;
+  protected EntityStorageInterface $metatagDefaults;
 
   /**
    * The Metatag token.
    *
    * @var \Drupal\metatag\MetatagToken
    */
-  protected $tokenService;
+  protected MetatagToken $tokenService;
 
   /**
    * Config factory.
    *
-   * @var Drupal\Core\Config\ConfigFactoryInterface
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The Metatag logging channel.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
-  protected $logger;
+  protected LoggerChannelInterface $logger;
 
   /**
    * The path matcher.
    *
    * @var \Drupal\Core\Path\PathMatcherInterface
    */
-  protected $pathMatcher;
+  protected PathMatcherInterface $pathMatcher;
 
   /**
    * The route match.
    *
    * @var \Drupal\Core\Routing\RouteMatchInterface
    */
-  protected $routeMatch;
+  protected RouteMatchInterface $routeMatch;
 
   /**
    * The request stack.
    *
    * @var \Symfony\Component\HttpFoundation\RequestStack
    */
-  protected $requestStack;
+  protected RequestStack $requestStack;
 
   /**
    * The language manager.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $languageManager;
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * Caches processed strings, keyed by tag name.
@@ -103,6 +106,20 @@ class MetatagManager implements MetatagManagerInterface {
    * @var array
    */
   protected $processedTokenCache = [];
+
+  /**
+   * Cache for sorted groups.
+   *
+   * @var array|null
+   */
+  protected $sortedGroupsCache = NULL;
+
+  /**
+   * Cache for sorted tags.
+   *
+   * @var array|null
+   */
+  protected $sortedTagsCache = NULL;
 
   /**
    * Constructor for MetatagManager.
@@ -242,6 +259,11 @@ class MetatagManager implements MetatagManagerInterface {
    * {@inheritdoc}
    */
   public function sortedGroups(): array {
+    // Return cached result if available.
+    if ($this->sortedGroupsCache !== NULL) {
+      return $this->sortedGroupsCache;
+    }
+
     $metatag_groups = $this->groupDefinitions();
 
     // Pull the data from the definitions into a new array.
@@ -258,6 +280,9 @@ class MetatagManager implements MetatagManagerInterface {
       'sortByWeightElement',
     ]);
 
+    // Cache the sorted groups.
+    $this->sortedGroupsCache = $groups;
+
     return $groups;
   }
 
@@ -265,6 +290,11 @@ class MetatagManager implements MetatagManagerInterface {
    * {@inheritdoc}
    */
   public function sortedTags(): array {
+    // Return cached result if available.
+    if ($this->sortedTagsCache !== NULL) {
+      return $this->sortedTagsCache;
+    }
+
     $metatag_tags = $this->tagDefinitions();
 
     // Pull the data from the definitions into a new array.
@@ -298,6 +328,9 @@ class MetatagManager implements MetatagManagerInterface {
         $this->logger->error('Expected an array but got null or other type for group: @group_name', ['@group_name' => $group_name]);
       }
     }
+
+    // Cache the sorted tags.
+    $this->sortedTagsCache = $sorted_tags;
 
     return $sorted_tags;
   }
@@ -505,6 +538,7 @@ class MetatagManager implements MetatagManagerInterface {
    *   The global meta tags or NULL.
    */
   public function getGlobalMetatags(): MetatagDefaults|NULL {
+    /** @var \Drupal\metatag\Entity\MetatagDefaults $metatags */
     $metatags = $this->metatagDefaults->load('global');
     return (!empty($metatags) && $metatags->status()) ? $metatags : NULL;
   }
@@ -528,6 +562,7 @@ class MetatagManager implements MetatagManagerInterface {
       $metatags = $this->metatagDefaults->load('404');
     }
 
+    /** @var \Drupal\metatag\Entity\MetatagDefaults $metatags */
     if ($metatags && !$metatags->status()) {
       // Do not return disabled special metatags.
       return NULL;
@@ -594,12 +629,15 @@ class MetatagManager implements MetatagManagerInterface {
       return [];
     }
 
-    // Use the entity's language code, if one is defined.
+    // Use the entity's language code, if one is defined. Views should probably
+    // get the current language instead of the configuration object language.
     $langcode = NULL;
     // Prepare any tokens that might exist.
     $token_replacements = [];
     if ($entity) {
-      $langcode = $entity->language()->getId();
+      if (!$entity instanceof ConfigEntityInterface) {
+        $langcode = $entity->language()->getId();
+      }
       // @todo This needs a better way of discovering the context.
       if ($entity instanceof ViewEntityInterface) {
         // Views tokens require the ViewExecutable, not the config entity.
@@ -678,9 +716,10 @@ class MetatagManager implements MetatagManagerInterface {
     }
 
     $entity_identifier = '_none';
-    // Use the entity's language code, if one is defined.
+    // Use the entity's language code, if one is defined. Config objects should
+    // get the current language instead of the configuration object language.
     $langcode = NULL;
-    if ($entity) {
+    if ($entity && !$entity instanceof ConfigEntityInterface) {
       $langcode = $entity->language()->getId();
       $entity_identifier = $entity->getEntityTypeId() . ':' . ($entity->uuid() ?? $entity->id()) . ':' . $langcode;
     }

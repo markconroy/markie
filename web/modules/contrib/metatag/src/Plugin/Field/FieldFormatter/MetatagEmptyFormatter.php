@@ -14,7 +14,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   id: 'metatag_empty_formatter',
   label: new TranslatableMarkup('Empty formatter'),
   field_types: [
-    'metatag'
+    'metatag',
   ]
 )]
 class MetatagEmptyFormatter extends FormatterBase {

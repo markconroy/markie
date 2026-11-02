@@ -1,17 +1,26 @@
+# @file
+# Custom services for the Metatag module.
+
 services:
   plugin.manager.metatag.tag:
     class: Drupal\metatag\MetatagTagPluginManager
     parent: default_plugin_manager
+  Drupal\metatag\MetatagTagPluginManager:
+    alias: plugin.manager.metatag.tag
 
   plugin.manager.metatag.group:
     class: Drupal\metatag\MetatagGroupPluginManager
     parent: default_plugin_manager
+  Drupal\metatag\MetatagGroupPluginManager:
+    alias: plugin.manager.metatag.group
 
   metatag.token:
     class: Drupal\metatag\MetatagToken
     arguments:
       - '@token'
       - '@token.entity_mapper'
+  Drupal\metatag\MetatagToken:
+    alias: metatag.token
 
   metatag.manager:
     class: Drupal\metatag\MetatagManager
@@ -26,6 +35,33 @@ services:
       - '@request_stack'
       - '@language_manager'
       - '@config.factory'
+  Drupal\metatag\MetatagManager:
+    alias: metatag.manager
 
   metatag.trimmer:
     class: Drupal\metatag\MetatagTrimmer
+  Drupal\metatag\MetatagTrimmer:
+    alias: metatag.trimmer
+
+  # Used for legacy hooks, will be removed later.
+  # @see https://www.drupal.org/project/metatag/issues/3579738
+  Drupal\metatag\Hook\EntityHooks:
+    class: Drupal\metatag\Hook\EntityHooks
+    autowire: true
+  Drupal\metatag\Hook\FormHooks:
+    class: Drupal\metatag\Hook\FormHooks
+    autowire: true
+  Drupal\metatag\Hook\HelpHooks:
+    class: Drupal\metatag\Hook\HelpHooks
+    autowire: true
+  Drupal\metatag\Hook\MigrateHooks:
+    class: Drupal\metatag\Hook\MigrateHooks
+    arguments:
+      - '@module_handler'
+      - '@?plugin.manager.migrate.destination'
+  Drupal\metatag\Hook\OutputHooks:
+    class: Drupal\metatag\Hook\OutputHooks
+    autowire: true
+  Drupal\metatag\Hook\TokenHooks:
+    class: Drupal\metatag\Hook\TokenHooks
+    autowire: true
