@@ -16,8 +16,12 @@ interface KeyProviderInterface {
    * @param \Drupal\key\KeyInterface $key
    *   The key whose value will be retrieved.
    *
-   * @return string
-   *   The key value.
+   * @return string|null
+   *   The key value, or NULL if the value is not available, for example
+   *   because the file or environment variable holding it does not exist.
+   *   Callers must handle NULL. Key config overrides are skipped when the
+   *   value is NULL, so an empty string must not be used to signal a missing
+   *   value.
    */
   public function getKeyValue(KeyInterface $key);
 

@@ -44,16 +44,21 @@ class MetatagXssTest extends BrowserTestBase {
    * "Image" meta tags are processed differently to others, so this checks for a
    * different string.
    *
+   * Hardcoding a specific URL for this to avoid needing to match the different
+   * hostname possibilities from different test environments.
+   *
    * @var string
    */
-  private $xssImageString = '"><script>alert("image xss");</script><meta "';
+  private $xssImageString = 'https://example.com/"><script>alert("image xss");</script><meta "';
 
   /**
    * Rendered xss tag that has escaped attribute to avoid xss injection.
    *
+   * The absolute URL will be retained.
+   *
    * @var string
    */
-  private $escapedXssImageTag = '<link rel="image_src" href="&quot;&gt;alert(&quot;image xss&quot;);" />';
+  private $escapedXssImageTag = '<link rel="image_src" href="https://example.com/&quot;&gt;alert(&quot;image xss&quot;);" />';
 
   /**
    * Administrator user for tests.

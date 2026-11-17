@@ -13,9 +13,6 @@
         "drupal/token": "*",
         "drupal/ctools": "*"
     },
-    "require-dev": {
-        "drupal/forum": "*"
-    },
     "conflict": {
         "drush/drush": "<12.5.1"
     },

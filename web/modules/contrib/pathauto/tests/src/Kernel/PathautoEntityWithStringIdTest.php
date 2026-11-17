@@ -7,6 +7,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\pathauto\PathautoState;
 use Drupal\pathauto_string_id_test\Entity\PathautoStringId;
 use Drupal\Tests\pathauto\Functional\PathautoTestHelperTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -70,6 +71,7 @@ class PathautoEntityWithStringIdTest extends KernelTestBase {
    *
    * @dataProvider entityWithStringIdProvider
    */
+  #[DataProvider('entityWithStringIdProvider')]
   public function testEntityWithStringId($id, $expected_key) {
     $entity = PathautoStringId::create([
       'id' => $id,

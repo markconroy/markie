@@ -826,3 +826,82 @@ function metatag_post_update_v2_06_error_page_defaults() {
     return t('No changes needed to be made.');
   }
 }
+
+/**
+ * Put `<none>` back into the 403/404 defaults where locale translated it.
+ *
+ * The URL tags' values shipped as `<none>` matched the interface string
+ * `<none>`, so locale replaced them with its translation (e.g. Dutch `-geen-`),
+ * which was then output as the link. Their schema now has a translation
+ * context of its own; this only reverts values that are exactly that
+ * translation, in the active configuration and in language overrides.
+ */
+function metatag_post_update_v2_07_error_page_defaults_untranslated_none() {
+  if (!\Drupal::moduleHandler()->moduleExists('locale')) {
+    return t('No changes needed to be made.');
+  }
+  $locale_storage = \Drupal::service('locale.storage');
+  $translation_of_none = static function (string $langcode) use ($locale_storage): ?string {
+    if ($langcode === 'en') {
+      return NULL;
+    }
+    $translation = $locale_storage->findTranslation(['source' => '<none>', 'context' => '', 'language' => $langcode]);
+    return $translation?->translation;
+  };
+  $tags = ['canonical_url', 'shortlink'];
+  $language_manager = \Drupal::languageManager();
+  $updated = [];
+
+  foreach (['403', '404'] as $id) {
+    $name = 'metatag.metatag_defaults.' . $id;
+    $config = \Drupal::configFactory()->getEditable($name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    // The active configuration, in the site's language.
+    $none = $translation_of_none((string) $config->get('langcode'));
+    $changed = FALSE;
+    foreach ($tags as $tag) {
+      if ($none !== NULL && $config->get("tags.$tag") === $none) {
+        $config->set("tags.$tag", '<none>');
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->save(TRUE);
+      $updated[] = $id;
+    }
+
+    // The translations into the other languages.
+    if (!method_exists($language_manager, 'getLanguageConfigOverride')) {
+      continue;
+    }
+    foreach (array_keys($language_manager->getLanguages()) as $langcode) {
+      $override = $language_manager->getLanguageConfigOverride($langcode, $name);
+      $none = $translation_of_none($langcode);
+      $changed = FALSE;
+      foreach ($tags as $tag) {
+        if ($none !== NULL && $override->get("tags.$tag") === $none) {
+          $override->clear("tags.$tag");
+          $changed = TRUE;
+        }
+      }
+      if (!$changed) {
+        continue;
+      }
+      if (empty($override->get('tags'))) {
+        $override->clear('tags');
+      }
+      $override->get() ? $override->save() : $override->delete();
+      $updated[] = "$id ($langcode)";
+    }
+  }
+
+  if ($updated) {
+    return t('The Metatag configuration for @items page(s) has been updated. Make sure to export the configuration to avoid losing the changes.', [
+      '@items' => implode(', ', $updated),
+    ]);
+  }
+  return t('No changes needed to be made.');
+}

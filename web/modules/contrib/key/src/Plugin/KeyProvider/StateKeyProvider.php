@@ -4,9 +4,11 @@ namespace Drupal\key\Plugin\KeyProvider;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\State\StateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyProvider;
 use Drupal\key\KeyInterface;
-use Drupal\key\Plugin\KeyProviderBase;
 use Drupal\key\Plugin\KeyPluginFormInterface;
+use Drupal\key\Plugin\KeyProviderBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -16,20 +18,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * should be considered to have the same security properties as database-stored
  * configuration. This provider is suitable for development keys, API tokens
  * with limited permissions, or other keys where database storage is acceptable.
- *
- * @KeyProvider(
- *   id = "state",
- *   label = @Translation("State"),
- *   description = @Translation("The State key provider allows a key to be retrieved from Drupal state."),
- *   tags = {
- *     "state",
- *   },
- *   key_value = {
- *     "accepted" = FALSE,
- *     "required" = FALSE
- *   }
- * )
  */
+#[KeyProvider(
+  id: 'state',
+  label: new TranslatableMarkup('State'),
+  description: new TranslatableMarkup('The State key provider allows a key to be retrieved from Drupal state.'),
+  tags: [
+    'state',
+  ],
+  key_value: [
+    'accepted' => FALSE,
+    'required' => FALSE,
+  ],
+)]
 class StateKeyProvider extends KeyProviderBase implements KeyPluginFormInterface {
 
   /**
@@ -89,7 +90,7 @@ class StateKeyProvider extends KeyProviderBase implements KeyPluginFormInterface
     $key_value = $this->state->get($state_variable);
 
     // Does the state variable exist.
-    if (!$key_value) {
+    if ($key_value === NULL || $key_value === '') {
       $form_state->setErrorByName('state_key', $this->t('The state variable does not exist or it is empty.'));
       return;
     }

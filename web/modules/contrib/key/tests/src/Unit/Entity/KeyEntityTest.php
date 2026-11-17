@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\key\Unit\Entity;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\key\Entity\Key;
 use Drupal\key\Plugin\KeyProvider\ConfigKeyProvider;
 use Drupal\key\Plugin\KeyType\AuthenticationKeyType;
@@ -12,6 +13,7 @@ use Drupal\Tests\key\Unit\KeyTestBase;
  * @coversDefaultClass \Drupal\key\Entity\Key
  * @group key
  */
+#[Group('key')]
 class KeyEntityTest extends KeyTestBase {
 
   /**
@@ -92,12 +94,12 @@ class KeyEntityTest extends KeyTestBase {
     // Mock the KeyTypeManager service.
     $this->keyTypeManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
-    $this->keyTypeManager->expects($this->any())
+    $this->keyTypeManager
       ->method('getDefinitions')
       ->willReturn([
         ['id' => 'authentication', 'label' => 'Authentication'],
       ]);
-    $this->keyTypeManager->expects($this->any())
+    $this->keyTypeManager
       ->method('createInstance')
       ->with('authentication', $this->keyTypeSettings)
       ->willReturn($plugin);
@@ -114,7 +116,7 @@ class KeyEntityTest extends KeyTestBase {
     // Mock the KeyProviderManager service.
     $this->keyProviderManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
-    $this->keyProviderManager->expects($this->any())
+    $this->keyProviderManager
       ->method('getDefinitions')
       ->willReturn([
         ['id' => 'file', 'label' => 'File', 'tags' => ['file']],
@@ -124,7 +126,7 @@ class KeyEntityTest extends KeyTestBase {
           'tags' => ['config'],
         ],
       ]);
-    $this->keyProviderManager->expects($this->any())
+    $this->keyProviderManager
       ->method('createInstance')
       ->with('config', $this->keyProviderSettings)
       ->willReturn($plugin);
@@ -140,12 +142,12 @@ class KeyEntityTest extends KeyTestBase {
     // Mock the KeyInputManager service.
     $this->keyInputManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
-    $this->keyInputManager->expects($this->any())
+    $this->keyInputManager
       ->method('getDefinitions')
       ->willReturn([
         ['id' => 'none', 'label' => 'None'],
       ]);
-    $this->keyInputManager->expects($this->any())
+    $this->keyInputManager
       ->method('createInstance')
       ->with('none', $this->keyInputSettings)
       ->willReturn($plugin);

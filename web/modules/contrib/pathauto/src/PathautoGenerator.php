@@ -342,33 +342,56 @@ class PathautoGenerator implements PathautoGeneratorInterface {
    * {@inheritdoc}
    */
   public function getPatternByEntity(EntityInterface $entity) {
+    $entity_type_id = $entity->getEntityTypeId();
     $langcode = $entity->language()->getId();
-    if (!isset($this->patterns[$entity->getEntityTypeId()][$entity->id()][$langcode])) {
-      foreach ($this->getPatternByEntityType($entity->getEntityTypeId()) as $pattern) {
+
+    // New entities have no id yet, so they cannot participate in the per-id
+    // cache. Iterate directly and return the first matching pattern (or NULL).
+    if ($entity->isNew()) {
+      foreach ($this->getPatternByEntityType($entity_type_id) as $pattern) {
         if ($pattern->applies($entity)) {
-          // Fetch the translated pattern string if a language-specific config
-          // override exists.
-          if ($this->languageManager instanceof ConfigurableLanguageManagerInterface) {
-            $override = $this->languageManager->getLanguageConfigOverride($langcode, 'pathauto.pattern.' . $pattern->id());
-            $translated = $override->get('pattern');
-            if ($translated !== NULL) {
-              $pattern = clone $pattern;
-              $pattern->setPattern($translated);
-            }
-          }
-          if ($entity->isNew()) {
-            return $pattern;
-          }
-          $this->patterns[$entity->getEntityTypeId()][$entity->id()][$langcode] = $pattern;
+          return $this->applyLanguagePatternOverride($pattern, $langcode);
+        }
+      }
+      return NULL;
+    }
+
+    $entity_id = $entity->id();
+    if (!isset($this->patterns[$entity_type_id][$entity_id][$langcode])) {
+      $this->patterns[$entity_type_id][$entity_id][$langcode] = NULL;
+      foreach ($this->getPatternByEntityType($entity_type_id) as $pattern) {
+        if ($pattern->applies($entity)) {
+          $this->patterns[$entity_type_id][$entity_id][$langcode] =
+            $this->applyLanguagePatternOverride($pattern, $langcode);
           break;
         }
       }
-      // If still not set.
-      if (!isset($this->patterns[$entity->getEntityTypeId()][$entity->id()][$langcode])) {
-        $this->patterns[$entity->getEntityTypeId()][$entity->id()][$langcode] = NULL;
+    }
+    return $this->patterns[$entity_type_id][$entity_id][$langcode];
+  }
+
+  /**
+   * Applies a language-specific pattern override, if one exists.
+   *
+   * @param \Drupal\pathauto\PathautoPatternInterface $pattern
+   *   The pathauto pattern to potentially override.
+   * @param string $langcode
+   *   The language code to look up overrides for.
+   *
+   * @return \Drupal\pathauto\PathautoPatternInterface
+   *   Either the original pattern, or a clone whose pattern string has been
+   *   replaced by the language-specific override when one is configured.
+   */
+  protected function applyLanguagePatternOverride(PathautoPatternInterface $pattern, string $langcode): PathautoPatternInterface {
+    if ($this->languageManager instanceof ConfigurableLanguageManagerInterface) {
+      $override = $this->languageManager->getLanguageConfigOverride($langcode, 'pathauto.pattern.' . $pattern->id());
+      $translated = $override->get('pattern');
+      if ($translated !== NULL) {
+        $pattern = clone $pattern;
+        $pattern->setPattern($translated);
       }
     }
-    return $this->patterns[$entity->getEntityTypeId()][$entity->id()][$langcode];
+    return $pattern;
   }
 
   /**

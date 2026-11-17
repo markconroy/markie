@@ -82,6 +82,38 @@ class ThreadRepository {
   }
 
   /**
+   * Gets the request tags that say what a call in a thread was for.
+   *
+   * Leaves out the tags every call carries anyway: the thread tags
+   * themselves, run or caller IDs (any tag containing a UUID or the thread
+   * ID), and the operation type, which is shown separately.
+   *
+   * @param string[] $tags
+   *   The call's request tags.
+   * @param string $operation_type
+   *   The call's operation type.
+   * @param string $thread_id
+   *   The thread's ID, if known.
+   *
+   * @return string[]
+   *   The remaining tags, in their original order.
+   */
+  public function getPurposeTags(array $tags, string $operation_type = '', string $thread_id = ''): array {
+    $purpose = [];
+    foreach ($tags as $tag) {
+      $tag = (string) $tag;
+      if ($tag === '' || $tag === $operation_type || $this->getThreadIdFromTag($tag) !== NULL) {
+        continue;
+      }
+      if (($thread_id !== '' && str_contains($tag, $thread_id)) || preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i', $tag)) {
+        continue;
+      }
+      $purpose[] = $tag;
+    }
+    return array_values(array_unique($purpose));
+  }
+
+  /**
    * Gets every request tag that identifies a thread ID.
    *
    * @param string $thread_id

@@ -202,7 +202,7 @@ class ProjectCollector {
     /** @var \Drupal\Core\Extension\Extension $extension */
     foreach ($extensions as $key => $extension) {
 
-      if ($extension->origin === 'core') {
+      if ($this->isCoreExtension($extension)) {
         // Ignore core extensions for the sake of upgrade status.
         continue;
       }
@@ -367,7 +367,7 @@ class ProjectCollector {
     /** @var \Drupal\Core\Extension\Extension $extension */
     foreach ($extensions as $key => $extension) {
       if (!empty($extension->status)
-      && $extension->origin === 'core'
+      && $this->isCoreExtension($extension)
       && !empty($extension->info['lifecycle'])
       && in_array(
           $extension->info['lifecycle'],
@@ -598,6 +598,30 @@ class ProjectCollector {
    */
   public static function getDrupalCoreMajorVersion(): int {
     return (int) \Drupal::VERSION;
+  }
+
+  /**
+   * Checks if an extension is from Drupal core.
+   *
+   * @param \Drupal\Core\Extension\Extension $extension
+   *   The extension to check.
+   *
+   * @return bool
+   *   TRUE if the extension is from core, FALSE otherwise.
+   */
+  private function isCoreExtension($extension): bool {
+    // First try the origin property (available on Module/Profile objects).
+    if (property_exists($extension, 'origin') && $extension->origin === 'core') {
+      return TRUE;
+    }
+    // Fall back to path-based check for Theme objects. ThemeExtensionList
+    // creates new Theme instances via subClassExtension() but doesn't copy the
+    // origin property from the original Extension, so themes don't have origin.
+    $pathname = $extension->getPathname();
+    if (strpos($pathname, '/core/') === 0) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
 }

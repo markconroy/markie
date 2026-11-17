@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for Drupal versions without object-oriented hooks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\ai_logging\Hook\CronHooks;
+use Drupal\ai_logging\Hook\FormHooks;
+use Drupal\ai_logging\Hook\ThemeHooks;
+
+/**
+ * Implements hook_cron().
+ */
+#[LegacyHook]
+function ai_logging_cron(): void {
+  \Drupal::service(CronHooks::class)->cron();
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function ai_logging_theme(): array {
+  return \Drupal::service(ThemeHooks::class)->theme();
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for views_exposed_form.
+ */
+#[LegacyHook]
+function ai_logging_form_views_exposed_form_alter(array &$form, FormStateInterface $form_state): void {
+  \Drupal::service(FormHooks::class)->formViewsExposedFormAlter($form, $form_state);
+}

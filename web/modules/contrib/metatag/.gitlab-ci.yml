@@ -32,7 +32,8 @@ variables:
   # 3529741: Added the Spanish, French and German words.
   # 3458724: Added fediverse.
   # 3619489: Added lullabot.
-  _CSPELL_WORDS: "españa, große, größe, müller, niño, résumé, rêve, schöne, fediverse, lullabot"
+  # 3633586: Added geen (Dutch).
+  _CSPELL_WORDS: "españa, große, größe, müller, niño, résumé, rêve, schöne, fediverse, lullabot, geen"
 
   # Run tests against the previous and next core major releases, to help make
   # sure small changes don't break anything too quickly.
@@ -54,9 +55,8 @@ cspell:
   allow_failure: false
 phpcs:
   allow_failure: false
-# @todo Fix all phpstan issues.
-# phpstan:
-#   allow_failure: false
+phpstan:
+  allow_failure: false
 stylelint:
   allow_failure: false
 

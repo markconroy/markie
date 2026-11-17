@@ -5,12 +5,16 @@ namespace Drupal\Tests\pathauto\Functional;
 use Drupal\pathauto\PathautoGeneratorInterface;
 use Drupal\pathauto\PathautoState;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Bulk update functionality tests.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoBulkUpdateTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;
@@ -25,7 +29,7 @@ class PathautoBulkUpdateTest extends BrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = ['node', 'pathauto', 'forum'];
+  protected static $modules = ['node', 'pathauto'];
 
   /**
    * Admin user.
@@ -61,7 +65,6 @@ class PathautoBulkUpdateTest extends BrowserTestBase {
       'bulk delete aliases',
       'bulk update aliases',
       'create url aliases',
-      'administer forums',
     ];
     $this->adminUser = $this->drupalCreateUser($permissions);
     $this->drupalLogin($this->adminUser);
@@ -69,7 +72,6 @@ class PathautoBulkUpdateTest extends BrowserTestBase {
     $this->patterns = [];
     $this->patterns['node'] = $this->createPattern('node', '/content/[node:title]');
     $this->patterns['user'] = $this->createPattern('user', '/users/[user:name]');
-    $this->patterns['forum'] = $this->createPattern('forum', '/forums/[term:name]');
   }
 
   /**
@@ -90,21 +92,18 @@ class PathautoBulkUpdateTest extends BrowserTestBase {
     $edit = [
       'update[canonical_entities:node]' => TRUE,
       'update[canonical_entities:user]' => TRUE,
-      'update[forum]' => TRUE,
     ];
     $this->drupalGet('admin/config/search/path/update_bulk');
     $this->submitForm($edit, 'Update');
 
-    // This has generated 8 aliases: 5 nodes, 2 users and 1 forum.
-    $this->assertSession()->pageTextContains('Generated 8 URL aliases.');
+    // This has generated 8 aliases: 5 nodes and 2 users.
+    $this->assertSession()->pageTextContains('Generated 7 URL aliases.');
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
       $this->assertEntityAliasExists($node);
     }
     $this->assertEntityAliasExists($this->adminUser);
-    // This is the default "General discussion" forum.
-    $this->assertAliasExists(['path' => '/taxonomy/term/1']);
 
     // Add a new node.
     $new_node = $this->drupalCreateNode(['path' => ['alias' => '', 'pathauto' => PathautoState::SKIP]]);

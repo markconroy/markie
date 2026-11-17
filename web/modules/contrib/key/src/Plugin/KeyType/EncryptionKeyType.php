@@ -3,22 +3,23 @@
 namespace Drupal\key\Plugin\KeyType;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\key\Plugin\KeyTypeBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyType;
 use Drupal\key\Plugin\KeyPluginFormInterface;
+use Drupal\key\Plugin\KeyTypeBase;
 
 /**
  * Defines a generic key type for encryption.
- *
- * @KeyType(
- *   id = "encryption",
- *   label = @Translation("Encryption"),
- *   description = @Translation("A generic key type to use for an encryption key that does not belong to any other defined key type."),
- *   group = "encryption",
- *   key_value = {
- *     "plugin" = "text_field"
- *   }
- * )
  */
+#[KeyType(
+  id: 'encryption',
+  label: new TranslatableMarkup('Encryption'),
+  description: new TranslatableMarkup('A generic key type to use for an encryption key that does not belong to any other defined key type.'),
+  group: 'encryption',
+  key_value: [
+    'plugin' => 'text_field',
+  ],
+)]
 class EncryptionKeyType extends KeyTypeBase implements KeyPluginFormInterface {
 
   /**
@@ -83,7 +84,12 @@ class EncryptionKeyType extends KeyTypeBase implements KeyPluginFormInterface {
     // If 'Other' was selected for the key size, use the custom entered value.
     $key_size = $form_state->getValue('key_size');
     if ($key_size == 'other') {
-      $form_state->setValue('key_size', $form_state->getValue('key_size_other_value'));
+      // The custom key size must be a whole number of bytes.
+      $key_size = self::getKeySizeBytes($form_state->getValue('key_size_other_value')) * 8;
+      if (!$key_size) {
+        $form_state->setErrorByName('key_size_other_value', $this->t('The custom key size must be a positive whole number of bits that is a multiple of 8.'));
+      }
+      $form_state->setValue('key_size', $key_size);
     }
     $form_state->unsetValue('key_size_other_value');
   }
@@ -99,13 +105,13 @@ class EncryptionKeyType extends KeyTypeBase implements KeyPluginFormInterface {
    * {@inheritdoc}
    */
   public static function generateKeyValue(array $configuration) {
-    if (!empty($configuration['key_size'])) {
-      $bytes = $configuration['key_size'] / 8;
+    $key_size = $configuration['key_size'] ?? NULL;
+    if ($key_size == 'other') {
+      $key_size = $configuration['key_size_other_value'] ?? NULL;
     }
-    else {
-      // If no key size has been defined, use 32 bytes as the default.
-      $bytes = 32;
-    }
+
+    // If no valid key size has been defined, use 32 bytes as the default.
+    $bytes = self::getKeySizeBytes($key_size) ?: 32;
     $random_key = random_bytes($bytes);
 
     return $random_key;
@@ -115,15 +121,35 @@ class EncryptionKeyType extends KeyTypeBase implements KeyPluginFormInterface {
    * {@inheritdoc}
    */
   public function validateKeyValue(array $form, FormStateInterface $form_state, $key_value) {
-    if (!$form_state->getValue('key_size')) {
+    // An invalid key size has already been reported by
+    // validateConfigurationForm().
+    $bytes = self::getKeySizeBytes($form_state->getValue('key_size'));
+    if (!$bytes) {
       return;
     }
 
     // Validate the key size.
-    $bytes = $form_state->getValue('key_size') / 8;
     if (is_string($key_value) && (strlen($key_value) != $bytes)) {
       $form_state->setErrorByName('key_size', $this->t('The selected key size does not match the actual size of the key.'));
     }
+  }
+
+  /**
+   * Converts a key size in bits to a number of bytes.
+   *
+   * @param mixed $key_size
+   *   The key size, in bits.
+   *
+   * @return int
+   *   The number of bytes, or 0 if the key size is not a positive whole number
+   *   of bits that is a multiple of 8.
+   */
+  private static function getKeySizeBytes($key_size): int {
+    $key_size = filter_var($key_size, FILTER_VALIDATE_INT, ['options' => ['min_range' => 8]]);
+    if ($key_size === FALSE || $key_size % 8) {
+      return 0;
+    }
+    return intdiv($key_size, 8);
   }
 
 }

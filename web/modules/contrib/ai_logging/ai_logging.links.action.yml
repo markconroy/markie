@@ -9,3 +9,25 @@ ai_log.add_page:
   route_name: entity.ai_log.add_page
   appears_on:
     - entity.ai_log_type.collection
+
+entity.ai_log.thread_delete_form:
+  title: 'Delete thread'
+  route_name: entity.ai_log.thread_delete_form
+  options:
+    attributes:
+      class:
+        - button--danger
+  appears_on:
+    - entity.ai_log.thread
+
+# The AI Logs view's own route answers requests for the collection path, so
+# the action is attached to it rather than to entity.ai_log.collection.
+ai_logging.delete_all:
+  title: 'Delete all logs'
+  route_name: ai_logging.delete_all
+  options:
+    attributes:
+      class:
+        - button--danger
+  appears_on:
+    - view.ai_logs.page_1

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_logging\Kernel\EventSubscriber;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\ai\Dto\TokenUsageDto;
 use Drupal\ai\Event\PostGenerateResponseEvent;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
+use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput;
+use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutput;
+use Drupal\ai\OperationType\Chat\Tools\ToolsPropertyResult;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIterator;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsOutput;
 use Drupal\ai\OperationType\OutputInterface;
@@ -370,13 +374,36 @@ class LogPostRequestEventSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Tests that a turn that only calls tools logs no reply.
+   * Tests that a turn with neither text nor tools logs no reply.
    *
    * @covers ::getResponseText
    */
-  public function testToolOnlyTurnLogsNoReply(): void {
+  public function testEmptyTurnLogsNoReply(): void {
     $this->dispatchOutputEvent(new ChatOutput(new ChatMessage('assistant', ''), [], []));
     $this->assertNull($this->loadOnlyLog()->get('response_text')->value);
+  }
+
+  /**
+   * Tests that a turn that only calls tools logs the calls it made.
+   *
+   * @covers ::getResponseText
+   * @covers ::getToolCallsText
+   */
+  public function testToolOnlyTurnLogsItsToolCalls(): void {
+    $function = new ToolsFunctionInput('search_publications');
+    $tool = new ToolsFunctionOutput($function, 'call_1', []);
+    $argument = new ToolsPropertyResult(NULL, 'Myanmar coup');
+    $argument->setName('query');
+    $tool->addArgument($argument);
+
+    $message = new ChatMessage('assistant', '');
+    $message->setTools([$tool]);
+    $this->dispatchOutputEvent(new ChatOutput($message, [], []));
+
+    $this->assertSame(
+      '{"tool_calls":[{"name":"search_publications","arguments":{"query":"Myanmar coup"}}]}',
+      $this->loadOnlyLog()->get('response_text')->value,
+    );
   }
 
   /**
@@ -409,6 +436,59 @@ class LogPostRequestEventSubscriberTest extends KernelTestBase {
     $this->config('ai_logging.settings')->set('prompt_logging_output', FALSE)->save();
     $this->dispatchOutputEvent(new ChatOutput(new ChatMessage('assistant', 'Hello world'), [], []));
     $this->assertNull($this->loadOnlyLog()->get('response_text')->value);
+  }
+
+  /**
+   * Tests that each call is logged with its own time, not the request's.
+   *
+   * @covers ::logPostRequest
+   */
+  public function testEachCallLoggedWithItsOwnTime(): void {
+    $request_time = $this->container->get('datetime.time')->getRequestTime();
+    // A clock that moves on by ten seconds each time it is read, as an
+    // agent's calls within one request would.
+    $this->container->set('datetime.time', new class($request_time) implements TimeInterface {
+
+      public function __construct(protected int $now) {}
+
+      /**
+       * {@inheritdoc}
+       */
+      public function getRequestTime() {
+        return $this->now;
+      }
+
+      /**
+       * {@inheritdoc}
+       */
+      public function getRequestMicroTime() {
+        return (float) $this->now;
+      }
+
+      /**
+       * {@inheritdoc}
+       */
+      public function getCurrentTime() {
+        $this->now += 10;
+        return $this->now;
+      }
+
+      /**
+       * {@inheritdoc}
+       */
+      public function getCurrentMicroTime() {
+        return (float) $this->getCurrentTime();
+      }
+
+    });
+
+    $this->dispatchChatEvent(['first']);
+    $this->dispatchChatEvent(['second']);
+
+    $storage = $this->container->get('entity_type.manager')->getStorage('ai_log');
+    $storage->resetCache();
+    $created = array_map(static fn ($log) => (int) $log->get('created')->value, array_values($storage->loadMultiple()));
+    $this->assertSame([$request_time + 10, $request_time + 20], $created);
   }
 
   /**

@@ -40,45 +40,13 @@ class PermissionsTest extends BrowserTestBase {
   /**
    * Permissions to check for.
    *
+   * Will be in the structure [$groupname][$tagname] => $label.
+   *
+   * Generated during setUp().
+   *
    * @var string
    */
-  protected $permissions = [
-    'basic' => [
-      'abstract' => 'Abstract',
-      'description' => 'Description',
-      'keywords' => 'Keywords',
-      'title' => 'Page title',
-    ],
-
-    // Tags in the "Advanced" group.
-    'advanced' => [
-      'cache_control' => 'Cache control',
-      'canonical_url' => 'Canonical URL',
-      'expires' => 'Expires',
-      'generator' => 'Generator',
-      'geo_placename' => 'Geographical place name',
-      'geo_position' => 'Geographical position',
-      'geo_region' => 'Geographical region',
-      'google' => 'Google',
-      'icbm' => 'ICBM',
-      'image_src' => 'Image',
-      'next' => 'Next page URL',
-      'original_source' => 'Original source',
-      'pragma' => 'Pragma',
-      'prev' => 'Previous page URL',
-      'rating' => 'Rating',
-      'referrer' => 'Referrer policy',
-      'refresh' => 'Refresh',
-      'revisit_after' => 'Revisit After',
-      'rights' => 'Rights',
-      // This one is more complicated, so skip it.
-      // @code
-      // 'robots' => 'Robots',
-      // @endcode
-      'set_cookie' => 'Set cookie',
-      'shortlink' => 'Shortlink URL',
-    ],
-  ];
+  protected $permissions = [];
 
   /**
    * {@inheritdoc}
@@ -91,6 +59,22 @@ class PermissionsTest extends BrowserTestBase {
 
     // Create a content type with a Metatag field.
     $this->createContentType();
+
+    // Tags that won't be tested because they are more complicated.
+    $tags_to_skip = [
+      'robots',
+    ];
+
+    // Build a list of all available meta tags.
+    $tag_plugin_manager = $this->container->get('plugin.manager.metatag.tag');
+    foreach ($tag_plugin_manager->getDefinitions() as $tag_name => $tag_spec) {
+      // Skip a few tags that are complicated.
+      if (in_array($tag_name, $tags_to_skip)) {
+        continue;
+      }
+
+      $this->permissions[$tag_spec['group']][$tag_name] = $tag_spec['label'];
+    }
   }
 
   /**

@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\key\Entity\Key;
+use Drupal\key\Plugin\KeyInput\GenerateKeyInput;
 use Drupal\key\Plugin\KeyPluginFormInterface;
 use Drupal\key\Plugin\KeyProviderSettableValueInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -253,9 +254,10 @@ abstract class KeyFormBase extends EntityForm {
     $form_state->set('key_value', $key_value_data);
 
     // Allow the Key Type plugin to validate the key value. Use the processed
-    // key value if there is one. Otherwise, retrieve the key value using the
-    // key provider.
-    if (isset($processed_values['processed_submitted'])) {
+    // key value if there is one, or if an empty value was submitted that is
+    // going to be saved. Otherwise, retrieve the key value using the key
+    // provider, which may supply the value itself.
+    if (isset($processed_values['processed_submitted']) && ($processed_values['processed_submitted'] !== '' || $this->shouldSetKeyValue($key_value_data))) {
       $key_value = $processed_values['processed_submitted'];
     }
     else {
@@ -285,34 +287,48 @@ abstract class KeyFormBase extends EntityForm {
       }
     }
 
-    // If the key provider allows a key value to be set.
-    if ($this->entity->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
-      $set_key_value = FALSE;
-
-      // If the key provider has changed, the key value should be set.
-      if ($this->originalKey && $this->originalKey->getKeyProvider()->getPluginId() != $this->entity->getKeyProvider()->getPluginId()) {
-        $set_key_value = TRUE;
-      }
-
-      // If the submitted value is not the same as the obscured value,
-      // the key value should be set.
-      if ($key_value_data['submitted'] != $key_value_data['obscured']) {
-        $set_key_value = TRUE;
-      }
-
-      // If the processed value is not empty, but the submitted value is,
-      // the key value should be set.
-      if (!empty($key_value_data['processed_original']) && empty($key_value_data['submitted'])) {
-        $set_key_value = TRUE;
-      }
-
-      // Set the key value in the entity, if necessary.
-      if ($set_key_value) {
-        $this->entity->setKeyValue($key_value_data['processed_submitted']);
-      }
+    // Set the key value in the entity, if necessary.
+    if ($this->shouldSetKeyValue($key_value_data)) {
+      $this->entity->setKeyValue($key_value_data['processed_submitted']);
     }
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Determines whether the submitted key value should be set in the entity.
+   *
+   * @param array $key_value_data
+   *   The key value data stored in form state.
+   *
+   * @return bool
+   *   TRUE if the key provider allows a key value to be set and the submitted
+   *   key value should be set, FALSE otherwise.
+   */
+  protected function shouldSetKeyValue(array $key_value_data) {
+    // If the key provider does not allow a key value to be set.
+    if (!$this->entity->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
+      return FALSE;
+    }
+
+    // If the key provider has changed, the key value should be set.
+    if ($this->originalKey && $this->originalKey->getKeyProvider()->getPluginId() != $this->entity->getKeyProvider()->getPluginId()) {
+      return TRUE;
+    }
+
+    // If the submitted value is not the same as the obscured value,
+    // the key value should be set.
+    if ($key_value_data['submitted'] != $key_value_data['obscured']) {
+      return TRUE;
+    }
+
+    // If the processed value is not empty, but the submitted value is,
+    // the key value should be set.
+    if (!empty($key_value_data['processed_original']) && empty($key_value_data['submitted'])) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -412,9 +428,6 @@ abstract class KeyFormBase extends EntityForm {
     /** @var \Drupal\key\Entity\Key $key */
     $key = $this->entity;
 
-    /** @var \Drupal\key\Plugin\KeyPluginInterface $plugin */
-    $plugin = $key->getKeyInput();
-
     // Get the current key value data.
     $key_value_data = $form_state->get('key_value');
 
@@ -427,6 +440,9 @@ abstract class KeyFormBase extends EntityForm {
     // Set the Key Input plugin.
     $key->setPlugin('key_input', $key_input_id);
 
+    /** @var \Drupal\key\Plugin\KeyPluginInterface $plugin */
+    $plugin = $key->getKeyInput();
+
     // Set the plugin's configuration to the default. It may be
     // overridden below.
     $configuration = $plugin->defaultConfiguration();
@@ -435,6 +451,7 @@ abstract class KeyFormBase extends EntityForm {
     $key_value_data['current'] = '';
 
     $use_original_key_value = FALSE;
+    $same_type_and_provider = FALSE;
 
     // If an original key exists, one of the following conditions must
     // be met in order to use the key value from it:
@@ -451,14 +468,25 @@ abstract class KeyFormBase extends EntityForm {
         // If the original key type is the same as the current one.
         if ($this->originalKey->getKeyType()->getPluginId() == $key->getKeyType()->getPluginId()) {
           $use_original_key_value = TRUE;
+          $same_type_and_provider = TRUE;
         }
       }
     }
 
     // If the original key value can be used.
     if ($use_original_key_value) {
-      // Use the configuration from the original key's plugin.
-      $configuration = $this->originalKey->getKeyInput()->getConfiguration();
+      // Use the configuration from the original key's plugin, if the key
+      // input plugin has not changed. Configuration belonging to a different
+      // plugin does not apply to this one.
+      if ($this->originalKey->getKeyInput()->getPluginId() == $plugin->getPluginId()) {
+        $configuration = $this->originalKey->getKeyInput()->getConfiguration();
+      }
+      // If the key type now declares the Generate input, but the key type and
+      // provider are unchanged, the key already has a value. Do not replace
+      // it with a generated one.
+      elseif ($same_type_and_provider && $plugin instanceof GenerateKeyInput && (string) ($key_value_data['processed_original'] ?? '') !== '') {
+        $configuration['generated'] = TRUE;
+      }
 
       // Set the current key value.
       $key_value_data['current'] = (!empty($key_value_data['obscured'])) ? $key_value_data['obscured'] : $key_value_data['processed_original'];

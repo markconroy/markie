@@ -9,6 +9,14 @@ environment, it stores a large amount of data into the database and so is
 ## How to configure the AI Logging module
 For more information, please see the [AI Logging module documentation](https://project.pages.drupalcode.org/ai/latest/modules/ai_logging/).
 
+## Deleting logs
+Logs are pruned automatically by the maximum number and age set on the
+settings page. To delete them all at once, use "Delete all logs" on the
+AI Logs list (`/admin/config/ai/logging/collection`) or on the settings page
+(`/admin/config/ai/logging/settings`). A single conversation
+thread can be deleted with "Delete thread" on its thread page. Both need the
+"Administer AI Log bundles, fields, and delete all" permission.
+
 ## Drush commands
 E.g. `drush ai:logs`; see the Drush Commands file for full options.
 Use `drush ai:logs:thread <thread_id>` to show every call of one conversation

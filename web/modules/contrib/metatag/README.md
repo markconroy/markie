@@ -62,11 +62,8 @@ The primary features include:
 
 ## Requirements
 
-This version requires Drupal 9.4 or newer and is compatible with Drupal 10. That
-said, it is always recommended to keep Drupal core installations up to date.
-
-The module requires PHP 8.0 or newer, as of Metatag v2.0.0 it will not work with
-PHP 7.
+This version requires Drupal 10.3+, 11+ or 12+. That said, it is always
+recommended to keep Drupal core installations up to date.
 
 This module requires the following modules:
 
@@ -80,6 +77,16 @@ Some modules are available that extend Metatag with additional or complimentary
 functionality. Many related modules are available from the [Metatag ecosystem
 page](https://www.drupal.org/project/metatag/ecosystem) and that is the
 best place to find them.
+
+These modules are highly recommended for all sites to make working with
+Metatag easier:
+
+- [Token Browser](https://www.drupal.org/project/token_browser):
+  Replaces the primary token browser with a more reliable UI; requires Drupal
+  core 11.3 or above.
+- [Token OR](https://www.drupal.org/project/token_or):
+  Provides a means to output a second token if the first one is empty, which can
+  be very useful for complex content architectures.
 
 The following are a noteworthy additions to Metatag's main functionality:
 
@@ -107,9 +114,6 @@ The following are a noteworthy additions to Metatag's main functionality:
   Allows creation of custom tokens without writing code.
 - [Token Modifier](https://www.drupal.org/project/token_modifier):
   Modify or transform token output before being used in metadata.
-- [Token OR](https://www.drupal.org/project/token_or):
-  Provides a means to output a second token if the first one is empty, which can
-  be very useful for complex content architectures.
 
 The following modules make additional meta tags available:
 
@@ -371,6 +375,7 @@ In order to uninstall the module, go to the appropriate field settings pages
 and remove the Metatag field listed in the message. Once this is done it will
 be possible to uninstall the module.
 
+
 ### Meta tags are not displayed
 
 In order for the meta tags to be displayed on the page the html.html.twig file
@@ -389,7 +394,6 @@ The `composer.json` file should be kept normalized using
 
 * `composer require --dev ergebnis/composer-normalize`
 * `composer normalize modules/contrib/metatag/composer.json`
-
 
 
 ## Maintainers / credits / contact
@@ -411,8 +415,6 @@ Kandelaars](https://www.drupal.org/u/mikeyk), [Ivo Van
 Geertruyen](https://www.drupal.org/u/mr.baileys), [Nikhilesh
 Gupta](https://www.drupal.org/u/nikhilesh-gupta), [Rakesh
 James](https://www.drupal.org/u/rakeshgectcr), and many others.
-
-Ongoing development is sponsored by [Mediacurrent](https://www.mediacurrent.com/).
 
 The best way to contact the authors is to submit an issue, be it a support
 request, a feature request or a bug report, in the [project issue

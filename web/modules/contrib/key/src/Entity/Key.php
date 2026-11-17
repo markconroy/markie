@@ -2,18 +2,30 @@
 
 namespace Drupal\key\Entity;
 
+use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Controller\KeyListBuilder;
 use Drupal\key\Exception\KeyValueNotSetException;
+use Drupal\key\Form\KeyAddForm;
+use Drupal\key\Form\KeyDeleteForm;
+use Drupal\key\Form\KeyEditForm;
 use Drupal\key\KeyInterface;
 use Drupal\key\Plugin\KeyPluginCollection;
 use Drupal\key\Plugin\KeyProviderSettableValueInterface;
 
 /**
  * Defines the Key entity.
+ *
+ * The annotation is kept for Drupal 10, which has no ConfigEntityType
+ * attribute. Keep both definitions in sync.
+ *
+ * @todo Remove the annotation when the minimum supported core version is
+ *   Drupal 11.0 or later.
  *
  * @ConfigEntityType(
  *   id = "key",
@@ -52,6 +64,41 @@ use Drupal\key\Plugin\KeyProviderSettableValueInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'key',
+  label: new TranslatableMarkup('Key'),
+  config_prefix: 'key',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  handlers: [
+    'list_builder' => KeyListBuilder::class,
+    'form' => [
+      'add' => KeyAddForm::class,
+      'edit' => KeyEditForm::class,
+      'delete' => KeyDeleteForm::class,
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/config/system/keys/add',
+    'edit-form' => '/admin/config/system/keys/manage/{key}',
+    'delete-form' => '/admin/config/system/keys/manage/{key}/delete',
+    'collection' => '/admin/config/system/keys',
+  ],
+  admin_permission: 'administer keys',
+  config_export: [
+    'id',
+    'label',
+    'description',
+    'key_type',
+    'key_type_settings',
+    'key_provider',
+    'key_provider_settings',
+    'key_input',
+    'key_input_settings',
+  ],
+)]
 class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginCollectionInterface {
 
   /**
@@ -260,17 +307,19 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
    * {@inheritdoc}
    */
   public function getKeyValue($reset = FALSE) {
-    $key_id = $this->id();
-    $key_values = &drupal_static(__FUNCTION__);
+    $memory_cache = $this->getMemoryCache();
+    $cache_key = $this->getKeyCacheId();
 
-    // If the key value has not already been retrieved during this page
-    // request or if the static variable storage needs to be reset for
-    // this key, retrieve the value using the key provider.
-    if (!isset($key_values[$key_id]) || $reset) {
-      $key_values[$key_id] = $this->getKeyProvider()->getKeyValue($this);
+    // If the key value has not already been retrieved during this request or
+    // a reset was requested, retrieve the value using the key provider.
+    $cache = $reset ? FALSE : $memory_cache->get($cache_key);
+    if (!$cache) {
+      $key_value = $this->getKeyProvider()->getKeyValue($this);
+      $memory_cache->set($cache_key, $key_value);
+      return $key_value;
     }
 
-    return $key_values[$key_id];
+    return $cache->data;
   }
 
   /**
@@ -295,8 +344,11 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
    */
   #[ActionMethod(adminLabel: new TranslatableMarkup('Set key value'), pluralize: FALSE)]
   public function setKeyValue($key_value) {
-    $key_type = $this->getKeyType();
-    if ($key_type->getPluginDefinition()['multivalue']['enabled'] && is_array($key_value)) {
+    if (is_array($key_value)) {
+      $key_type = $this->getKeyType();
+      if (empty($key_type->getPluginDefinition()['multivalue']['enabled'])) {
+        throw new \InvalidArgumentException(sprintf('The key type "%s" of key "%s" does not support multiple values, so the key value must be a string.', $key_type->getPluginId(), $this->id()));
+      }
       $key_value = $key_type->serialize($key_value);
     }
     $this->keyValue = $key_value;
@@ -307,12 +359,42 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
    */
   #[ActionMethod(adminLabel: new TranslatableMarkup('Delete key value'), pluralize: FALSE)]
   public function deleteKeyValue() {
+    // Clear the cached key value.
+    $this->invalidateKeyValueCache();
+
     if ($this->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
       return $this->getKeyProvider()->deleteKeyValue($this);
     }
     else {
       return FALSE;
     }
+  }
+
+  /**
+   * Helper method to get key cache id.
+   *
+   * @return string
+   *   The cache key id.
+   */
+  protected function getKeyCacheId(): string {
+    return 'key:value:' . $this->id();
+  }
+
+  /**
+   * Gets the memory cache that holds key values for the current request.
+   *
+   * @return \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface
+   *   The memory cache service.
+   */
+  protected function getMemoryCache(): MemoryCacheInterface {
+    return \Drupal::service('key.memory_cache');
+  }
+
+  /**
+   * Removes this key's value from the memory cache.
+   */
+  protected function invalidateKeyValueCache(): void {
+    $this->getMemoryCache()->delete($this->getKeyCacheId());
   }
 
   /**
@@ -338,14 +420,20 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    // The key value or the provider configuration may have changed, so the
+    // value cached during this request is no longer reliable.
+    $this->invalidateKeyValueCache();
+
     // Allow the key provider to perform post-save actions.
     $this->getKeyProvider()->postSave($this, $storage, $update);
 
-    // If an original key exists.
-    if (isset($this->original)) {
-      /** @var \Drupal\key\Entity\Key $original */
-      $original = $this->original;
+    // @todo Remove the fallback to the original property when the minimum
+    //   supported core version is Drupal 11.2 or later.
+    /** @var \Drupal\key\Entity\Key|null $original */
+    $original = method_exists($this, 'getOriginal') ? $this->getOriginal() : ($this->original ?? NULL);
 
+    // If an original key exists.
+    if ($original) {
       // If the original key's provider allows setting a key value and
       // the plugin ID is different from the one that was just saved with
       // the entity.
@@ -366,6 +454,8 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
     foreach ($entities as $key) {
       /** @var \Drupal\key\Entity\Key $key */
+      $key->invalidateKeyValueCache();
+
       // Give the key provider plugin the opportunity to delete the key value.
       if ($key->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
         $key->deleteKeyValue();

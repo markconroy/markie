@@ -4,6 +4,7 @@ namespace Drupal\ai_logging\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Configure AI Logging settings.
@@ -122,7 +123,21 @@ class AiLogFormSettings extends ConfigFormBase {
       '#default_value' => $config->get('thread_primary_tag_pattern'),
     ];
 
-    return parent::buildForm($form, $form_state);
+    $form = parent::buildForm($form, $form_state);
+
+    $delete_url = Url::fromRoute('ai_logging.delete_all');
+    if ($delete_url->access()) {
+      $form['actions']['delete_all'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Delete all logs'),
+        '#url' => $delete_url,
+        '#attributes' => [
+          'class' => ['button', 'button--danger'],
+        ],
+      ];
+    }
+
+    return $form;
   }
 
   /**

@@ -2,7 +2,6 @@
 
 namespace Drupal\metatag_views\Form;
 
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -23,18 +22,18 @@ class MetatagViewsEditForm extends FormBase {
   use MetatagViewsValuesCleanerTrait;
 
   /**
+   * The entity type manager interface.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
    * Drupal\metatag\MetatagManagerInterface definition.
    *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
   protected MetatagManagerInterface $metatagManager;
-
-  /**
-   * The Views manager.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected EntityStorageInterface $viewsManager;
 
   /**
    * Array of display settings from ViewEntityInterface::getDisplay().
@@ -69,7 +68,7 @@ class MetatagViewsEditForm extends FormBase {
    */
   public function __construct(MetatagManagerInterface $metatag_manager, EntityTypeManagerInterface $entity_type_manager, MetatagToken $token, MetatagTagPluginManager $tagPluginManager) {
     $this->metatagManager = $metatag_manager;
-    $this->viewsManager = $entity_type_manager->getStorage('view');
+    $this->entityTypeManager = $entity_type_manager;
     $this->tokenService = $token;
     $this->tagPluginManager = $tagPluginManager;
   }
@@ -98,8 +97,8 @@ class MetatagViewsEditForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Get the parameters from request.
-    $view_id = $this->getRequest()->get('view_id');
-    $display_id = $this->getRequest()->get('display_id');
+    $view_id = $this->getRequest()->attributes->get('view_id');
+    $display_id = $this->getRequest()->attributes->get('display_id');
 
     // Get meta tags from the view entity.
     $metatags = [];
@@ -188,7 +187,7 @@ class MetatagViewsEditForm extends FormBase {
     $metatags = $this->clearMetatagViewsDisallowedValues($metatags);
 
     /** @var \Drupal\views\ViewEntityInterface $view */
-    $view = $this->viewsManager->load($view_id);
+    $view = $this->entityTypeManager->getStorage('view')->load($view_id);
 
     // Store the meta tags on the view.
     $config_name = $view->getConfigDependencyName();

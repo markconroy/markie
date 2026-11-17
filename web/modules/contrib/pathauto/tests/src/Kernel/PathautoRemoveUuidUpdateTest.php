@@ -23,17 +23,6 @@ class PathautoRemoveUuidUpdateTest extends KernelTestBase {
   use PathautoTestHelperTrait;
 
   /**
-   * Disable schema validation because we intentionally write invalid config.
-   *
-   * The test injects uuid keys into condition plugin config to simulate
-   * legacy data. In Drupal 11.4+, this key is no longer in the schema,
-   * so strict validation would reject it before the post update runs.
-   *
-   * @var bool
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -53,6 +42,12 @@ class PathautoRemoveUuidUpdateTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+
+    // The test injects uuid keys into condition plugin config to simulate
+    // legacy data. In Drupal 11.4+, this key is no longer in the schema, so
+    // strict validation would reject it before the post update runs.
+    $this->strictConfigSchema = FALSE;
+
     parent::setUp();
 
     $this->installEntitySchema('user');

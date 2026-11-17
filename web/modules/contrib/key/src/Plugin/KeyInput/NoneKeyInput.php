@@ -3,17 +3,18 @@
 namespace Drupal\key\Plugin\KeyInput;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyInput;
 use Drupal\key\Plugin\KeyInputBase;
 
 /**
  * Defines a key input for providers that don't accept a value.
- *
- * @KeyInput(
- *   id = "none",
- *   label = @Translation("None"),
- *   description = @Translation("A key input for providers that don't accept a value.")
- * )
  */
+#[KeyInput(
+  id: 'none',
+  label: new TranslatableMarkup('None'),
+  description: new TranslatableMarkup("A key input for providers that don't accept a value."),
+)]
 class NoneKeyInput extends KeyInputBase {
 
   /**

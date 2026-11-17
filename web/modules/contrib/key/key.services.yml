@@ -2,6 +2,8 @@ services:
   key.repository:
     class: Drupal\key\KeyRepository
     arguments: ['@entity_type.manager', '@plugin.manager.key.key_provider', '@plugin.manager.key.key_type', '@plugin.manager.key.key_input']
+  Drupal\key\KeyRepository: '@key.repository'
+  Drupal\key\KeyRepositoryInterface: '@key.repository'
   plugin.manager.key.key_type:
     class: Drupal\key\Plugin\KeyPluginManager
     arguments: ['key_type', '@container.namespaces', '@cache.discovery', '@module_handler']
@@ -16,3 +18,7 @@ services:
     arguments: ['@config.factory', '@cache.data']
     tags:
       - {name: config.factory.override, priority: 10}
+  Drupal\key\KeyConfigOverrides: '@key.config_override'
+  key.memory_cache:
+    class: Drupal\Core\Cache\MemoryCache\MemoryCache
+    arguments: ['@datetime.time']

@@ -62,8 +62,8 @@ class V2UpdatesTest extends UpdatePathTestBase {
    */
   protected function setDatabaseDumpFiles() {
     // Drupal 10 uses the D9 core fixture, D11 uses the D10 fixture.
-    $core9 = static::getDrupalRoot() . '/core/modules/system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz';
-    $core10 = static::getDrupalRoot() . '/core/modules/system/tests/fixtures/update/drupal-10.3.0.bare.standard.php.gz';
+    $core9 = $this->root . '/core/modules/system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz';
+    $core10 = $this->root . '/core/modules/system/tests/fixtures/update/drupal-10.3.0.bare.standard.php.gz';
     if (file_exists($core9)) {
       $this->databaseDumpFiles = [
         $core9,

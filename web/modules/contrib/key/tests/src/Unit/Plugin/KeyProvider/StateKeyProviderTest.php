@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\key\Unit\Plugin\KeyProvider;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\State\StateInterface;
@@ -14,6 +15,7 @@ use Drupal\Tests\UnitTestCase;
  * @coversDefaultClass \Drupal\key\Plugin\KeyProvider\StateKeyProvider
  * @group key
  */
+#[Group('key')]
 class StateKeyProviderTest extends UnitTestCase {
 
   /**
@@ -26,9 +28,16 @@ class StateKeyProviderTest extends UnitTestCase {
   /**
    * The state service.
    *
-   * @var \Drupal\Core\State\StateInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\State\StateInterface|\PHPUnit\Framework\MockObject\Stub
    */
   protected $state;
+
+  /**
+   * The logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface|\PHPUnit\Framework\MockObject\Stub
+   */
+  protected $logger;
 
   /**
    * The configuration object.
@@ -54,14 +63,14 @@ class StateKeyProviderTest extends UnitTestCase {
   /**
    * The key entity object.
    *
-   * @var \Drupal\key\Entity\Key|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\key\Entity\Key|\PHPUnit\Framework\MockObject\Stub
    */
   protected $key;
 
   /**
    * The string translation service.
    *
-   * @var \Drupal\Core\StringTranslation\TranslationInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\StringTranslation\TranslationInterface|\PHPUnit\Framework\MockObject\Stub
    */
   protected $stringTranslation;
 
@@ -75,7 +84,7 @@ class StateKeyProviderTest extends UnitTestCase {
     $container = new ContainerBuilder();
 
     // Mock the string translation service.
-    $this->stringTranslation = $this->createMock(TranslationInterface::class);
+    $this->stringTranslation = $this->createStub(TranslationInterface::class);
     $this->stringTranslation->method('translate')
       ->willReturnCallback(function ($string) {
         return $string;
@@ -89,8 +98,10 @@ class StateKeyProviderTest extends UnitTestCase {
     // Set the container.
     \Drupal::setContainer($container);
 
-    // Mock the state service.
-    $this->state = $this->createMock(StateInterface::class);
+    // Stub the state service. Tests that expect calls on it replace it with
+    // a mock through ::createProvider().
+    $this->state = $this->createStub(StateInterface::class);
+    $this->logger = $loggerFactory->get('key');
     $this->configuration = ['state_key' => 'test_key_state'];
     $this->pluginId = 'state';
     $this->pluginDefinition = [
@@ -98,22 +109,10 @@ class StateKeyProviderTest extends UnitTestCase {
       'label' => 'State',
     ];
 
-    $this->provider = new StateKeyProvider(
-      $this->configuration,
-      $this->pluginId,
-      $this->pluginDefinition,
-      $this->state,
-      $loggerFactory->get('key')
-    );
+    $this->provider = $this->createProvider($this->state);
 
-    // Add translation service to the provider.
-    $this->provider->setStringTranslation($this->stringTranslation);
-
-    // Create a properly configured key mock.
-    $this->key = $this->getMockBuilder(Key::class)
-      ->disableOriginalConstructor()
-      ->onlyMethods(['id'])
-      ->getMock();
+    // Create a properly configured key stub.
+    $this->key = $this->createStub(Key::class);
     $this->key->method('id')->willReturn('test_key');
   }
 
@@ -129,10 +128,12 @@ class StateKeyProviderTest extends UnitTestCase {
    * @covers ::getKeyValue
    */
   public function testGetKeyValue() {
-    $this->state->expects($this->once())
+    $state = $this->createMock(StateInterface::class);
+    $state->expects($this->once())
       ->method('get')
       ->with('test_key_state')
       ->willReturn('secret_value');
+    $this->provider = $this->createProvider($state);
 
     $result = $this->provider->getKeyValue($this->key);
     $this->assertEquals('secret_value', $result);
@@ -189,10 +190,12 @@ class StateKeyProviderTest extends UnitTestCase {
     $form_state->setValues(['state_key' => 'test_key_state']);
 
     // Set up the state mock to return a value.
-    $this->state->expects($this->once())
+    $state = $this->createMock(StateInterface::class);
+    $state->expects($this->once())
       ->method('get')
       ->with('test_key_state')
       ->willReturn('some_value');
+    $this->provider = $this->createProvider($state);
 
     // This should not cause any errors.
     $this->provider->validateConfigurationForm($form, $form_state);
@@ -200,13 +203,34 @@ class StateKeyProviderTest extends UnitTestCase {
   }
 
   /**
+   * Creates the state key provider under test.
+   *
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state service to give the provider.
+   *
+   * @return \Drupal\key\Plugin\KeyProvider\StateKeyProvider
+   *   The state key provider.
+   */
+  protected function createProvider(StateInterface $state): StateKeyProvider {
+    $provider = new StateKeyProvider(
+      $this->configuration,
+      $this->pluginId,
+      $this->pluginDefinition,
+      $state,
+      $this->logger
+    );
+    $provider->setStringTranslation($this->stringTranslation);
+    return $provider;
+  }
+
+  /**
    * Helper to mock the logger.factory service.
    */
   protected function getLoggerFactoryMock() {
-    $logger = $this->createMock('Drupal\Core\Logger\LoggerChannelInterface');
+    $logger = $this->createStub('Drupal\Core\Logger\LoggerChannelInterface');
 
     $factory = $this->createMock('Drupal\Core\Logger\LoggerChannelFactoryInterface');
-    $factory->expects($this->any())
+    $factory
       ->method('get')
       ->with('key')
       ->willReturn($logger);

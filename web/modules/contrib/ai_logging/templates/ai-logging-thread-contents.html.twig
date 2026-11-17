@@ -1,0 +1,38 @@
+{#
+/**
+ * @file
+ * Default theme implementation for a thread page's contents.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the wrapper.
+ * - items: The thread's questions, calls and answers, in order, each with:
+ *   - type: 'question', 'call' or 'answer'.
+ *   - marker: The call's number, or a letter for a question or answer.
+ *   - id: The ID of the element further down the page it links to.
+ *   - label: What it was.
+ *   - meta: When it was, and for a call its tokens.
+ * - totals: The thread's date, calls, duration and tokens.
+ *
+ * @ingroup themeable
+ */
+#}
+<nav{{ attributes.addClass('ai-logging-contents') }} aria-labelledby="ai-logging-contents-title">
+  <div class="ai-logging-contents__header">
+    <h2 id="ai-logging-contents-title" class="ai-logging-contents__title">{{ 'Contents'|t }}</h2>
+    <span class="ai-logging-contents__totals">{{ totals }}</span>
+  </div>
+  <ol class="ai-logging-contents__list">
+    {% for item in items %}
+      <li class="ai-logging-contents__item ai-logging-contents__item--{{ item.type|clean_class }}">
+        <span class="ai-logging-contents__marker">{{ item.marker }}</span>
+        <a class="ai-logging-contents__link" href="#{{ item.id }}">{{ item.label }}</a>
+        <span class="ai-logging-contents__meta">{{ item.meta }}</span>
+      </li>
+    {% endfor %}
+  </ol>
+  {# Hidden until ai_logging.threads.js makes the buttons work. #}
+  <div class="ai-logging-contents__actions" data-ai-logging-actions hidden>
+    <button type="button" class="button button--small" data-ai-logging-details="open">{{ 'Expand all'|t }}</button>
+    <button type="button" class="button button--small" data-ai-logging-details="close">{{ 'Collapse all'|t }}</button>
+  </div>
+</nav>

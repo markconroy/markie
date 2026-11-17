@@ -5,6 +5,7 @@ namespace Drupal\metatag_views;
 use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Cache\CacheFactoryInterface;
 use Drupal\Core\Plugin\PreWarmablePluginManagerTrait;
 use Drupal\Core\PreWarm\PreWarmableInterface;
 use Drupal\views\Plugin\views\cache\CachePluginBase;
@@ -25,13 +26,23 @@ class MetatagViewsCachePluginManager implements PluginManagerInterface, CachedDi
   protected ViewsPluginManager $viewsPluginManager;
 
   /**
+   * The cache factory.
+   *
+   * @var \Drupal\Core\Cache\CacheFactoryInterface
+   */
+  protected CacheFactoryInterface $cacheFactory;
+
+  /**
    * MetatagViewsCachePluginManager constructor.
    *
    * @param \Drupal\views\Plugin\ViewsPluginManager $views_plugin_manager
    *   The ViewsPluginManager as argument.
+   * @param \Drupal\Core\Cache\CacheFactoryInterface $cache_factory
+   *   The cache factory.
    */
-  public function __construct(ViewsPluginManager $views_plugin_manager) {
+  public function __construct(ViewsPluginManager $views_plugin_manager, CacheFactoryInterface $cache_factory) {
     $this->viewsPluginManager = $views_plugin_manager;
+    $this->cacheFactory = $cache_factory;
   }
 
   /**
@@ -44,7 +55,7 @@ class MetatagViewsCachePluginManager implements PluginManagerInterface, CachedDi
    *   Return new MetatagViewsCacheWrapper
    */
   protected function wrap(CachePluginBase $plugin) {
-    return new MetatagViewsCacheWrapper($plugin);
+    return new MetatagViewsCacheWrapper($plugin, $this->cacheFactory);
   }
 
   /**

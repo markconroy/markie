@@ -2,29 +2,32 @@
 
 namespace Drupal\key\Plugin\KeyProvider;
 
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyProvider;
 use Drupal\key\Exception\KeyValueNotSetException;
-use Drupal\key\Plugin\KeyProviderBase;
-use Drupal\key\Plugin\KeyPluginFormInterface;
-use Drupal\key\Plugin\KeyProviderSettableValueInterface;
 use Drupal\key\KeyInterface;
+use Drupal\key\Plugin\KeyPluginFormInterface;
+use Drupal\key\Plugin\KeyPluginInterface;
+use Drupal\key\Plugin\KeyProviderBase;
+use Drupal\key\Plugin\KeyProviderSettableValueInterface;
 
 /**
  * Adds a key provider that allows a key to be stored in configuration.
- *
- * @KeyProvider(
- *   id = "config",
- *   label = @Translation("Configuration"),
- *   description = @Translation("The Configuration key provider stores the key in Drupal's configuration system."),
- *   tags = {
- *     "config",
- *   },
- *   key_value = {
- *     "accepted" = TRUE,
- *     "required" = FALSE
- *   }
- * )
  */
+#[KeyProvider(
+  id: 'config',
+  label: new TranslatableMarkup('Configuration'),
+  description: new TranslatableMarkup("The Configuration key provider stores the key in Drupal's configuration system."),
+  tags: [
+    'config',
+  ],
+  key_value: [
+    'accepted' => TRUE,
+    'required' => FALSE,
+  ],
+)]
 class ConfigKeyProvider extends KeyProviderBase implements KeyPluginFormInterface, KeyProviderSettableValueInterface {
 
   /**
@@ -40,8 +43,15 @@ class ConfigKeyProvider extends KeyProviderBase implements KeyPluginFormInterfac
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form_object = $form_state->getFormObject();
+    assert($form_object instanceof EntityFormInterface);
+    $key = $form_object->getEntity();
+    assert($key instanceof KeyInterface);
+    $key_type = $key->getKeyType();
+    assert($key_type instanceof KeyPluginInterface);
+
     // If this key type is for an encryption key.
-    if ($form_state->getFormObject()->getEntity()->getKeyType()->getPluginDefinition()['group'] == 'encryption') {
+    if ($key_type->getPluginDefinition()['group'] == 'encryption') {
       // Add an option to indicate that the value is stored Base64-encoded.
       $form['base64_encoded'] = [
         '#type' => 'checkbox',

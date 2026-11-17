@@ -6,11 +6,13 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\pathauto\VerboseMessenger;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * @coversDefaultClass \Drupal\pathauto\VerboseMessenger
  * @group pathauto
  */
+#[Group('pathauto')]
 class VerboseMessengerTest extends UnitTestCase {
 
   /**
@@ -31,7 +33,7 @@ class VerboseMessengerTest extends UnitTestCase {
       ->method('hasPermission')
       ->withAnyParameters()
       ->willReturn(TRUE);
-    $messenger = $this->createMock(MessengerInterface::class);
+    $messenger = $this->createStub(MessengerInterface::class);
 
     $this->messenger = new VerboseMessenger($config_factory, $account, $messenger);
   }

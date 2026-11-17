@@ -3,21 +3,22 @@
 namespace Drupal\key\Plugin\KeyType;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyType;
 use Drupal\key\Plugin\KeyTypeBase;
 
 /**
  * Defines a generic key type for authentication.
- *
- * @KeyType(
- *   id = "authentication",
- *   label = @Translation("Authentication"),
- *   description = @Translation("A generic key type to use for a password or API key that does not belong to any other defined key type."),
- *   group = "authentication",
- *   key_value = {
- *     "plugin" = "text_field"
- *   }
- * )
  */
+#[KeyType(
+  id: 'authentication',
+  label: new TranslatableMarkup('Authentication'),
+  description: new TranslatableMarkup('A generic key type to use for a password or API key that does not belong to any other defined key type.'),
+  group: 'authentication',
+  key_value: [
+    'plugin' => 'text_field',
+  ],
+)]
 class AuthenticationKeyType extends KeyTypeBase {
 
   /**

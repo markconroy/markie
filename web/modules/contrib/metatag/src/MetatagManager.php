@@ -6,7 +6,6 @@ use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -45,18 +44,18 @@ class MetatagManager implements MetatagManagerInterface {
   protected MetatagTagPluginManager $tagPluginManager;
 
   /**
-   * The Metatag defaults storage system.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected EntityStorageInterface $metatagDefaults;
-
-  /**
    * The Metatag token.
    *
    * @var \Drupal\metatag\MetatagToken
    */
   protected MetatagToken $tokenService;
+
+  /**
+   * The entity type manager interface.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Config factory.
@@ -161,7 +160,7 @@ class MetatagManager implements MetatagManagerInterface {
     $this->tagPluginManager = $tagPluginManager;
     $this->tokenService = $token;
     $this->logger = $channelFactory->get('metatag');
-    $this->metatagDefaults = $entityTypeManager->getStorage('metatag_defaults');
+    $this->entityTypeManager = $entityTypeManager;
     $this->pathMatcher = $pathMatcher;
     $this->routeMatch = $routeMatch;
     $this->requestStack = $requestStack;
@@ -216,19 +215,22 @@ class MetatagManager implements MetatagManagerInterface {
    */
   public function defaultTagsFromEntity(ContentEntityInterface $entity): array {
     /** @var \Drupal\metatag\Entity\MetatagDefaults $metatags */
-    $metatags = $this->metatagDefaults->load('global');
+    $metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load('global');
     if (!$metatags || !$metatags->status()) {
       return [];
     }
     // Add/overwrite with tags set on the entity type.
     /** @var \Drupal\metatag\Entity\MetatagDefaults $entity_type_tags */
-    $entity_type_tags = $this->metatagDefaults->load($entity->getEntityTypeId());
+    $entity_type_tags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load($entity->getEntityTypeId());
     if (!is_null($entity_type_tags) && $entity_type_tags->status()) {
       $metatags->overwriteTags($entity_type_tags->get('tags'));
     }
     // Add/overwrite with tags set on the entity bundle.
     /** @var \Drupal\metatag\Entity\MetatagDefaults $bundle_metatags */
-    $bundle_metatags = $this->metatagDefaults->load($entity->getEntityTypeId() . '__' . $entity->bundle());
+    $bundle_metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load($entity->getEntityTypeId() . '__' . $entity->bundle());
     if (!is_null($bundle_metatags) && $bundle_metatags->status()) {
       $metatags->overwriteTags($bundle_metatags->get('tags'));
     }
@@ -538,9 +540,10 @@ class MetatagManager implements MetatagManagerInterface {
    *   The global meta tags or NULL.
    */
   public function getGlobalMetatags(): MetatagDefaults|NULL {
-    /** @var \Drupal\metatag\Entity\MetatagDefaults $metatags */
-    $metatags = $this->metatagDefaults->load('global');
-    return (!empty($metatags) && $metatags->status()) ? $metatags : NULL;
+    /** @var \Drupal\metatag\Entity\MetatagDefaults|null $metatags */
+    $metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load('global');
+    return ($metatags !== NULL && $metatags->status()) ? $metatags : NULL;
   }
 
   /**
@@ -553,13 +556,16 @@ class MetatagManager implements MetatagManagerInterface {
     $metatags = NULL;
 
     if ($this->pathMatcher->isFrontPage()) {
-      $metatags = $this->metatagDefaults->load('front');
+      $metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+        ->load('front');
     }
     elseif ($this->routeMatch->getRouteName() == 'system.403') {
-      $metatags = $this->metatagDefaults->load('403');
+      $metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+        ->load('403');
     }
     elseif ($this->routeMatch->getRouteName() == 'system.404') {
-      $metatags = $this->metatagDefaults->load('404');
+      $metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+        ->load('404');
     }
 
     /** @var \Drupal\metatag\Entity\MetatagDefaults $metatags */
@@ -582,7 +588,8 @@ class MetatagManager implements MetatagManagerInterface {
    */
   public function getEntityDefaultMetatags(ContentEntityInterface $entity): array {
     /** @var \Drupal\metatag\Entity\MetatagDefaults $entity_metatags */
-    $entity_metatags = $this->metatagDefaults->load($entity->getEntityTypeId());
+    $entity_metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load($entity->getEntityTypeId());
     $metatags = [];
     if ($entity_metatags != NULL && $entity_metatags->status()) {
       // Merge with global defaults.
@@ -591,7 +598,8 @@ class MetatagManager implements MetatagManagerInterface {
 
     // Finally, check if we should apply bundle overrides.
     /** @var \Drupal\metatag\Entity\MetatagDefaults $bundle_metatags */
-    $bundle_metatags = $this->metatagDefaults->load($entity->getEntityTypeId() . '__' . $entity->bundle());
+    $bundle_metatags = $this->entityTypeManager->getStorage('metatag_defaults')
+      ->load($entity->getEntityTypeId() . '__' . $entity->bundle());
     if ($bundle_metatags != NULL && $bundle_metatags->status()) {
       // Merge with existing defaults.
       $metatags = array_merge($metatags, $bundle_metatags->get('tags'));

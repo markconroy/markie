@@ -12,3 +12,10 @@ library:
     - upgrade_status_test_library/deprecated_library
     - upgrade_status_test_twig/deprecated_library
   deprecated: The "%library_id%" asset library is deprecated for testing.
+
+library_with_invalid_dependency:
+  css:
+    component:
+      assets/test3.css: {}
+  dependencies:
+    - invalid_library_without_extension

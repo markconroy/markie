@@ -2,7 +2,6 @@
 
 namespace Drupal\metatag\Hook;
 
-use Drupal\commerce_migrate_commerce\Plugin\migrate\source\commerce1\ProductDisplay;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -93,7 +92,7 @@ class MigrateHooks {
         // E.g. d7_user.
         $source_type = 'user';
       }
-      elseif ($this->moduleHandler->moduleExists('commerce_migrate_commerce') && is_a($source, ProductDisplay::class)) {
+      elseif ($this->moduleHandler->moduleExists('commerce_migrate_commerce') && is_a($source, 'Drupal\commerce_migrate_commerce\Plugin\migrate\source\commerce1\ProductDisplay')) {
         // Products were nodes in Drupal 7 so map the $source_type to node.
         $source_type = 'node';
       }

@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * Default theme implementation for a question or answer in a thread.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the wrapper.
+ * - id: The element's ID, for the thread's contents to link to.
+ * - kind: 'question' or 'answer'.
+ * - title: The title, e.g. "Question · 10:42:07".
+ * - text: The question or answer. Plain text, or rendered Markdown when
+ *   markdown is TRUE.
+ * - markdown: Whether text is rendered Markdown.
+ *
+ * @ingroup themeable
+ */
+#}
+{%
+  set classes = [
+    'ai-logging-highlight',
+    'ai-logging-highlight--' ~ kind|clean_class,
+  ]
+%}
+{%
+  set text_classes = [
+    'ai-logging-highlight__text',
+    markdown ? 'ai-logging-highlight__text--markdown',
+  ]
+%}
+<section{{ attributes.addClass(classes).setAttribute('id', id).setAttribute('aria-labelledby', id ~ '-title') }}>
+  <h3 id="{{ id }}-title" class="ai-logging-highlight__title">{{ title }}</h3>
+  <div{{ create_attribute({'class': text_classes}) }}>{{ text }}</div>
+</section>

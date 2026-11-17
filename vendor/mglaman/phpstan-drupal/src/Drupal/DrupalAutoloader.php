@@ -13,10 +13,7 @@ use ReflectionClass;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
 use Throwable;
-use function array_map;
-use function array_merge;
 use function array_walk;
 use function class_exists;
 use function dirname;
@@ -25,12 +22,10 @@ use function in_array;
 use function is_array;
 use function is_dir;
 use function is_string;
-use function str_contains;
 use function str_replace;
 use function strtr;
 use function trigger_error;
 use function ucwords;
-use function usort;
 
 /**
  * Bootstraps a Drupal site for analysis from PHPStan's bootstrap file.
@@ -66,11 +61,6 @@ class DrupalAutoloader
     /**
      * @var array<string, string>
      */
-    private array $serviceYamls = [];
-
-    /**
-     * @var array<string, string>
-     */
     private array $serviceClassProviders = [];
 
     /**
@@ -100,7 +90,6 @@ class DrupalAutoloader
 
         $this->autoloader = include $drupalVendorRoot . '/autoload.php';
 
-        $this->serviceYamls['core'] = $drupalRoot . '/core/core.services.yml';
         $this->serviceClassProviders['core'] = '\Drupal\Core\CoreServiceProvider';
         $this->serviceMap['service_provider.core.service_provider'] = ['class' => $this->serviceClassProviders['core']];
         // Attach synthetic services
@@ -111,24 +100,10 @@ class DrupalAutoloader
         $this->serviceMap['service_container'] = ['class' => DrupalContainer::class];
         $this->serviceMap[ContainerInterface::class] = ['alias' => 'service_container'];
 
-        $extensionDiscovery = new ExtensionDiscovery($this->drupalRoot);
-        $extensionDiscovery->setProfileDirectories([]);
-        $profiles = $extensionDiscovery->scan('profile');
-        $profile_directories = array_map(static function (Extension $profile) : string {
-            return $profile->getPath();
-        }, $profiles);
-        $extensionDiscovery->setProfileDirectories($profile_directories);
-
-        $this->moduleData = array_merge($extensionDiscovery->scan('module'), $profiles);
-        // Load test extensions after regular ones. Test modules stub functions
-        // from their parent module behind function_exists() guards, so if the
-        // test module's .module file loads first the parent's unconditional
-        // declaration is a compile error that loadAndCatchErrors() cannot
-        // intercept.
-        usort($this->moduleData, static function (Extension $a, Extension $b): int {
-            return str_contains($a->getName(), '_test') <=> str_contains($b->getName(), '_test');
-        });
-        $this->themeData = $extensionDiscovery->scan('theme');
+        $site = $container->getByType(DrupalSite::class);
+        $profiles = $site->getProfiles();
+        $this->moduleData = $site->getModules();
+        $this->themeData = $site->getThemes();
         $this->addCoreTestNamespaces();
         $this->addModuleNamespaces();
         $this->addThemeNamespaces();
@@ -143,11 +118,11 @@ class DrupalAutoloader
         $checkCoreDeprecatedHooksInApiFiles = $drupalParams['bleedingEdge']['checkCoreDeprecatedHooksInApiFiles'] || $checkDeprecatedHooksInApiFiles;
         $checkContribDeprecatedHooksInApiFiles = $drupalParams['bleedingEdge']['checkContribDeprecatedHooksInApiFiles'] || $checkDeprecatedHooksInApiFiles;
 
-        foreach ($this->moduleData as $extension) {
-            $this->loadExtension($extension);
+        foreach ($this->moduleData as $module) {
+            $this->loadExtension($module);
 
-            $module_name = $extension->getName();
-            $module_dir = $this->drupalRoot . '/' . $extension->getPath();
+            $module_name = $module->getName();
+            $module_dir = $this->drupalRoot . '/' . $module->getPath();
             // Add .install
             if (file_exists($module_dir . '/' . $module_name . '.install')) {
                 $ignored_install_files = ['entity_test', 'update_test_schema'];
@@ -161,11 +136,11 @@ class DrupalAutoloader
             }
 
             // Add .api.php for core modules
-            if ($checkCoreDeprecatedHooksInApiFiles && $extension->origin === 'core' && file_exists($module_dir . '/' . $module_name . '.api.php')) {
+            if ($checkCoreDeprecatedHooksInApiFiles && $module->origin === 'core' && file_exists($module_dir . '/' . $module_name . '.api.php')) {
                 $this->loadAndCatchErrors($module_dir . '/' . $module_name . '.api.php');
             }
             // Add .api.php for contrib modules
-            if ($checkContribDeprecatedHooksInApiFiles && $extension->origin !== 'core' && file_exists($module_dir . '/' . $module_name . '.api.php')) {
+            if ($checkContribDeprecatedHooksInApiFiles && $module->origin !== 'core' && file_exists($module_dir . '/' . $module_name . '.api.php')) {
                 $this->loadAndCatchErrors($module_dir . '/' . $module_name . '.api.php');
             }
             // Add misc .inc that are magically allowed via hook_hook_info.
@@ -182,9 +157,9 @@ class DrupalAutoloader
                 }
             }
         }
-        foreach ($this->themeData as $extension) {
-            $this->loadExtension($extension);
-            $theme_dir = $this->drupalRoot . '/' . $extension->getPath();
+        foreach ($this->themeData as $theme) {
+            $this->loadExtension($theme);
+            $theme_dir = $this->drupalRoot . '/' . $theme->getPath();
             $theme_settings_file = $theme_dir . '/theme-settings.php';
             if (file_exists($theme_settings_file)) {
                 $this->loadAndCatchErrors($theme_settings_file);
@@ -201,92 +176,56 @@ class DrupalAutoloader
             }
         }
 
-        foreach ($this->serviceYamls as $extension => $serviceYaml) {
-            $yaml = Yaml::parseFile($serviceYaml, Yaml::PARSE_CUSTOM_TAGS);
-            // Weed out service files which only provide parameters.
-            if (!isset($yaml['services']) || !is_array($yaml['services'])) {
-                continue;
+        foreach ($site->getServiceDefinitions() as $serviceId => $serviceDefinition) {
+            // Check if this is an alias shortcut.
+            // @link https://symfony.com/doc/4.4/service_container/alias_private.html#aliasing
+            if (is_string($serviceDefinition)) {
+                $serviceDefinition = [
+                    'alias' => str_replace('@', '', $serviceDefinition),
+                ];
             }
-            foreach ($yaml['services'] as $serviceId => $serviceDefinition) {
-                // Check if this is an alias shortcut.
-                // @link https://symfony.com/doc/4.4/service_container/alias_private.html#aliasing
-                if (is_string($serviceDefinition)) {
-                    $serviceDefinition = [
-                        'alias' => str_replace('@', '', $serviceDefinition),
-                    ];
-                }
-                // Prevent \Nette\DI\ContainerBuilder::completeStatement from array_walk_recursive into the arguments
-                // and thinking these are real services for PHPStan's container.
-                if (isset($serviceDefinition['arguments']) && is_array($serviceDefinition['arguments'])) {
-                    array_walk($serviceDefinition['arguments'], function (&$argument) : void {
-                        if (is_array($argument) || !is_string($argument)) {
-                            // @todo fix for @http_kernel.controller.argument_metadata_factory
-                            $argument = '';
-                        } else {
-                            $argument = str_replace('@', '', $argument);
-                        }
-                    });
-                }
-                // Handle shorthand syntax for service definition:
-                // @code
-                //   Drupal\foo\FooService: {}
-                //   Drupal\foo\BarService:
-                //     tags:
-                //       - { name: foo_bar }
-                // @endcode
-                if (!isset($serviceDefinition['class']) && $this->classExists($serviceId)) {
-                    $serviceDefinition['class'] = $serviceId;
-                }
-                // @todo sanitize "calls" and "configurator" and "factory"
-                /**
-                jsonapi.params.enhancer:
-                class: Drupal\jsonapi\Routing\JsonApiParamEnhancer
-                calls:
-                - [setContainer, ['@service_container']]
-                tags:
-                - { name: route_enhancer }
-                 */
-                unset($serviceDefinition['tags'], $serviceDefinition['calls'], $serviceDefinition['configurator'], $serviceDefinition['factory']);
-                $this->serviceMap[$serviceId] = $serviceDefinition;
+            // Prevent \Nette\DI\ContainerBuilder::completeStatement from array_walk_recursive into the arguments
+            // and thinking these are real services for PHPStan's container.
+            if (isset($serviceDefinition['arguments']) && is_array($serviceDefinition['arguments'])) {
+                array_walk($serviceDefinition['arguments'], function (&$argument) : void {
+                    if (is_array($argument) || !is_string($argument)) {
+                        // @todo fix for @http_kernel.controller.argument_metadata_factory
+                        $argument = '';
+                    } else {
+                        $argument = str_replace('@', '', $argument);
+                    }
+                });
             }
+            // Handle shorthand syntax for service definition:
+            // @code
+            //   Drupal\foo\FooService: {}
+            //   Drupal\foo\BarService:
+            //     tags:
+            //       - { name: foo_bar }
+            // @endcode
+            if (!isset($serviceDefinition['class']) && $this->classExists($serviceId)) {
+                $serviceDefinition['class'] = $serviceId;
+            }
+            // @todo sanitize "calls" and "configurator" and "factory"
+            /**
+            jsonapi.params.enhancer:
+            class: Drupal\jsonapi\Routing\JsonApiParamEnhancer
+            calls:
+            - [setContainer, ['@service_container']]
+            tags:
+            - { name: route_enhancer }
+             */
+            unset($serviceDefinition['tags'], $serviceDefinition['calls'], $serviceDefinition['configurator'], $serviceDefinition['factory']);
+            $this->serviceMap[$serviceId] = $serviceDefinition;
         }
 
-        $this->loadConfigSchemas($container);
+        $container->getByType(ConfigSchemaData::class)->setSchemaDirectories($site->getSchemaDirectories());
 
         $service_map = $container->getByType(ServiceMap::class);
-        $service_map->setDrupalServices($this->serviceMap, $this->serviceYamls);
+        $service_map->setDrupalServices($this->serviceMap);
 
         $extension_map = $container->getByType(ExtensionMap::class);
         $extension_map->setExtensions($this->moduleData, $this->themeData, $profiles);
-    }
-
-    protected function loadConfigSchemas(Container $container): void
-    {
-        // Only collect the schema directories here. Parsing every schema file
-        // has a real memory cost, and this bootstrap runs regardless of
-        // whether a schema-consuming feature (configGetReturnType or
-        // configGetUnknownKeyRule) is enabled, so ConfigSchemaData parses the
-        // files lazily on first query.
-        $schemaDirs = [];
-        $coreSchemaDir = $this->drupalRoot . '/core/config/schema';
-        if (is_dir($coreSchemaDir)) {
-            $schemaDirs[] = $coreSchemaDir;
-        }
-        foreach ($this->moduleData as $extension) {
-            $schemaDir = $this->drupalRoot . '/' . $extension->getPath() . '/config/schema';
-            if (is_dir($schemaDir)) {
-                $schemaDirs[] = $schemaDir;
-            }
-        }
-        foreach ($this->themeData as $extension) {
-            $schemaDir = $this->drupalRoot . '/' . $extension->getPath() . '/config/schema';
-            if (is_dir($schemaDir)) {
-                $schemaDirs[] = $schemaDir;
-            }
-        }
-
-        $configSchemaData = $container->getByType(ConfigSchemaData::class);
-        $configSchemaData->setSchemaDirectories($schemaDirs);
     }
 
     protected function loadLegacyIncludes(): void
@@ -325,10 +264,6 @@ class DrupalAutoloader
                 $this->namespaces["Drupal\\Tests\\$module_name"] = $module_test_dir;
             }
 
-            $servicesFileName = $module_dir . '/' . $module_name . '.services.yml';
-            if (file_exists($servicesFileName)) {
-                $this->serviceYamls[$module_name] = $servicesFileName;
-            }
             $camelized = $this->camelize($module_name);
             $name = "{$camelized}ServiceProvider";
             $class = "Drupal\\{$module_name}\\{$name}";

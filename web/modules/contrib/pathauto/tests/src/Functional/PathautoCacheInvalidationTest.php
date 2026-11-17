@@ -4,13 +4,16 @@ namespace Drupal\Tests\pathauto\Functional;
 
 use Drupal\pathauto\PathautoGeneratorInterface;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests cache invalidation after bulk alias operations.
  *
  * @group pathauto
  */
-#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoCacheInvalidationTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

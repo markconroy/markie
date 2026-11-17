@@ -5,12 +5,16 @@ namespace Drupal\Tests\pathauto\Functional;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\pathauto\PathautoState;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Mass delete functionality tests.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoMassDeleteTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

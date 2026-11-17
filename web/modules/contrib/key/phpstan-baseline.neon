@@ -1,0 +1,288 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Attribute class Drupal\\\\Core\\\\Entity\\\\Attribute\\\\ConfigEntityType does not exist\\.$#"
+			count: 1
+			path: src/Entity/Key.php
+
+		-
+			message: "#^Attribute class Drupal\\\\Core\\\\Entity\\\\Attribute\\\\ConfigEntityType does not exist\\.$#"
+			count: 1
+			path: src/Entity/KeyConfigOverride.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: src/Controller/KeyConfigOverrideListBuilder.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: src/Controller/KeyListBuilder.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: src/Form/KeyConfigOverrideAddForm.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: src/Form/KeyFormBase.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: src/Form/KeyFormBase.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyAdminTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyAdminTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyDrushCommandsTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyDrushCommandsTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyEditFormEmptyValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyEditFormEmptyValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyInputTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyInputTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyNonAdminAccessTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyNonAdminAccessTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyOverrideAdminTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyOverrideAdminTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyRouteEntityAccessTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyRouteEntityAccessTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyRepositoryServiceTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyRepositoryServiceTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\DataProvider does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/EncryptionKeyTypeTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/EncryptionKeyTypeTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/EncryptionKeyTypeTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/FileKeyProviderTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/FileKeyProviderTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyConfigOverridesTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyConfigOverridesTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyTypeInputChangeTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Functional/KeyTypeInputChangeTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyEnvProviderSourceTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyEnvProviderSourceTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyDeprecationTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\IgnoreDeprecations does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyDeprecationTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyDeprecationTest.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\Tests\\\\key\\\\Kernel\\\\KeyDeprecationTest\\:\\:expectUserDeprecationMessage\\(\\)\\.$#"
+			count: 4
+			path: tests/src/Kernel/KeyDeprecationTest.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Tests\\key\\Kernel\\KeyDeprecationTest\:\:expectDeprecation\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: tests/src/Kernel/KeyDeprecationTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyFormEmptyValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyFormEmptyValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyMultiValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyMultiValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyProviderMissingValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyProviderMissingValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyServiceAliasTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyServiceAliasTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyZeroValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyZeroValueTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyValueResetTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyValueResetTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyValueCacheTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+			count: 1
+			path: tests/src/Kernel/KeyValueCacheTest.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Unit/Entity/KeyEntityTest.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: tests/src/Unit/KeyTestBase.php
+
+		-
+			message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\Group does not exist\\.$#"
+			count: 1
+			path: tests/src/Unit/Plugin/KeyProvider/StateKeyProviderTest.php

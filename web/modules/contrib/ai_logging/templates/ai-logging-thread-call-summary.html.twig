@@ -1,0 +1,32 @@
+{#
+/**
+ * @file
+ * Default theme implementation for the summary of a collapsed thread call.
+ *
+ * Available variables:
+ * - title: The call's number and what it got back, e.g. "3 · Tool calls".
+ * - purpose_tags: The request tags that say what the call was for.
+ * - meta: When the call was made in the thread, its tokens and model.
+ * - tool_calls: The tools called, if the model only called tools, each with:
+ *   - name: The tool's name.
+ *   - arguments: Its arguments, summarized on one line.
+ * - preview: The start of the call's reply, if it replied.
+ *
+ * @ingroup themeable
+ */
+#}
+<span class="ai-logging-call__summary">
+  <span class="ai-logging-call__line">
+    <span class="ai-logging-call__title">{{ title }}</span>
+    {% for tag in purpose_tags %}
+      <span class="ai-logging-badge">{{ tag }}</span>
+    {% endfor %}
+    <span class="ai-logging-call__meta">{{ meta }}</span>
+  </span>
+  {% for tool_call in tool_calls %}
+    <span class="ai-logging-call__tool"><span class="ai-logging-call__tool-name">{{ tool_call.name }}</span>{% if tool_call.arguments %} <span class="ai-logging-call__tool-arguments">{{ tool_call.arguments }}</span>{% endif %}</span>
+  {% endfor %}
+  {% if preview %}
+    <span class="ai-logging-call__preview">{{ preview }}</span>
+  {% endif %}
+</span>

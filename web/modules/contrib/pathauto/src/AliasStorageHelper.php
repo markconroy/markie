@@ -123,14 +123,14 @@ class AliasStorageHelper implements AliasStorageHelperInterface {
       return NULL;
     }
 
-    // Generate a link to the alias.
-    $alias_link = Link::fromTextAndUrl($alias, Url::fromUri('internal:' . $alias))->toString();
-
     // Update the existing alias if there is one and the configuration is set to
     // replace it.
     if ($existing_alias && $config->get('update_action') == PathautoGeneratorInterface::UPDATE_ACTION_DELETE) {
       $old_alias = $existing_alias->getAlias();
       $existing_alias->setAlias($alias)->save();
+
+      // Generate a link to the alias.
+      $alias_link = Link::fromTextAndUrl($alias, Url::fromUri('internal:' . $alias))->toString();
 
       $this->messenger->addMessage($this->t('Created new URL alias %alias for %source, replacing %old_alias.', [
         '%alias' => $alias_link,
@@ -148,6 +148,9 @@ class AliasStorageHelper implements AliasStorageHelperInterface {
         'langcode' => $langcode,
       ]);
       $path_alias->save();
+
+      // Generate a link to the alias.
+      $alias_link = Link::fromTextAndUrl($alias, Url::fromUri('internal:' . $alias))->toString();
 
       $this->messenger->addMessage($this->t('Created new URL alias %alias for %source.', [
         '%alias' => $alias_link,

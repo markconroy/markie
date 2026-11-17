@@ -9,3 +9,8 @@ threads:
   css:
     theme:
       css/ai_logging.threads.css: {}
+  js:
+    js/ai_logging.threads.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

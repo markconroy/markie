@@ -3,16 +3,17 @@
 namespace Drupal\key_test\Plugin\KeyInput;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyInput;
 use Drupal\key\Plugin\KeyInputBase;
 
 /**
  * Defines a multi-value key input class.
- *
- * @KeyInput(
- *   id = "key_test_multi",
- *   label = @Translation("Test multivalue")
- * )
  */
+#[KeyInput(
+  id: 'key_test_multi',
+  label: new TranslatableMarkup('Test multivalue'),
+)]
 class MutliValueKeyInput extends KeyInputBase {
 
   /**

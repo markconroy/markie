@@ -3,12 +3,16 @@
 namespace Drupal\Tests\pathauto\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pathauto taxonomy UI integration.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoTaxonomyWebTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

@@ -6,6 +6,14 @@ ai_logging.settings_form:
   requirements:
     _permission: 'administer ai log'
 
+ai_logging.delete_all:
+  path: '/admin/config/ai/logging/settings/delete'
+  defaults:
+    _form: '\Drupal\ai_logging\Form\AiLogDeleteAllForm'
+    _title: 'Delete all AI logs'
+  requirements:
+    _permission: 'administer ai log'
+
 ai_logging.list_page:
   path: '/admin/config/ai/logging'
   defaults:
@@ -65,4 +73,13 @@ entity.ai_log.thread:
     _title_callback: '\Drupal\ai_logging\Controller\AiLogThreadController::threadTitle'
   requirements:
     _permission: 'view ai log'
+    _custom_access: '\Drupal\ai_logging\Controller\AiLogThreadController::access'
+
+entity.ai_log.thread_delete_form:
+  path: '/admin/config/ai/logging/threads/{thread_id}/delete'
+  defaults:
+    _form: '\Drupal\ai_logging\Form\AiLogThreadDeleteForm'
+    _title: 'Delete thread'
+  requirements:
+    _permission: 'administer ai log'
     _custom_access: '\Drupal\ai_logging\Controller\AiLogThreadController::access'

@@ -2,6 +2,7 @@
 
 namespace Drupal\pathauto;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -51,9 +52,9 @@ class PathautoPatternListBuilder extends DraggableListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOperations(EntityInterface $entity) {
+  public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
     /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
-    $operations = parent::getDefaultOperations($entity);
+    $operations = parent::getDefaultOperations($entity, $cacheability);
 
     if (!$entity->hasLinkTemplate('duplicate-form')) {
       return $operations;

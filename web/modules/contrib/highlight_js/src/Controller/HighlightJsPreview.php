@@ -71,8 +71,12 @@ class HighlightJsPreview extends ControllerBase {
         throw new \Exception();
       }
 
-      $plugin_config = Xss::filter($plugin_config);
+      // Decode the configuration and reject anything that is not an array;
+      // filtering the raw JSON is ineffective and lets escaped markup through.
       $plugin_config = Json::decode($plugin_config);
+      if (!is_array($plugin_config)) {
+        throw new \Exception();
+      }
       $plugin_id = Xss::filter($plugin_id);
 
       /** @var \Drupal\highlight_js\HighlightJsInterface $instance */

@@ -1,0 +1,12 @@
+name: Key access test
+type: module
+description: 'Restricts access to key entities via entity access hooks.'
+package: Testing
+hidden: true
+dependencies:
+  - key:key
+
+# Information added by Drupal.org packaging script on 2026-11-03
+version: '8.x-1.23'
+project: 'key'
+datestamp: 1793686866

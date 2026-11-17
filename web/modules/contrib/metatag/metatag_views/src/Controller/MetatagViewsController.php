@@ -3,7 +3,6 @@
 namespace Drupal\metatag_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Url;
 use Drupal\metatag\MetatagManagerInterface;
 use Drupal\views\Views;
@@ -15,13 +14,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @package Drupal\metatag_views\Controller
  */
 class MetatagViewsController extends ControllerBase {
-
-  /**
-   * The Views storage interface.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected EntityStorageInterface $viewStorage;
 
   /**
    * The Metatag manager interface.
@@ -40,8 +32,7 @@ class MetatagViewsController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityStorageInterface $viewStorage, MetatagManagerInterface $metatagManager) {
-    $this->viewStorage = $viewStorage;
+  public function __construct(MetatagManagerInterface $metatagManager) {
     $this->metatagManager = $metatagManager;
 
     // Generate the labels for views and displays.
@@ -53,7 +44,6 @@ class MetatagViewsController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')->getStorage('view'),
       $container->get('metatag.manager')
     );
   }
@@ -228,7 +218,7 @@ class MetatagViewsController extends ControllerBase {
    */
   protected function getViewsAndDisplaysLabels() {
     /** @var \Drupal\views\ViewEntityInterface[] $views */
-    $views = $this->viewStorage->loadByProperties(['status' => 1]);
+    $views = $this->entityTypeManager()->getStorage('view')->loadByProperties(['status' => 1]);
 
     $labels = [];
 

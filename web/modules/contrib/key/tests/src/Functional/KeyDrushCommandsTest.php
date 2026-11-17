@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\key\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 use Drush\TestTraits\DrushTestTrait;
 
@@ -9,6 +11,8 @@ use Drush\TestTraits\DrushTestTrait;
  * @coversDefaultClass \Drupal\key\Commands\KeyCommands
  * @group key
  */
+#[Group('key')]
+#[RunTestsInSeparateProcesses]
 class KeyDrushCommandsTest extends BrowserTestBase {
 
   use DrushTestTrait;

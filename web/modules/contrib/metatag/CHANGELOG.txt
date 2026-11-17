@@ -1,3 +1,23 @@
+Metatag 2.2.7, 2026-11-11
+-------------------------
+#3636528 by DamienMcKenna: Recommend the Token Browser module.
+#3636795 by DamienMcKenna: PermissionsTest automatically determines tags.
+#3633586 by joshuaramaekers, d.steindl, DamienMcKenna: Fixed unwanted
+  translation of '<none>' in URL meta tags.
+#3635626 by DamienMcKenna: Updated README.md about supported Drupal releases.
+#3636782 by ishfaqafridi85, csakiistvan, DamienMcKenna: Resolved phpstan issues.
+
+
+Metatag 2.2.6, 2026-11-05
+-------------------------
+#3633574 by lorseau, DamienMcKenna: Indicate incompatibility with Schema Metatag
+  v3.0.x.
+#3349990 by glynster, DamienMcKenna, kruser, junkuncz, fago, taran2l: image_src
+  now outputs an absolute URL for consistency with other image meta tags.
+#3633336 by shubhamgoel, Liam Morland, DamienMcKenna: Don't DI entity storage
+  classes.
+
+
 Metatag 2.2.5, 2026-10-31
 -------------------------
 #3633665 by hcksharp, wkr1shna, camhoward, DamienMcKenna: addMessage() fails

@@ -40,3 +40,13 @@ variables:
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
   OPT_IN_TEST_MAX_PHP: 1
+  # From core 11.5, use the project's deprecation ignore file; CI appends
+  # core's .deprecation-ignore.txt to it.
+  DRUPAL_DEPRECATION_FILTER_CONFIG: '{"projectIgnoreFile":"$CI_PROJECT_DIR/.deprecation-ignore.txt"}'
+
+# The templates run the previous major on its minimum PHP (8.1), whose Debian
+# bullseye images can no longer install packages. Run it on PHP 8.3 instead;
+# the phpstan and phpunit previous-major jobs inherit this.
+composer (previous major):
+  variables:
+    PHP_VERSION: '8.3'

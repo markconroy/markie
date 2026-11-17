@@ -7,7 +7,7 @@ configure: highlight_js.settings
 dependencies:
   - drupal:ckeditor5
 
-# Information added by Drupal.org packaging script on 2026-06-13
-version: '1.3.0'
+# Information added by Drupal.org packaging script on 2026-11-04
+version: '1.3.1'
 project: 'highlight_js'
-datestamp: 1781383492
+datestamp: 1793783340

@@ -34,9 +34,12 @@ class LanguageSelect extends HighlightJsPluginBase implements HighlightJsInterfa
    */
   public function build(): array {
 
+    $text = $this->configuration['text'];
     return [
       '#theme' => 'highlight_js_language_select',
-      '#text' => $this->configuration['text'],
+      // Force the source to a string so a render array cannot be injected
+      // through the configuration and the output is escaped by Twig.
+      '#text' => is_string($text) ? $text : '',
       '#attached' => [
         'library' => [
           'highlight_js/highlight_js.tomorrow-night',

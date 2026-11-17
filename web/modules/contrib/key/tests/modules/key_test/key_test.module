@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the Key test module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_key_type_info_alter().
+ */
+function key_test_key_type_info_alter(array &$definitions): void {
+  // Let tests change the key input plugin a key type declares, as a module
+  // would by changing the key_value.plugin entry in its plugin definition.
+  $overrides = \Drupal::state()->get('key_test.key_type_input', []);
+  foreach ($overrides as $key_type_id => $key_input_id) {
+    if (isset($definitions[$key_type_id])) {
+      $definitions[$key_type_id]['key_value']['plugin'] = $key_input_id;
+    }
+  }
+}

@@ -2,8 +2,10 @@
 
 namespace mglaman\PHPStanDrupal\Rules\Drupal;
 
+use Drupal\Core\DependencyInjection\ContainerNotInitializedException;
 use PhpParser\Node;
 use PhpParser\Node\Name;
+use PHPStan\Analyser\DependencyTracker;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\RuleErrorBuilder;
 use Throwable;
@@ -27,6 +29,9 @@ final class ModuleLoadInclude extends LoadIncludeBase
         return Node\Expr\FuncCall::class;
     }
 
+    /**
+     * @param Scope&DependencyTracker $scope
+     */
     public function processNode(Node $node, Scope $scope): array
     {
         if (!$node->name instanceof Name) {
@@ -61,6 +66,7 @@ final class ModuleLoadInclude extends LoadIncludeBase
             ];
         }
         $file = $module->getAbsolutePath() . DIRECTORY_SEPARATOR . $filename;
+        $scope->trackFileDependency($file);
         if (is_file($file)) {
             try {
                 // Load the include so its symbols are available for the rest
@@ -69,6 +75,12 @@ final class ModuleLoadInclude extends LoadIncludeBase
                 // include must not crash the analysis, but PHPStan's own
                 // exceptions elsewhere must propagate.
                 require_once $file;
+            } catch (ContainerNotInitializedException $e) {
+                // Top-level code in the include needs a container, which does
+                // not exist during analysis. Its top-level functions are still
+                // declared. Reporting this would also be unreliable: PHP won't
+                // re-run the file, so only the first call in a process throws.
+                return [];
             } catch (Throwable $e) {
                 return [
                     RuleErrorBuilder::message('A file could not be loaded from module_load_include')

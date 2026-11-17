@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the Key module.
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
+
 /**
  * Set default value for stripping trailing line breaks.
  */
@@ -26,7 +28,7 @@ function key_update_8001() {
         // Set Strip Line Breaks to FALSE and save the configuration.
         $settings['strip_line_breaks'] = FALSE;
         $key->set('key_provider_settings', $settings);
-        $key->save(TRUE);
+        DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => $key->save(), fn() => $key->save(TRUE));
 
         $updated = TRUE;
       }
@@ -72,7 +74,7 @@ function key_update_8002() {
     }
 
     $override->set('config_prefix', $config_prefix);
-    $override->save(TRUE);
+    DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => $override->save(), fn() => $override->save(TRUE));
   }
 
   if ($updated) {

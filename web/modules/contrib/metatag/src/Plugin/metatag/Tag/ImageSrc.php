@@ -17,6 +17,7 @@ use Drupal\metatag\MetatagType;
   type: MetatagType::Image,
   description: new TranslatableMarkup('An image associated with this page, for use as a thumbnail in social networks and other services.'),
   weight: 4,
+  absolute_url: TRUE,
 )]
 class ImageSrc extends LinkRelBase {
   // Nothing here yet. Just a placeholder class for a plugin.

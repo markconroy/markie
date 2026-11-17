@@ -72,7 +72,7 @@ abstract class GroupBase extends PluginBase {
   /**
    * Get this group's human-friendly name.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   * @return string
    *   This group's human-friendly name.
    */
   public function label(): string {
@@ -82,7 +82,7 @@ abstract class GroupBase extends PluginBase {
   /**
    * This group object's description.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   * @return string
    *   This group's description.
    */
   public function description(): string {

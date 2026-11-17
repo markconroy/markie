@@ -10,6 +10,11 @@ parameters:
     # new static() is a best practice in Drupal, so we cannot fix that.
     - "#^Unsafe usage of new static#"
     - "#^Missing cache backend declaration for performance.#"
+    # Migrate source plugins must keep extending and calling DrupalSqlBase,
+    # which core deprecated in 11.3 without providing a replacement.
     -
       identifiers:
         - class.extendsDeprecatedClass
+        - instanceof.deprecatedClass
+        - method.deprecatedClass
+        - staticMethod.deprecatedClass

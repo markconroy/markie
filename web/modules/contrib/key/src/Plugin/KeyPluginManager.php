@@ -32,6 +32,11 @@ class KeyPluginManager extends DefaultPluginManager {
    *   The module handler.
    */
   public function __construct($type, \Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
+    $type_attributes = [
+      'key_type' => 'Drupal\key\Attribute\KeyType',
+      'key_provider' => 'Drupal\key\Attribute\KeyProvider',
+      'key_input' => 'Drupal\key\Attribute\KeyInput',
+    ];
     $type_annotations = [
       'key_type' => 'Drupal\key\Annotation\KeyType',
       'key_provider' => 'Drupal\key\Annotation\KeyProvider',
@@ -46,7 +51,7 @@ class KeyPluginManager extends DefaultPluginManager {
     $this->pluginType = $type;
     $this->subdir = 'Plugin/' . str_replace(' ', '', ucwords(str_replace('_', ' ', $type)));
 
-    parent::__construct($this->subdir, $namespaces, $module_handler, $plugin_interfaces[$type], $type_annotations[$type]);
+    parent::__construct($this->subdir, $namespaces, $module_handler, $plugin_interfaces[$type], $type_attributes[$type], $type_annotations[$type]);
     $this->alterInfo($type . '_info');
     $this->setCacheBackend($cache_backend, $type, ['key_plugins']);
   }

@@ -33,6 +33,7 @@ Submit bug reports and feature suggestions, or track changes in the
     - [Get a single key entity](#get-a-single-key-entity)
     - [Get a key value](#get-a-key-value)
     - [Get multiple values from a key](#get-multiple-values-from-a-key)
+- [Overriding configuration](#overriding-configuration)
 - [Maintainers](#maintainers)
 
 
@@ -89,7 +90,22 @@ Key:
   secure than storing it in the database.
 
 - **Environment:** Allows the key to be stored in an environmental
-  variable.
+  variable. Enter only the variable's name in the key form; the value
+  is read from the environment of the PHP process when the key is
+  used. The variable must be visible to the PHP process that runs
+  Drupal, so it is normally set outside of the codebase, for example:
+  - Apache: `SetEnv MY_API_KEY "value"` in the virtual host
+    configuration.
+  - PHP-FPM: `env[MY_API_KEY] = "value"` in the pool configuration.
+  - Hosting platforms and containers: the platform's environment
+    variable or secrets settings, or the container's environment
+    (for example `web_environment` in a DDEV project's
+    `.ddev/config.yaml` for local development).
+
+  If the key is also used from the command line (Drush, cron), the
+  variable must be set in that environment as well. Avoid hard-coding
+  the value with `putenv()` in a settings file that is committed to
+  version control, since that stores the key alongside the code.
 
 All three provider plugins support storing encryption keys with Base64
 encoding.
@@ -193,6 +209,54 @@ but the examples can be extrapolated to fit the use case of your module.
 
 This will return an array of values. If the key does not support multiple
 values, the array will contain only one element.
+
+
+## Overriding configuration
+
+Key can supply the value of any configuration item from a key, so that a
+secret used by another module (an API key in that module's settings, for
+example) does not have to be stored in configuration. This works with any
+module, without changes to its code.
+
+Overrides are managed on the "Key Overrides" tab of the Configuration
+synchronization page (`/admin/config/development/configuration/key-overrides`),
+by users with the "administer key configuration overrides" permission. Each
+override names a configuration object, an item within it, and the key that
+provides the value.
+
+Overrides use Drupal's
+[configuration override system](https://www.drupal.org/docs/drupal-apis/configuration-api/configuration-override-system),
+the same mechanism as `$config` overrides in `settings.php`. With an
+override in place:
+
+- Code that reads configuration the normal way receives the key's value.
+  The module that owns the setting does not need to know about Key:
+
+  ```php
+  // Returns the value of the key, not the stored value.
+  \Drupal::config('my_module.settings')->get('api_key');
+  ```
+
+- The value stored in configuration is unchanged by the override. It is
+  what configuration export, command-line tools such as `config:get`, and
+  editable configuration (`\Drupal::configFactory()->getEditable()`) see.
+
+When an override is created, "Clear the stored configuration value" is
+checked by default. It sets the stored value of the configuration item to
+NULL, so the secret is removed from the database and from configuration
+exports. The override continues to provide the key's value at runtime.
+
+Things to be aware of:
+
+- Settings forms that extend `ConfigFormBase` load editable configuration,
+  so an overridden field shows the stored value (empty, if it was cleared)
+  rather than the key's value. Saving the form writes whatever is in the
+  field back to configuration, but the override still takes precedence at
+  runtime. Leave such fields empty, so the secret is not stored again.
+- If a key has no value (its provider returns NULL, for example because
+  its file is missing or not readable by the web server), the override is
+  skipped, and the stored configuration value is used. An empty string is
+  a value, and does override the stored value.
 
 
 ## Maintainers

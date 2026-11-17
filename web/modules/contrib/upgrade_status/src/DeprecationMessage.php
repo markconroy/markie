@@ -88,6 +88,26 @@ class DeprecationMessage {
   }
 
   /**
+   * Sets the line value.
+   *
+   * @param int $line
+   *   The line associated to the deprecation message.
+   */
+  public function setLine(int $line) {
+    $this->line = $line;
+  }
+
+  /**
+   * Sets the file value.
+   *
+   * @param string $file
+   *   The file related to the deprecation message.
+   */
+  public function setFile(string $file) {
+    $this->file = $file;
+  }
+
+  /**
    * Get analyzer providing the message.
    *
    * @return string

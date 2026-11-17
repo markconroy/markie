@@ -3,6 +3,8 @@
 namespace Drupal\key_test\Plugin\KeyProvider;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyProvider;
 use Drupal\key\KeyInterface;
 use Drupal\key\Plugin\KeyProviderBase;
 use Drupal\key\Plugin\KeyProviderSettableValueInterface;
@@ -10,20 +12,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a key provider that stores in memory.
- *
- * @KeyProvider(
- *   id = "key_test_state",
- *   label = @Translation("State ☠️"),
- *   description = @Translation("Stores keys in state."),
- *   tags = {
- *     "state",
- *   },
- *   key_value = {
- *     "accepted" = TRUE,
- *     "required" = FALSE
- *   }
- * )
  */
+#[KeyProvider(
+  id: 'key_test_state',
+  label: new TranslatableMarkup('State ☠️'),
+  description: new TranslatableMarkup('Stores keys in state.'),
+  tags: [
+    'state',
+  ],
+  key_value: [
+    'accepted' => TRUE,
+    'required' => FALSE,
+  ],
+)]
 class State extends KeyProviderBase implements KeyProviderSettableValueInterface, ContainerFactoryPluginInterface {
 
   /**
@@ -59,21 +60,21 @@ class State extends KeyProviderBase implements KeyProviderSettableValueInterface
    * {@inheritdoc}
    */
   public function getKeyValue(KeyInterface $key) {
-    return $this->state->get('key_test:' . $this->configuration['state_key']);
+    return $this->state->get('key_test:' . ($this->configuration['state_key'] ?? ''));
   }
 
   /**
    * {@inheritdoc}
    */
   public function setKeyValue(KeyInterface $key, $key_value) {
-    return $this->state->set('key_test:' . $this->configuration['state_key'], $key_value);
+    return $this->state->set('key_test:' . ($this->configuration['state_key'] ?? ''), $key_value);
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteKeyValue(KeyInterface $key) {
-    return $this->state->delete('key_test:' . $this->configuration['state_key']);
+    return $this->state->delete('key_test:' . ($this->configuration['state_key'] ?? ''));
   }
 
 }

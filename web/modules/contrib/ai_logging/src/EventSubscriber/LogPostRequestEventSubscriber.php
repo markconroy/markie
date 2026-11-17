@@ -2,6 +2,8 @@
 
 namespace Drupal\ai_logging\EventSubscriber;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -12,6 +14,7 @@ use Drupal\ai\Event\PostStreamingResponseEvent;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
+use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutputInterface;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
 use Drupal\ai_logging\AiLogInterface;
@@ -21,6 +24,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * The event that is triggered after a response is generated.
  *
  * @package Drupal\ai_logging\EventSubscriber
+ *
+ * @internal
  */
 class LogPostRequestEventSubscriber implements EventSubscriberInterface {
 
@@ -46,6 +51,13 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
   protected $moduleHandler;
 
   /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected TimeInterface $time;
+
+  /**
    * UUID to log for streaming.
    *
    * @var array
@@ -55,10 +67,11 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
   /**
    * Constructor.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, ModuleHandlerInterface $moduleHandler, TimeInterface $time) {
     $this->entityTypeManager = $entityTypeManager;
     $this->aiSettings = $configFactory->get('ai_logging.settings');
     $this->moduleHandler = $moduleHandler;
+    $this->time = $time;
   }
 
   /**
@@ -91,6 +104,10 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
         'operation_type' => $event->getOperationType(),
         'configuration' => json_encode($event->getConfiguration()),
         'bundle' => 'generic',
+        // The time of this call, not of the request: an agent makes all of
+        // a turn's calls within one request, and the request time would
+        // give them all the same timestamp.
+        'created' => $this->time->getCurrentTime(),
         'tags' => $event->getTags(),
         'prompt' => $this->getPromptText($event->getInput()),
         'extra_data' => json_encode($event->getDebugData()),
@@ -158,12 +175,20 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
    * reply to a call that nothing continues (a structured JSON schema call, or
    * the final turn of an agent) is not visible anywhere.
    *
+   * A turn that only calls tools has no text at all. Left at NULL those
+   * turns log nothing, and since getRawOutput() is '{}' for several
+   * providers, every step of an agent loop that picks a tool then shows up
+   * blank - the most interesting part of the run, invisible. So the calls
+   * themselves are recorded instead, as the tool names and the arguments
+   * the model chose.
+   *
    * @param \Drupal\ai\OperationType\OutputInterface $output
    *   The output to read the reply from.
    *
    * @return string|null
-   *   The reply text, or NULL for a call that is not chat, a streamed reply
-   *   that is not assembled yet, or a turn that only calls tools.
+   *   The reply text, a JSON object of the tool calls for a turn that only
+   *   calls tools, or NULL for a call that is not chat, a streamed reply
+   *   that is not assembled yet, or a turn with neither text nor tools.
    */
   protected function getResponseText(OutputInterface $output): ?string {
     if (!$output instanceof ChatOutput) {
@@ -174,7 +199,38 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
       return NULL;
     }
     $text = $message->getText();
-    return $text === '' ? NULL : $text;
+    if ($text !== '') {
+      return $text;
+    }
+    return $this->getToolCallsText($message);
+  }
+
+  /**
+   * Describes the tool calls a text-less turn made.
+   *
+   * @param \Drupal\ai\OperationType\Chat\ChatMessage $message
+   *   The normalized reply.
+   *
+   * @return string|null
+   *   A JSON object under a 'tool_calls' key, or NULL if no tool was called.
+   */
+  protected function getToolCallsText(ChatMessage $message): ?string {
+    $calls = [];
+    foreach ($message->getTools() ?? [] as $tool) {
+      if (!$tool instanceof ToolsFunctionOutputInterface) {
+        continue;
+      }
+      $arguments = [];
+      foreach ($tool->getArguments() as $argument) {
+        $arguments[$argument->getName()] = $argument->getValue();
+      }
+      $calls[] = [
+        'name' => $tool->getName(),
+        'arguments' => $arguments,
+      ];
+    }
+
+    return $calls === [] ? NULL : Json::encode(['tool_calls' => $calls]);
   }
 
   /**

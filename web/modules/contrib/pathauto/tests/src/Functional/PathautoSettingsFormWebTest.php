@@ -4,12 +4,16 @@ namespace Drupal\Tests\pathauto\Functional;
 
 use Drupal\pathauto\PathautoGeneratorInterface;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pathauto settings form.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoSettingsFormWebTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

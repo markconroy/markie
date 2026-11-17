@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Restricts access to key entities for testing route access checks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Forbids every operation on entities whose ID is listed in the
+ * 'key_access_test.forbidden' state value.
+ */
+function key_access_test_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  if (!in_array($entity->getEntityTypeId(), ['key', 'key_config_override'], TRUE)) {
+    return AccessResult::neutral();
+  }
+  $forbidden = \Drupal::state()->get('key_access_test.forbidden', []);
+  return AccessResult::forbiddenIf(in_array($entity->id(), $forbidden, TRUE))
+    ->setCacheMaxAge(0);
+}
+
+/**
+ * Implements hook_entity_create_access().
+ *
+ * Forbids creating entities of the types listed in the
+ * 'key_access_test.forbidden_create' state value.
+ */
+function key_access_test_entity_create_access(AccountInterface $account, array $context, $entity_bundle) {
+  $forbidden = \Drupal::state()->get('key_access_test.forbidden_create', []);
+  return AccessResult::forbiddenIf(in_array($context['entity_type_id'], $forbidden, TRUE))
+    ->setCacheMaxAge(0);
+}

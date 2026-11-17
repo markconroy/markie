@@ -132,6 +132,30 @@ class ThreadRepositoryTest extends KernelTestBase {
   }
 
   /**
+   * Tests which tags are kept as a call's purpose.
+   */
+  public function testPurposeTags(): void {
+    $tags = [
+      'chat',
+      'ai_agents',
+      'ai_agents_thread_abc123',
+      'ai_agents_runner_abc123',
+      'ai_agents_caller_runner_0f8fad5b-d9cb-469f-a165-70867728950e',
+      'ai_agents_prompt_agent',
+      'ai_agents',
+    ];
+    $this->assertSame(
+      ['ai_agents', 'ai_agents_prompt_agent'],
+      $this->repository->getPurposeTags($tags, 'chat', 'abc123'),
+    );
+    // Without a thread ID, only thread tags and UUIDs are left out.
+    $this->assertSame(
+      ['ai_agents', 'ai_agents_runner_abc123', 'ai_agents_prompt_agent'],
+      $this->repository->getPurposeTags($tags, 'chat'),
+    );
+  }
+
+  /**
    * Tests the thread label taken from the first primary chat call.
    *
    * @covers ::loadFirstChatPrompt

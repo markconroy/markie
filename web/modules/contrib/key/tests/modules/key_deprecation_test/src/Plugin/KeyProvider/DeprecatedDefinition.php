@@ -1,12 +1,17 @@
 <?php
 
-namespace Drupal\key_test\Plugin\KeyProvider;
+declare(strict_types=1);
 
-use Drupal\key\Plugin\KeyProviderBase;
+namespace Drupal\key_deprecation_test\Plugin\KeyProvider;
+
 use Drupal\key\KeyInterface;
+use Drupal\key\Plugin\KeyProviderBase;
 
 /**
  * Plugin with deprecated definition entries.
+ *
+ * It is defined with an annotation on purpose: attributes have no
+ * 'storage_method' entry.
  *
  * @KeyProvider(
  *   id = "deprecated_defintion_entries",
@@ -18,7 +23,7 @@ use Drupal\key\KeyInterface;
  *   }
  * )
  */
-class DeprecatedDefinition extends KeyProviderBase {
+final class DeprecatedDefinition extends KeyProviderBase {
 
   /**
    * {@inheritdoc}

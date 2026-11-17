@@ -4,12 +4,16 @@ namespace Drupal\Tests\pathauto\Functional;
 
 use Drupal\Tests\BrowserTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pathauto user UI integration.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoUserWebTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

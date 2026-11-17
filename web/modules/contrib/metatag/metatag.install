@@ -51,6 +51,28 @@ function metatag_requirements($phase) {
       ];
     }
 
+    // Suggest the Token Browser module.
+    if (!\Drupal::moduleHandler()->moduleExists('token_browser')) {
+      $requirements['metatag_token_browser'] = [
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Info, fn() => REQUIREMENT_INFO),
+        'title' => 'Metatag',
+        'value' => new TranslatableMarkup('Token Browser'),
+        'description' => new TranslatableMarkup('The <a href="@module">Token Browser module</a> is recommended for all Drupal 11.3+ sites to make the token interface usable.', [
+          '@module' => 'https://www.drupal.org/project/token_browser',
+        ]),
+      ];
+    }
+    else {
+      $requirements['metatag_token_browser'] = [
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::OK, fn() => REQUIREMENT_OK),
+        'title' => 'Metatag',
+        'value' => new TranslatableMarkup('Token Browser is installed'),
+        'description' => new TranslatableMarkup('The <a href="@module">Token Browser module</a> is installed.', [
+          '@module' => 'https://www.drupal.org/project/token_browser',
+        ]),
+      ];
+    }
+
     // Suggest the Token OR module.
     if (!\Drupal::moduleHandler()->moduleExists('token_or')) {
       $requirements['metatag_token_or'] = [
@@ -58,6 +80,16 @@ function metatag_requirements($phase) {
         'title' => 'Metatag',
         'value' => new TranslatableMarkup('Token Or'),
         'description' => new TranslatableMarkup('The <a href="@module">Token OR module</a> is suggested for when the basic content tokens are not flexible enough, e.g. to make a meta tag show the contents of one field if it is filled in or another if the first one is empty.', [
+          '@module' => 'https://www.drupal.org/project/token_or',
+        ]),
+      ];
+    }
+    else {
+      $requirements['metatag_token_or'] = [
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::OK, fn() => REQUIREMENT_OK),
+        'title' => 'Metatag',
+        'value' => new TranslatableMarkup('Token Or is installed'),
+        'description' => new TranslatableMarkup('The <a href="@module">Token Or module</a> is installed.', [
           '@module' => 'https://www.drupal.org/project/token_or',
         ]),
       ];

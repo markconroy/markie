@@ -12,7 +12,7 @@ entity.key.add_form:
     _entity_form: 'key.add'
     _title: 'Add key'
   requirements:
-    _permission: 'administer keys'
+    _entity_create_access: 'key'
 
 entity.key.edit_form:
   path: '/admin/config/system/keys/manage/{key}'
@@ -20,7 +20,7 @@ entity.key.edit_form:
     _entity_form: 'key.edit'
     _title: 'Edit key'
   requirements:
-    _permission: 'administer keys'
+    _entity_access: 'key.update'
 
 entity.key.delete_form:
   path: '/admin/config/system/keys/manage/{key}/delete'
@@ -28,7 +28,7 @@ entity.key.delete_form:
     _entity_form: 'key.delete'
     _title: 'Delete Key'
   requirements:
-    _permission: 'administer keys'
+    _entity_access: 'key.delete'
 
 entity.key_config_override.collection:
   path: '/admin/config/development/configuration/key-overrides'
@@ -44,7 +44,7 @@ entity.key_config_override.add_form:
     _entity_form: 'key_config_override.add'
     _title: 'Add a key configuration override'
   requirements:
-    _permission: 'administer key configuration overrides'
+    _entity_create_access: 'key_config_override'
 
 entity.key_config_override.delete_form:
   path: '/admin/config/development/configuration/key-overrides/manage/{key_config_override}/delete'
@@ -52,4 +52,4 @@ entity.key_config_override.delete_form:
     _entity_form: 'key_config_override.delete'
     _title: 'Delete Key Configuration Override'
   requirements:
-    _permission: 'administer key configuration overrides'
+    _entity_access: 'key_config_override.delete'

@@ -4,12 +4,16 @@ namespace Drupal\Tests\pathauto\Functional;
 
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pathauto settings form.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoEnablingEntityTypesTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

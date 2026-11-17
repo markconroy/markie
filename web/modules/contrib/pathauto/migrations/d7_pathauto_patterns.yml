@@ -5,6 +5,7 @@ migration_tags:
   - Configuration
 source:
   plugin: pathauto_pattern
+  source_module: pathauto
   constants:
     status: true
     selection_logic: 'and'

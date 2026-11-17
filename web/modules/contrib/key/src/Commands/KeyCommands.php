@@ -375,7 +375,7 @@ class KeyCommands extends DrushCommands {
     // If the Base64 option was specified, encode the key value.
     $base64 = $options['base64'];
     if ($base64) {
-      $key_value = base64_encode($key_value);
+      $key_value = base64_encode($key_value ?? '');
     }
 
     $row = [];

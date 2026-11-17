@@ -4,26 +4,27 @@ namespace Drupal\key\Plugin\KeyType;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Attribute\KeyType;
 use Drupal\key\Plugin\KeyTypeBase;
 use Drupal\key\Plugin\KeyTypeMultivalueInterface;
 
 /**
  * Defines a generic key type for authentication with multiple values.
- *
- * @KeyType(
- *   id = "authentication_multivalue",
- *   label = @Translation("Authentication (Multivalue)"),
- *   description = @Translation("A generic key type to use for an authentication key that contains multiple values."),
- *   group = "authentication",
- *   key_value = {
- *     "plugin" = "textarea_field"
- *   },
- *   multivalue = {
- *     "enabled" = true,
- *     "fields" = {}
- *   }
- * )
  */
+#[KeyType(
+  id: 'authentication_multivalue',
+  label: new TranslatableMarkup('Authentication (Multivalue)'),
+  description: new TranslatableMarkup('A generic key type to use for an authentication key that contains multiple values.'),
+  group: 'authentication',
+  key_value: [
+    'plugin' => 'textarea_field',
+  ],
+  multivalue: [
+    'enabled' => TRUE,
+    'fields' => [],
+  ],
+)]
 class AuthenticationMultivalueKeyType extends KeyTypeBase implements KeyTypeMultivalueInterface {
 
   /**
@@ -89,7 +90,9 @@ class AuthenticationMultivalueKeyType extends KeyTypeBase implements KeyTypeMult
    * {@inheritdoc}
    */
   public function unserialize($value) {
-    return Json::decode($value);
+    // A provider with no stored value returns NULL, which json_decode() no
+    // longer accepts. Decoding an empty string gives the same NULL result.
+    return Json::decode($value ?? '');
   }
 
 }

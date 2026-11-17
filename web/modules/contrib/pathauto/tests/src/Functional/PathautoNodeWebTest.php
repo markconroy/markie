@@ -7,12 +7,16 @@ use Drupal\node\Entity\Node;
 use Drupal\pathauto\Entity\PathautoPattern;
 use Drupal\pathauto\PathautoState;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pathauto node UI integration.
  *
  * @group pathauto
  */
+#[Group('pathauto')]
+#[RunTestsInSeparateProcesses]
 class PathautoNodeWebTest extends BrowserTestBase {
 
   use PathautoTestHelperTrait;

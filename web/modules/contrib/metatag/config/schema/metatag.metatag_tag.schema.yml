@@ -11,6 +11,7 @@ metatag.metatag_tag.cache_control:
 metatag.metatag_tag.canonical_url:
   type: text
   label: 'Canonical URL'
+  translation context: 'Metatag URL'
 metatag.metatag_tag.description:
   type: text
   label: 'Description'
@@ -59,6 +60,7 @@ metatag.metatag_tag.robots:
 metatag.metatag_tag.shortlink:
   type: text
   label: 'Shortlink'
+  translation context: 'Metatag URL'
 metatag.metatag_tag.title:
   type: text
   label: 'Page title'

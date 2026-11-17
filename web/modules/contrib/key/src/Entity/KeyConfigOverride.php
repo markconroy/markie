@@ -3,10 +3,22 @@
 namespace Drupal\key\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\key\Controller\KeyConfigOverrideListBuilder;
+use Drupal\key\Form\KeyConfigOverrideAddForm;
+use Drupal\key\Form\KeyConfigOverrideDeleteForm;
 use Drupal\key\KeyConfigOverrideInterface;
 
 /**
  * Defines the KeyConfigOverride entity.
+ *
+ * The annotation is kept for Drupal 10, which has no ConfigEntityType
+ * attribute. Keep both definitions in sync.
+ *
+ * @todo Remove the annotation when the minimum supported core version is
+ *   Drupal 11.0 or later.
  *
  * @ConfigEntityType(
  *   id = "key_config_override",
@@ -41,6 +53,37 @@ use Drupal\key\KeyConfigOverrideInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'key_config_override',
+  label: new TranslatableMarkup('Key Configuration Override'),
+  config_prefix: 'config_override',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  handlers: [
+    'list_builder' => KeyConfigOverrideListBuilder::class,
+    'form' => [
+      'add' => KeyConfigOverrideAddForm::class,
+      'delete' => KeyConfigOverrideDeleteForm::class,
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/config/development/configuration/key-overrides/add',
+    'delete-form' => '/admin/config/development/configuration/key-overrides/manage/{key_config_override}/delete',
+    'collection' => '/admin/config/development/configuration/key-overrides',
+  ],
+  admin_permission: 'administer key configuration overrides',
+  config_export: [
+    'id',
+    'label',
+    'config_type',
+    'config_prefix',
+    'config_name',
+    'config_item',
+    'key_id',
+  ],
+)]
 class KeyConfigOverride extends ConfigEntityBase implements KeyConfigOverrideInterface {
 
   /**
@@ -173,6 +216,33 @@ class KeyConfigOverride extends ConfigEntityBase implements KeyConfigOverrideInt
     }
 
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    static::resetOverrides();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
+    static::resetOverrides();
+  }
+
+  /**
+   * Resets overrides already applied in the current request.
+   *
+   * The persistent mapping cache is invalidated through the list cache tag,
+   * but the override service and the config factory also hold static copies.
+   */
+  protected static function resetOverrides() {
+    \Drupal::service('key.config_override')->resetMapping();
+    \Drupal::configFactory()->reset();
   }
 
 }
