@@ -6,11 +6,14 @@ namespace Drupal\Tests\ai_translate\Kernel;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ai_translate\Controller\AiTranslateController;
 use Drupal\ai_translate\TextTranslator;
 use Drupal\ai_translate_test\Plugin\AiProvider\CountingTranslateProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests translation caching against a real provider plugin.
@@ -22,6 +25,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group ai_translate
  */
 #[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class TranslationCacheTest extends KernelTestBase {
 
   /**
@@ -118,6 +122,43 @@ class TranslationCacheTest extends KernelTestBase {
       'The provider was called once, not twice.');
     $this->assertNotFalse($this->bin->get($this->cacheId('Our services')),
       'The entry was written to the dedicated bin under the expected ID.');
+  }
+
+  /**
+   * Cache writes work when AI Context has no consumer plugin API.
+   */
+  #[RunInSeparateProcess]
+  public function testCachingDoesNotLoadTheOptionalConsumerPlugin(): void {
+    $pluginClass = 'Drupal\\ai_translate\\Plugin\\AiContextConsumerType\\AiContextConsumerTypeTranslate';
+    $this->assertFalse(class_exists($pluginClass, FALSE));
+    // Model an older AI Context release: the module exists, the optional
+    // selection factory is absent, and loading the consumer plugin fails.
+    $guard = static function (string $class) use ($pluginClass): void {
+      if ($class === $pluginClass) {
+        throw new \LogicException('The optional consumer API is unavailable.');
+      }
+    };
+    spl_autoload_register($guard, TRUE, TRUE);
+    try {
+      $moduleHandler = $this->createMock(ModuleHandlerInterface::class);
+      $moduleHandler->method('moduleExists')->with('ai_context')->willReturn(TRUE);
+      $translator = new TextTranslator(
+        $this->container->get('entity_type.manager'),
+        $this->container->get('language_manager'),
+        $this->container->get('config.factory'),
+        $this->container->get('ai.provider'),
+        $this->container->get('twig'),
+        $moduleHandler,
+        $this->bin,
+      );
+      $translator->translateContent('Our services', $this->german);
+      $translator->translateContent('Our services', $this->german);
+      $this->assertCount(1, CountingTranslateProvider::$calls);
+      $this->assertNotFalse($this->bin->get($this->cacheId('Our services')));
+    }
+    finally {
+      spl_autoload_unregister($guard);
+    }
   }
 
   /**

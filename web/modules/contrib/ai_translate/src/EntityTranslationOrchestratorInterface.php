@@ -74,12 +74,24 @@ interface EntityTranslationOrchestratorInterface {
    *   The source language.
    * @param \Drupal\Core\Language\LanguageInterface $langTo
    *   The target language.
+   * @param array $entityContext
+   *   Optional entity context: an array holding entity_context from
+   *   AiTranslateEntityContext::toContext(), passed on as the
+   *   translateContent() $context argument, so chat-proxy calls
+   *   can match Entity Types / Taxonomy / Specific Entities. Direct
+   *   string translation may omit this. Source and target langcodes are
+   *   taken from $langFrom / $langTo, never from this array.
    *
    * @return array|null
    *   The metadata item with a 'translated' key added, keyed by column, or
    *   NULL if the item could not be translated.
    */
-  public function translateTextMetadataItem(array $singleField, LanguageInterface $langFrom, LanguageInterface $langTo): ?array;
+  public function translateTextMetadataItem(
+    array $singleField,
+    LanguageInterface $langFrom,
+    LanguageInterface $langTo,
+    array $entityContext = [],
+  ): ?array;
 
   /**
    * Creates and saves a translated entity from translated metadata.

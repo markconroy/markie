@@ -3,6 +3,7 @@
 namespace Drupal\Tests\ai_translate\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @group ai_translate
  */
 #[RunTestsInSeparateProcesses]
+#[Group('ai_translate')]
 class InstallAiTranslateTest extends KernelTestBase {
 
   /**

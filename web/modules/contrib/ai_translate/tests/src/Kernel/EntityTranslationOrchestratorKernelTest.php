@@ -12,6 +12,7 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate\TranslationException;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @group ai_translate
  */
 #[RunTestsInSeparateProcesses]
+#[Group('ai_translate')]
 class EntityTranslationOrchestratorKernelTest extends EntityKernelTestBase {
 
   use NodeCreationTrait;

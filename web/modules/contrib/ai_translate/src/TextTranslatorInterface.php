@@ -19,10 +19,12 @@ interface TextTranslatorInterface {
    * @param \Drupal\Core\Language\LanguageInterface|null $langFrom
    *   Optional source language.
    * @param array $context
-   *   Translation context. Possible keys include, but not limited to:
-   *   - preferred_model
-   *   - preferred_version
-   *   - preferred_provider.
+   *   Optional context, passed through to the provider. This module reads
+   *   the entity_context key (entity_type, bundle, id), built by
+   *   AiTranslateEntityContext::toContext(), so Context Control Center
+   *   entity scopes can match; callers with no entity omit it. Other
+   *   modules may add their own keys for their own providers, as
+   *   ai_translate_plus does.
    *
    * @return string
    *   Translated content.

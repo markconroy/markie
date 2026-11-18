@@ -12,6 +12,7 @@ use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\ai_translate\AiTranslateEntityContext;
 use Drupal\ai_translate\EntityTranslationOrchestratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -29,6 +30,19 @@ class AiTranslateController extends ControllerBase {
    * @var \Drupal\ai_translate\EntityTranslationOrchestratorInterface
    */
   protected EntityTranslationOrchestratorInterface $translationOrchestrator;
+
+  /**
+   * Entity context for the current entity translation batch.
+   *
+   * An array holding entity_context, passed on as translateContent()
+   * $context.
+   * Stored on the controller so batch operations keep it after the
+   * object is serialized, without changing the historical
+   * translateSingleField() signature.
+   *
+   * @var array<string, mixed>
+   */
+  protected array $entityContext = [];
 
   /**
    * {@inheritdoc}
@@ -87,6 +101,7 @@ class AiTranslateController extends ControllerBase {
       ->setInitMessage($this->t('Batch is starting'))
       ->setErrorMessage($this->t('Batch has encountered an error'));
 
+    $this->entityContext = AiTranslateEntityContext::toContext($entity);
     foreach ($textMetadata as $singleMeta) {
       $batchBuilder->addOperation([$this, 'translateSingleField'], [
         $singleMeta,
@@ -127,7 +142,12 @@ class AiTranslateController extends ControllerBase {
     LanguageInterface $langTo,
     array &$context,
   ) {
-    $translatedField = $this->translationOrchestrator->translateTextMetadataItem($singleField, $langFrom, $langTo);
+    $translatedField = $this->translationOrchestrator->translateTextMetadataItem(
+      $singleField,
+      $langFrom,
+      $langTo,
+      $this->entityContext,
+    );
     if ($translatedField === NULL) {
       $context['results']['failures'][] = $singleField['field_name'] ?? (string) reset($singleField['parents']);
       return;

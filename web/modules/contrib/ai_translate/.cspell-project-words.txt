@@ -1,6 +1,9 @@
 agentic
+automator
 caractères
+ccc
 ceci
+ckeditor
 contravariance
 endverbatim
 echoai
@@ -12,5 +15,7 @@ unflatten
 updatedb
 pymdownx
 superfences
+zorble
 nbsp
 unparseable
+hitl

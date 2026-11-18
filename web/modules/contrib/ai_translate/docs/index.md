@@ -29,6 +29,8 @@ translation in the target language.
 - **Drush support.** Trigger translations from the command line.
 - **Agent-ready.** Translation is exposed as an AI function call and, optionally,
   as a Tool API plugin, so AI agents can translate content directly.
+- **Context Control Center.** Optional pushed site context on chat-proxy
+  translations when AI Context is enabled.
 - **Framework mode.** Hand the Translate tab back to Drupal and use AI Translate
   as the translation engine behind other tools, such as AI TMGMT.
 

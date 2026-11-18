@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -16,6 +17,7 @@ use Drupal\Core\Url;
 use Drupal\ai_translate\Attribute\FieldTextExtractor;
 use Drupal\ai_translate\ConfigurableFieldTextExtractorInterface;
 use Drupal\ai_translate\TextExtractorInterface;
+use Drupal\ai_translate\TranslationDisclosureInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -78,6 +80,13 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
   protected FieldTextExtractorPluginManagerInterface $extractorManager;
 
   /**
+   * Records the AI disclosure on translations.
+   *
+   * @var \Drupal\ai_translate\TranslationDisclosureInterface|null
+   */
+  protected ?TranslationDisclosureInterface $disclosure = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -88,6 +97,7 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
     $instance->textExtractor = $container->get('ai_translate.text_extractor');
     $instance->logger = $container->get('logger.factory')->get('ai_translate');
     $instance->extractorManager = $container->get('plugin.manager.text_extractor');
+    $instance->disclosure = $container->get('ai_translate.translation_disclosure');
 
     return $instance;
   }
@@ -131,6 +141,7 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
   public function setValue(ContentEntityInterface $entity, string $fieldName, array $textMeta): void {
     // Get the entity in the source language.
     $entity_in_source_language = $entity->getUntranslated();
+    $langFrom = $entity_in_source_language->language();
 
     // Check if the field exists and has values before proceeding.
     if ($entity_in_source_language->get($fieldName)->isEmpty()) {
@@ -158,7 +169,7 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
       if ($referencedEntity->isTranslatable() && $referencedEntity->access('update')) {
         try {
           // Save the updated referenced entity.
-          $this->translateReferencedEntity($referencedEntity, $singleValue, $translationLanguage);
+          $this->translateReferencedEntity($referencedEntity, $singleValue, $translationLanguage, $langFrom);
           $referencedEntity->save();
 
           $newValue[$delta] = ['entity' => $referencedEntity];
@@ -182,10 +193,11 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
   /**
    * Translate the referenced entity.
    */
-  protected function translateReferencedEntity(ContentEntityInterface $entity, array $fieldsMeta, string $language): void {
+  protected function translateReferencedEntity(ContentEntityInterface $entity, array $fieldsMeta, string $language, ?LanguageInterface $langFrom = NULL): void {
 
     // Check if the entity has the translation, create it if not.
-    if (!$entity->hasTranslation($language)) {
+    $isNew = !$entity->hasTranslation($language);
+    if ($isNew) {
       $translatedEntity = $entity->addTranslation($language, $entity->toArray());
     }
     else {
@@ -216,6 +228,9 @@ class ReferenceFieldExtractor extends FieldExtractorBase implements Configurable
       // entity.
       $extractor->setValue($translatedEntity, $subFieldName, $subFieldValue);
     }
+
+    // The caller saves the referenced entity, which persists the disclosure.
+    $this->disclosure?->apply($translatedEntity, $langFrom, $isNew ? $entity : NULL);
   }
 
   /**

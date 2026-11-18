@@ -14,7 +14,7 @@ variables:
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
-  OPT_IN_TEST_NEXT_MAJOR: 0
+  OPT_IN_TEST_NEXT_MAJOR: 1
   OPT_IN_TEST_MAX_PHP: 1
   # Run the previous major variant automatically instead of as a manual job,
   # so code that only works on recent core versions gets caught.
@@ -26,6 +26,12 @@ variables:
   SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
   _CSPELL_IGNORE_PATHS: "'.cspell-project-words.txt'"
   COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
+
+# PHPStan and kernel tests need the real CCC consumer type API. This
+# is not a runtime dependency of ai_translate.
+.composer-base:
+  before_script:
+    - composer require --dev drupal/ai_context:1.0.x-dev --no-update
 
 phpunit (previous major):
   allow_failure: true
@@ -43,6 +49,7 @@ composer (previous major):
   before_script:
     # We need doctrine/instantiator to still be on 2.0 for previous major.
     - composer require doctrine/instantiator:"2.0.0" --no-update
+    - composer require --dev drupal/ai_context:1.0.x-dev --no-update
 
 cspell:
   allow_failure: false
@@ -55,6 +62,21 @@ phpstan (previous major):
   allow_failure: true
   variables:
     _PHPSTAN_EXTRA: '--configuration=phpstan-previous-major.neon'
+
+# The next major (Drupal 12) jobs are manual: start them from the pipeline
+# page. Several dependencies have no Drupal 12 release yet, so these jobs report
+# but do not block. phpunit (next major) is allowed to fail by the template
+# already. Make them run automatically with _AUTORUN_NEXT_MAJOR once they pass.
+composer (next major):
+  allow_failure: true
+  variables:
+    # Dependencies that do not declare Drupal 12 support in a release yet,
+    # installed through the lenient endpoint. Only set here: in the other
+    # composer jobs it lets Composer pick releases that do not support that
+    # core version. Remove a project once it has a release with ^12.
+    _LENIENT_ALLOW_LIST: 'ai,ai_agents,ai_ckeditor,ai_content_suggestions,ai_context,ai_disclosure,ai_logging,field_validation,layout_builder_at,modeler_api,tool'
+phpstan (next major):
+  allow_failure: true
 
 .phpunit-base:
   before_script:

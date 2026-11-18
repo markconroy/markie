@@ -10,11 +10,13 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldConfigInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_translate\Attribute\FieldTextExtractor;
 use Drupal\ai_translate\TextExtractorInterface;
+use Drupal\ai_translate\TranslationDisclosureInterface;
 use Drupal\Core\Entity\RevisionableStorageInterface;
 use Drupal\layout_builder\InlineBlockUsageInterface;
 use Drupal\layout_builder\Plugin\Block\InlineBlock;
@@ -128,6 +130,13 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
   protected InlineBlockUsageInterface $inlineBlockUsage;
 
   /**
+   * Records the AI disclosure on translations.
+   *
+   * @var \Drupal\ai_translate\TranslationDisclosureInterface|null
+   */
+  protected ?TranslationDisclosureInterface $disclosure = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -141,6 +150,7 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
     $instance->logger = $container->get('logger.factory')?->get('ai_translate');
     $instance->uuid = $container->get('uuid');
     $instance->inlineBlockUsage = $container->get('inline_block.usage');
+    $instance->disclosure = $container->get('ai_translate.translation_disclosure');
     try {
       $instance->blockStorage = $instance->entityTypeManager
         ->getStorage('block_content');
@@ -215,15 +225,16 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
    */
   public function setValue(ContentEntityInterface $entity, string $fieldName, array $textMeta) : void {
     $translationLanguage = $entity->language()->getId();
+    $langFrom = $entity->getUntranslated()->language();
     if ($this->moduleHandler->moduleExists('layout_builder_at')) {
       // Layout Builder has been set up for asymmetric block translation.
       // Use this approach as well for AI translations.
-      $this->asymmetricLayoutBuilderBlockTranslation($entity, $fieldName, $translationLanguage, $textMeta);
+      $this->asymmetricLayoutBuilderBlockTranslation($entity, $fieldName, $translationLanguage, $textMeta, $langFrom);
     }
     else {
       // Layout Builder has been set up for symmetric block translation.
       // Use this approach as well for AI translations.
-      $this->symmetricLayoutBuilderBlockTranslation($translationLanguage, $textMeta);
+      $this->symmetricLayoutBuilderBlockTranslation($translationLanguage, $textMeta, $langFrom);
     }
   }
 
@@ -255,15 +266,23 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
    *   The translation language to translate into.
    * @param array $textMeta
    *   The translated data.
+   * @param \Drupal\Core\Language\LanguageInterface|null $langFrom
+   *   The language the run translates from, if known.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function symmetricLayoutBuilderBlockTranslation(string $translationLanguage, array $textMeta): void {
+  protected function symmetricLayoutBuilderBlockTranslation(string $translationLanguage, array $textMeta, ?LanguageInterface $langFrom = NULL): void {
     foreach ($this->blockStorage->loadByProperties(['uuid' => array_keys($textMeta)]) as $blockEntity) {
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $blockEntity */
       // @todo Decide if/when we should update existing translation.
-      $blockEntity = $blockEntity->hasTranslation($translationLanguage)
-        ? $blockEntity->getTranslation($translationLanguage)
-        : $blockEntity->addTranslation($translationLanguage, $blockEntity->toArray());
+      $sourceBlock = NULL;
+      if ($blockEntity->hasTranslation($translationLanguage)) {
+        $blockEntity = $blockEntity->getTranslation($translationLanguage);
+      }
+      else {
+        $sourceBlock = $blockEntity;
+        $blockEntity = $blockEntity->addTranslation($translationLanguage, $blockEntity->toArray());
+      }
 
       foreach ($textMeta[$blockEntity->uuid()] as $subFieldName => $subValue) {
         $field = $blockEntity->get($subFieldName);
@@ -276,6 +295,7 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
         }
         $extractor->setValue($blockEntity, $subFieldName, $subValue);
       }
+      $this->disclosure?->apply($blockEntity, $langFrom, $sourceBlock);
       $this->blockStorage->save($blockEntity);
     }
   }
@@ -291,10 +311,12 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
    *   The translation language to translate into.
    * @param array $textMeta
    *   The translated data.
+   * @param \Drupal\Core\Language\LanguageInterface|null $langFrom
+   *   The language the run translates from, if known.
    *
    * @throws \Drupal\Core\TypedData\Exception\ReadOnlyException
    */
-  protected function asymmetricLayoutBuilderBlockTranslation(ContentEntityInterface $entity, string $fieldName, string $translationLanguage, array $textMeta): void {
+  protected function asymmetricLayoutBuilderBlockTranslation(ContentEntityInterface $entity, string $fieldName, string $translationLanguage, array $textMeta, ?LanguageInterface $langFrom = NULL): void {
     $sourceEntity = $entity->getUntranslated();
     $originalSections = $sourceEntity->get($fieldName)->getValue();
     $duplicatedSections = [];
@@ -319,6 +341,8 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
         }
 
         if ($blockEntity) {
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $blockEntity */
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $clonedBlock */
           $clonedBlock = $blockEntity->createDuplicate();
           $clonedBlock->set('uuid', $this->uuid->generate());
           $clonedBlock->set('langcode', $translationLanguage);
@@ -337,6 +361,9 @@ class LbFieldExtractor extends FieldExtractorBase implements ContainerFactoryPlu
                 }
                 $extractor->setValue($clonedBlock, $translationFieldName, $translationFieldValue);
               }
+              // Only a block that got translated text is disclosed, not one
+              // that was merely cloned.
+              $this->disclosure?->apply($clonedBlock, $langFrom, $blockEntity);
             }
           }
 

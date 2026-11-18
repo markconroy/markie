@@ -35,3 +35,4 @@ nav:
       - Field text extractors: developers/field-text-extractors.md
       - Entity translation orchestrator: developers/entity-translation-orchestrator.md
       - Agentic integrations: developers/agentic-integrations.md
+      - Context Control Center: developers/context-consumers.md

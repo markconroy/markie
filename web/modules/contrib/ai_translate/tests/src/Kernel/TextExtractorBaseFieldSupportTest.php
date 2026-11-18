@@ -16,12 +16,16 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests text extraction support for configurable and base fields.
  *
  * @group ai_translate
  */
+#[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class TextExtractorBaseFieldSupportTest extends KernelTestBase {
 
   use CommentTestTrait;

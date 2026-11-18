@@ -8,12 +8,16 @@ use Drupal\ai_translate\Plugin\AiFunctionCall\TranslateEntity;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel tests for the entity translation function call plugin.
  *
  * @group ai_translate
  */
+#[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class TranslateEntityFunctionCallKernelTest extends EntityTranslationOrchestratorKernelTest {
 
   use NodeCreationTrait;

@@ -39,13 +39,22 @@ function ai_translate_help($route_name, RouteMatchInterface $route_match) {
 /**
  * Check if default provider is chosen and model is selected.
  *
+ * When none is set, users who can open the AI settings form get a message
+ * asking them to set one.
+ *
+ * @param bool $message_for_all
+ *   Whether to show the message regardless of access to the AI settings form.
+ *
  * @return bool
  *   True if a default provider has been set.
  */
-function _ai_translate_check_default_provider_and_model(): bool {
+function _ai_translate_check_default_provider_and_model(bool $message_for_all = FALSE): bool {
   $sets = \Drupal::service('ai.provider')->getDefaultProviderForOperationType('translate_text');
   if (empty($sets['provider_id'])) {
-    \Drupal::messenger()->addMessage(t('Please set a default provider & model for text translation in the <a href=":url">AI module settings</a>.', [':url' => Url::fromRoute('ai.settings_form')->toString()]), 'error', FALSE);
+    $settings_url = Url::fromRoute('ai.settings_form');
+    if ($message_for_all || $settings_url->access()) {
+      \Drupal::messenger()->addMessage(t('Please set a default provider & model for text translation in the <a href=":url">AI module settings</a>.', [':url' => $settings_url->toString()]), 'error', FALSE);
+    }
     return FALSE;
   }
   return TRUE;

@@ -8,6 +8,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ai_translate_test\Plugin\AiProvider\CountingChatProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests caching when translate_text is handled by the chat proxy.
@@ -22,6 +23,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group ai_translate
  */
 #[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class ChatProxyTranslationCacheTest extends KernelTestBase {
 
   /**
@@ -59,6 +61,8 @@ class ChatProxyTranslationCacheTest extends KernelTestBase {
 
     $this->setProviders('chat-1');
     CountingChatProvider::$calls = [];
+    CountingChatProvider::$lastInput = NULL;
+    CountingChatProvider::$lastTags = [];
     $this->german = \Drupal::languageManager()->getLanguage('de');
   }
 

@@ -13,6 +13,7 @@ use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate_test\Plugin\AiProvider\CountingChatProvider;
 use Drupal\ai_translate_test\Plugin\AiProvider\SecondChatProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests which provider and model the chat proxy delegates to.
@@ -25,6 +26,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group ai_translate
  */
 #[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class ChatProxyModelSelectionTest extends KernelTestBase {
 
   /**

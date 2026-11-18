@@ -5,10 +5,17 @@ ai_translate.settings:
     use_ai_translate:
       type: boolean
       label: 'Use AI Translate as the default to translate content'
+    show_model_name:
+      type: boolean
+      label: 'Show the translation model name'
     cache_translations:
       type: boolean
       label: 'Cache translation results'
       description: 'Reuse a previously generated translation when the same text is translated between the same two languages again.'
+    ai_disclosure_apply:
+      type: boolean
+      label: 'Record AI translations in AI Disclosure'
+      description: 'Mark each translation created by AI with the AI translated disclosure grade. Used only when AI Disclosure is installed.'
     reference_defaults:
       type: sequence
       label: 'Referenced entity types that will be translated by default'
@@ -87,3 +94,17 @@ ai_translate.third_party.translate_references:
   label: 'Translate referenced entities'
   constraints:
     NotBlank: [ ]
+
+# Translate consumer type settings in the Context Control Center. The
+# type ships no install config; keys exist only once an admin saves.
+ai_context.consumer_type_settings.translate:
+  type: config_object
+  label: 'AI Translate consumer type settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    share_entity_cache:
+      type: boolean
+      label: 'Share cached translations across content while context is pushed'
+      description: 'Keep one stored translation per string for the whole site even while the Context Control Center pushes content-specific context.'

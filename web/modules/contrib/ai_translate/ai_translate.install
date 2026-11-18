@@ -21,7 +21,9 @@ function ai_translate_install($is_syncing) {
   if (!empty(\Drupal::configFactory()->getEditable('ai.settings')->get('default_providers.chat.provider_id'))) {
     _ai_translate_set_default_translate_provider();
   }
-  _ai_translate_check_default_provider_and_model();
+  // Whoever installs the module sets it up, also when installing through Drush
+  // as an anonymous user.
+  _ai_translate_check_default_provider_and_model(TRUE);
 }
 
 /**
@@ -137,4 +139,26 @@ function ai_translate_update_10004(&$sandbox) {
   $config->setData($installed_config);
   $config->set('language_settings', $language_settings);
   $config->save();
+}
+
+/**
+ * Add the AI Disclosure setting, switched off so updated sites opt in.
+ */
+function ai_translate_update_10005(&$sandbox) {
+  $config = \Drupal::configFactory()->getEditable('ai_translate.settings');
+  if ($config->get('ai_disclosure_apply') !== NULL) {
+    return;
+  }
+  $config->set('ai_disclosure_apply', FALSE)->save();
+}
+
+/**
+ * Add the setting that shows the translation model name, switched off.
+ */
+function ai_translate_update_10006(&$sandbox) {
+  $config = \Drupal::configFactory()->getEditable('ai_translate.settings');
+  if ($config->get('show_model_name') !== NULL) {
+    return;
+  }
+  $config->set('show_model_name', FALSE)->save();
 }

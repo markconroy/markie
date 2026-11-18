@@ -16,12 +16,16 @@ use Drupal\ai_translate\TextExtractorInterface;
 use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate\TranslationException;
 use Drupal\content_translation\ContentTranslationManagerInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * @coversDefaultClass \Drupal\ai_translate\EntityTranslationOrchestrator
  * @group ai_translate
  */
+#[Group('ai_translate')]
+#[CoversClass(EntityTranslationOrchestrator::class)]
 class EntityTranslationOrchestratorTest extends UnitTestCase {
 
   /**
@@ -112,7 +116,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::translateEntity
+   * Tests that translating fails when the translation already exists.
    */
   public function testTranslateEntityReturnsExistingResult(): void {
     $sourceLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'en']);
@@ -134,7 +138,6 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
    * Tests entity handling using the metadata supplied by field extractors.
    *
    * @dataProvider translatedValueProvider
-   * @covers ::translateTextMetadataItem
    */
   #[DataProvider('translatedValueProvider')]
   public function testTranslatedValues(array $metadata, string $response, string $expected): void {
@@ -144,7 +147,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
 
     $this->textTranslator->expects($this->once())
       ->method('translateContent')
-      ->with($metadata[$column], $targetLanguage, $sourceLanguage)
+      ->with($metadata[$column], $targetLanguage, $sourceLanguage, [])
       ->willReturn($response);
 
     $translated = $this->orchestrator->translateTextMetadataItem($metadata, $sourceLanguage, $targetLanguage);
@@ -201,7 +204,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::translateTextMetadataItem
+   * Tests that a failed translation of a metadata item returns NULL.
    */
   public function testTranslateTextMetadataItemReturnsNullOnFailure(): void {
     $sourceLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'en']);
@@ -222,8 +225,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::translateEntity
-   * @covers ::saveTranslatedEntity
+   * Tests that a translation is created and saved.
    */
   public function testTranslateEntityCreatesAndSavesTranslation(): void {
     $sourceLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'en']);
@@ -239,6 +241,9 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
 
     $entity->method('language')->willReturn($sourceLanguage);
     $entity->method('hasTranslation')->willReturn(FALSE);
+    $entity->method('getEntityTypeId')->willReturn('node');
+    $entity->method('bundle')->willReturn('article');
+    $entity->method('id')->willReturn('8');
     $entity->method('toArray')->willReturn(['body' => [['value' => 'Hello']]]);
     $entity->expects($this->once())
       ->method('addTranslation')
@@ -260,7 +265,13 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
 
     $this->textTranslator->expects($this->once())
       ->method('translateContent')
-      ->with('Hello', $targetLanguage, $sourceLanguage)
+      ->with('Hello', $targetLanguage, $sourceLanguage, [
+        'entity_context' => [
+          'entity_type' => 'node',
+          'bundle' => 'article',
+          'id' => '8',
+        ],
+      ])
       ->willReturn('Bonjour');
 
     $expectedMetadata = [[
@@ -287,7 +298,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::translateEntity
+   * Tests that an unknown target language fails the translation.
    */
   public function testTranslateEntityFailsForInvalidTargetLanguage(): void {
     $sourceLanguage = $this->createConfiguredMock(LanguageInterface::class, ['getId' => 'en']);

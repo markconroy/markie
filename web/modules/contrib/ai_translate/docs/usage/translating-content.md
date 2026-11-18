@@ -5,13 +5,19 @@ entity and go to its **Translate** tab. AI Translate adds an **AI Translations**
 column to the overview, with a one-click action for each language that has no
 translation yet.
 
-![The Translate tab with a Translate using link per language](../images/translate-overview.png)
+![The Translate tab with model names enabled below each Translate with AI link](../images/translate-overview.png)
 
 ## Create a translation
 
 1. Open the entity's **Translate** tab (for a node, `/node/{id}/translations`).
-2. In the **AI Translations** column, select **Translate using &lt;model&gt;** for
+2. In the **AI Translations** column, select **Translate with AI** for
    the target language.
+   To display the readable model name below the action, enable **Show the
+   translation model name** at `/admin/config/ai/ai-translate`. This setting
+   is off by default. For chat models, the name
+   reflects the target language's model override or the configured fallback.
+   If the provider cannot supply a model label, the action remains available
+   without the model description.
 3. AI Translate extracts the translatable text, sends it to the AI provider, and
    writes the returned text back into a new translation. The work runs in a batch,
    so large entities with many referenced items report progress as they go.

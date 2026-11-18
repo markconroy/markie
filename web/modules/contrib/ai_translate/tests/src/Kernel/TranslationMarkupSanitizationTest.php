@@ -8,6 +8,7 @@ use Drupal\ai_translate\Controller\AiTranslateController;
 use Drupal\ai_translate_test\Plugin\AiProvider\TranslateTestProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that AI translation does not corrupt HTML markup.
@@ -17,6 +18,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group ai_translate
  */
 #[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class TranslationMarkupSanitizationTest extends KernelTestBase {
 
   /**

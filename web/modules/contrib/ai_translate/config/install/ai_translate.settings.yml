@@ -1,4 +1,5 @@
 use_ai_translate: true
+show_model_name: false
 cache_translations: true
 reference_defaults: { }
 prompt: 'ai_translate__ai_translate_default'
@@ -6,3 +7,4 @@ entity_reference_depth: 1
 language_settings: { }
 translation_status: keep_original
 redirect_after_create: list
+ai_disclosure_apply: true

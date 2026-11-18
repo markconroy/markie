@@ -11,6 +11,9 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Template\TwigEnvironment;
+use Drupal\Core\Url;
+use Drupal\ai_context\Service\AiContextSelectionFactoryInterface;
+use Drupal\ai_translate\AiTranslateContext;
 use Drupal\ai\AiProviderPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -64,6 +67,11 @@ class AiTranslateSettingsForm extends ConfigFormBase {
   protected RouteBuilderInterface $routeBuilder;
 
   /**
+   * Optional CCC integration, absent on unsupported AI Context versions.
+   */
+  protected ?AiContextSelectionFactoryInterface $contextSelectionFactory = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -73,6 +81,9 @@ class AiTranslateSettingsForm extends ConfigFormBase {
     $instance->languageManager = $container->get('language_manager');
     $instance->providerManager = $container->get('ai.provider');
     $instance->routeBuilder = $container->get('router.builder');
+    if ($container->has('ai_context.selection_factory')) {
+      $instance->contextSelectionFactory = $container->get('ai_context.selection_factory');
+    }
     return $instance;
   }
 
@@ -102,6 +113,36 @@ class AiTranslateSettingsForm extends ConfigFormBase {
     $chat_models = $this->providerManager->getSimpleProviderModelOptions('chat', FALSE);
     $form['#tree'] = TRUE;
 
+    if ($this->moduleHandler->moduleExists('ai_context')) {
+      $form['context_control_center'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Context Control Center'),
+        '#open' => TRUE,
+      ];
+      $form['context_control_center']['status'] = [
+        '#markup' => $this->contextSelectionFactory === NULL
+          ? $this->t('Translation context integration requires AI Context 1.0.0-beta5 or later.')
+          : ($this->contextSelectionFactory->isPushAllowed(AiTranslateContext::CONSUMER_ID)
+            ? $this->t('Automatic context push is enabled for chat-proxy translations. Native translation providers do not receive context.')
+            : $this->t('Automatic context push is off for translations. Configure the Translate consumer to enable it.')),
+      ];
+      if ($this->contextSelectionFactory !== NULL) {
+        $url = Url::fromRoute('ai_context.settings.consumer_edit', [
+          'consumer_id' => AiTranslateContext::CONSUMER_ID,
+        ]);
+        $access = $url->access(NULL, TRUE);
+        $form['context_control_center']['configure'] = [
+          '#type' => 'link',
+          '#title' => $this->t('Configure translation context'),
+          '#url' => $url,
+          '#access' => $access->isAllowed(),
+          '#cache' => ['contexts' => $access->getCacheContexts()],
+          '#prefix' => '<p>',
+          '#suffix' => '</p>',
+        ];
+      }
+    }
+
     // Allow site builders to opt-out of using this module to override the
     // default translation tab.
     $form['use_ai_translate'] = [
@@ -111,12 +152,29 @@ class AiTranslateSettingsForm extends ConfigFormBase {
       '#description' => $this->t('When using this module on its own, keep this box checked. This allows AI Translate to take over the "Translate" tab when editing any entity. When this module is used as a translation framework for other translation mechanisms such as AI TMGMT; however, the default Drupal translation may be desired for the "Translate" tab.'),
     ];
 
+    $form['show_model_name'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show the translation model name'),
+      '#description' => $this->t('Display the readable model name below each Translate with AI link on the translation overview. The names come from the model list of the provider. Some providers get that list from their API, and the list is read on each visit to an overview that is an administration page, so the overview can load more slowly.'),
+      '#config_target' => static::CONFIG_NAME . ':show_model_name',
+    ];
+
     $form['cache_translations'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Cache translation results'),
       '#description' => $this->t('Reuse a previous translation when the same text is translated between the same two languages again. Cuts cost and avoids re-sending unchanged fields. Stored results record the AI provider and model that produced them, so switching model translates afresh, and switching back reuses what was stored before. Editing a translation prompt discards the results that used it.'),
       '#config_target' => static::CONFIG_NAME . ':cache_translations',
     ];
+
+    // The setting does nothing without AI Disclosure, so keep it out of sight.
+    if ($this->moduleHandler->moduleExists('ai_disclosure')) {
+      $form['ai_disclosure_apply'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Record AI translations in AI Disclosure'),
+        '#description' => $this->t('Mark each translation created by AI with the "AI translated" disclosure grade. The source content keeps its own disclosure.'),
+        '#config_target' => static::CONFIG_NAME . ':ai_disclosure_apply',
+      ];
+    }
 
     // Add translation status setting.
     $form['translation_status'] = [

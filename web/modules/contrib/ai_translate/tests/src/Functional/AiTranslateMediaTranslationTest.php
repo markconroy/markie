@@ -139,4 +139,37 @@ class AiTranslateMediaTranslationTest extends BrowserTestBase {
     );
   }
 
+  /**
+   * Ensures that the Translate tab offers no AI links without a provider.
+   */
+  public function testNoTranslationLinksWithoutProvider(): void {
+    // A model of its own for French would otherwise still get a link.
+    \Drupal::configFactory()->getEditable('ai.settings')
+      ->clear('default_providers.translate_text')
+      ->save();
+    \Drupal::configFactory()->getEditable('ai_translate.settings')
+      ->set('language_settings.fr.model', 'echoai__gpt-test')
+      ->save();
+
+    $permissions = [
+      'create ai content translation',
+      'edit any test_media media',
+      'translate test_media media',
+      'translate editable entities',
+    ];
+    $overview_url = $this->media->toUrl('drupal:content-translation-overview');
+    $message = 'Please set a default provider & model for text translation';
+
+    $this->drupalLogin($this->drupalCreateUser($permissions));
+    $this->drupalGet($overview_url);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->elementNotExists('css', 'a[href*="/ai_translate/translate/media/"]');
+    $this->assertSession()->pageTextNotContains($message);
+
+    $this->drupalLogin($this->drupalCreateUser([...$permissions, 'administer ai']));
+    $this->drupalGet($overview_url);
+    $this->assertSession()->elementNotExists('css', 'a[href*="/ai_translate/translate/media/"]');
+    $this->assertSession()->pageTextContains($message);
+  }
+
 }

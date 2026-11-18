@@ -19,6 +19,7 @@ use Drupal\layout_builder\SectionComponent;
 use Drupal\layout_builder\SectionListInterface;
 use Drupal\Tests\ai_translate\Traits\BlockContentCreationTrait;
 use Drupal\Tests\layout_builder\Traits\EnableLayoutBuilderTrait;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -27,6 +28,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @group ai_translate
  */
 #[RunTestsInSeparateProcesses]
+#[Group('ai_translate')]
 class LbFieldExtractorTest extends KernelTestBase {
 
   use BlockContentCreationTrait;

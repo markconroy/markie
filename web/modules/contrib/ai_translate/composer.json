@@ -7,6 +7,8 @@
         "drupal/ai": ">1.2.1"
     },
     "require-dev": {
+        "drupal/ai_context": "1.0.x-dev",
+        "drupal/ai_disclosure": "^1.0@beta",
         "drupal/layout_builder_at": "^3.0",
         "drupal/layout_builder_st": "^2.0",
         "drupal/tool": "^1.0.0-beta10",
@@ -16,6 +18,7 @@
         "drupal/tool": "<1.0.0-beta10"
     },
     "suggest": {
+        "drupal/ai_context": "1.0.0-beta5 or later. Push site context into chat-proxy translations via the Context Control Center consumer type.",
         "drupal/tool": "Install to expose AI Translate as a Tool plugin via the optional ai_translate_tool submodule."
     },
     "autoload": {

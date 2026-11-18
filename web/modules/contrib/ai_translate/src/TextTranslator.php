@@ -13,6 +13,8 @@ use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\Core\Template\TwigEnvironment;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\TranslateText\TranslateTextInput;
+use Drupal\ai\OperationType\Chat\ChatInput;
+use Drupal\ai_context\Service\AiContextSelectionFactoryInterface;
 
 /**
  * Defines text translator service.
@@ -29,6 +31,22 @@ use Drupal\ai\OperationType\TranslateText\TranslateTextInput;
  * install. Flushing that bin, or a full cache rebuild, drops every stored
  * translation. A read or write that fails is logged and never stops a
  * translation.
+ *
+ * While the Context Control Center pushes context into chat-proxy translations
+ * (ai_context enabled, the Translate consumer type enabled, and push on for
+ * translate:default), which items it pushes can depend on the entity being
+ * translated. The cache ID then also carries the sanitized entity_context from
+ * the $context array, so two entities holding the same string are translated
+ * separately, and every entry is tagged so that saving a context item or the AI
+ * Context settings invalidates it. Push is off by default, and while it is off
+ * the ID is unchanged and one string is shared across entities. Whenever
+ * ai_context is enabled, entries are tagged on the consumers and Translate type
+ * configuration, so changes invalidate stored translations even when their
+ * entity-less cache ID stays the same within the push namespace. The Translate
+ * type setting "Share cached translations across content while context is
+ * pushed" opts back into one entry
+ * per string while pushing, for sites whose context items do not vary by
+ * entity.
  *
  * Three limitations are worth knowing about.
  *
@@ -63,6 +81,7 @@ class TextTranslator implements TextTranslatorInterface {
     protected TwigEnvironment $twig,
     protected ModuleHandlerInterface $moduleHandler,
     protected CacheBackendInterface $cache,
+    protected ?AiContextSelectionFactoryInterface $selectionFactory = NULL,
   ) {}
 
   /**
@@ -84,9 +103,7 @@ class TextTranslator implements TextTranslatorInterface {
       // resolved before the lookup. This only reads ai.settings; the provider
       // plugin itself is not built unless the lookup misses.
       if (!empty($providerConfig) && $settings->get('cache_translations')) {
-        // @todo Include $context in the key once a caller uses it for provider
-        // selection.
-        $cid = $this->cacheId($input_text, $langTo, $langFrom, $providerConfig);
+        $cid = $this->cacheId($input_text, $langTo, $langFrom, $providerConfig, $context);
         $cached = $this->cacheGet($cid);
         if ($cached !== NULL) {
           return $cached;
@@ -95,8 +112,17 @@ class TextTranslator implements TextTranslatorInterface {
 
       /** @var \Drupal\ai\OperationType\TranslateText\TranslateTextInterface $provider */
       $provider = $this->aiProviderManager->createInstance($providerConfig['provider_id'], $providerConfig);
+      $translate_input = new TranslateTextInput(
+        $input_text,
+        $langFrom?->getId(),
+        $langTo->getId(),
+      );
+      AiTranslateEntityContext::applyFromContext(
+        $translate_input,
+        $context,
+      );
       $translation = $provider->translateText(
-        new TranslateTextInput($input_text, $langFrom?->getId(), $langTo->getId()),
+        $translate_input,
         $providerConfig['model_id']
       );
 
@@ -252,6 +278,9 @@ class TextTranslator implements TextTranslatorInterface {
    * Which provider and model those are is not always what the translate_text
    * default says. See providerSignature().
    *
+   * While context is pushed, the entity being translated is part of the ID
+   * as well. See entityContextSegment().
+   *
    * @param string $input_text
    *   The text that would be sent to the provider.
    * @param \Drupal\Core\Language\LanguageInterface $langTo
@@ -261,6 +290,8 @@ class TextTranslator implements TextTranslatorInterface {
    * @param array $providerConfig
    *   The resolved default provider for the translate_text operation, from
    *   AiProviderPluginManager::getDefaultProviderForOperationType().
+   * @param array $context
+   *   The translateContent() $context array; only entity_context is read.
    *
    * @return string
    *   The cache ID.
@@ -270,16 +301,107 @@ class TextTranslator implements TextTranslatorInterface {
     LanguageInterface $langTo,
     ?LanguageInterface $langFrom,
     array $providerConfig,
+    array $context = [],
   ) : string {
-    return implode(':', array_merge(
+    $segments = array_merge(
       ['ai_translate'],
       $this->providerSignature($providerConfig, $langTo),
       [
         $langFrom?->getId() ?? 'auto',
         $langTo->getId(),
-        hash('sha256', $input_text),
       ]
-    ));
+    );
+    // Older entries have no CCC invalidation tags, including entries written
+    // before AI Context was installed. A separate namespace while pushing
+    // prevents reusing them even on calls without an entity.
+    if ($this->contextIsPushed()) {
+      $segments[] = 'context-v1';
+    }
+    $entitySegment = $this->entityContextSegment($context);
+    if ($entitySegment !== NULL) {
+      $segments[] = $entitySegment;
+    }
+    $segments[] = hash('sha256', $input_text);
+
+    return implode(':', $segments);
+  }
+
+  /**
+   * Names the entity a translation is for, when that can change the result.
+   *
+   * While context is pushed, the Context Control Center can push items scoped
+   * to the entity being translated (Entity Types, Taxonomy, Specific
+   * Entities), so one string can legitimately translate differently for two
+   * entities. While it is not, nothing reads entity_context, and keying on it
+   * would only cost the reuse of a translation across entities. A site whose
+   * items are site-wide guidance can keep that reuse while pushing with the
+   * Translate consumer type's share_entity_cache setting.
+   *
+   * @param array $context
+   *   The translateContent() $context array; only entity_context is read.
+   *
+   * @return string|null
+   *   One ID segment, or NULL when the entity is not part of the key.
+   */
+  protected function entityContextSegment(array $context) : ?string {
+    if (!$this->contextIsPushed()) {
+      return NULL;
+    }
+    $typeSettings = $this->configFactory
+      ->get(AiTranslateContext::TYPE_SETTINGS_CONFIG);
+    if ($typeSettings->get(AiTranslateContext::SHARE_ENTITY_CACHE)) {
+      return NULL;
+    }
+    $entity = AiTranslateEntityContext::fromContext($context);
+    if ($entity === NULL) {
+      return NULL;
+    }
+
+    // Escape the separator too, so custom identities cannot collide.
+    return implode('.', array_map(static fn (string $value): string => str_replace('.', '%2E', rawurlencode($value)), [
+      $entity['entity_type'],
+      $entity['bundle'] ?? '',
+      $entity['id'] ?? '',
+    ]));
+  }
+
+  /**
+   * Whether the Context Control Center pushes context into translations.
+   *
+   * Mirrors the gate AI Context applies before a push: the module is
+   * enabled, the Translate consumer type is enabled and available, and push
+   * is on for translate:default. The provider must be the chat proxy and both
+   * inputs must support metadata. Push is off by default.
+   *
+   * @return bool
+   *   TRUE while pushed context can shape a translation.
+   */
+  protected function contextIsPushed() : bool {
+    if ($this->selectionFactory === NULL || !$this->moduleHandler->moduleExists('ai_context')) {
+      return FALSE;
+    }
+
+    $providerConfig = $this->aiProviderManager->getDefaultProviderForOperationType('translate_text');
+    if (($providerConfig['provider_id'] ?? '') !== static::CHAT_PROXY_PROVIDER_ID
+      || !method_exists(TranslateTextInput::class, 'getRequestMetadataValue')
+      || !method_exists(TranslateTextInput::class, 'setRequestMetadataValue')
+      || !method_exists(ChatInput::class, 'getRequestMetadataValue')
+      || !method_exists(ChatInput::class, 'setRequestMetadataValue')) {
+      return FALSE;
+    }
+
+    try {
+      return $this->selectionFactory->isPushAllowed(
+        AiTranslateContext::CONSUMER_ID,
+      );
+    }
+    catch (\Throwable $e) {
+      $this->getLogger('ai_translate')->warning(
+        'Could not resolve the AI Context push setting, caching without entity context: @message',
+        ['@message' => $e->getMessage()]
+      );
+      return FALSE;
+    }
   }
 
   /**
@@ -341,6 +463,13 @@ class TextTranslator implements TextTranslatorInterface {
    * language-specific prompt entity turns out to be empty. Editing a prompt
    * does not change its ID, so a tag is the only thing that can catch it.
    *
+   * With ai_context enabled, the consumers and Translate type configuration
+   * decide whether context is pushed at all, so both are tagged and a push
+   * or sharing toggle invalidates entity-less entries even when their ID
+   * stays the same. The push namespace also excludes legacy untagged entries.
+   * While context is pushed, the items and AI Context settings shape what
+   * the provider is shown, so those are tagged as well.
+   *
    * @param \Drupal\Core\Language\LanguageInterface $langTo
    *   Destination language, which decides the prompt.
    * @param \Drupal\Core\Config\ImmutableConfig $settings
@@ -358,6 +487,15 @@ class TextTranslator implements TextTranslatorInterface {
     ];
     foreach (array_unique(array_filter($promptIds)) as $promptId) {
       $tags[] = 'config:ai.ai_prompt.' . $promptId;
+    }
+
+    if ($this->moduleHandler->moduleExists('ai_context')) {
+      $tags[] = 'config:ai_context.consumers';
+      $tags[] = 'config:' . AiTranslateContext::TYPE_SETTINGS_CONFIG;
+    }
+    if ($this->contextIsPushed()) {
+      $tags[] = 'ai_context_item_list';
+      $tags[] = 'config:ai_context.settings';
     }
 
     return $tags;

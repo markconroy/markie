@@ -57,6 +57,26 @@ This is not needed for the AI function call plugin, which ships with
 AI Translate itself. See
 [Agentic integrations](developers/agentic-integrations.md).
 
+## Optional: Context Control Center
+
+To push site context into chat-proxy translations, enable
+[AI Context](https://www.drupal.org/project/ai_context) **1.0.0-beta5 or later**
+alongside this module:
+
+1. Enable AI Context and this module.
+2. Enable the **Translate** consumer type. Open **Consumer Types** under
+   **Context Control Center**. Depending on the AI module version, that sits
+   under **Configuration → AI → Tools & Automation** or **Configuration → AI
+   Setup and Configuration**.
+3. Open **Context consumers** and edit `translate:default`.
+4. Turn on **Push context automatically**.
+5. Subscribe to scopes (for example Use Case = Working with Text) and optionally
+   Always / Never include.
+
+Automatic push stays off until you update that configuration. Native
+`translate_text` providers and agent-driven translation are not this consumer.
+See [Context Control Center](developers/context-consumers.md).
+
 ## Set up translation
 
 1. Enable a second language at `Administration > Configuration > Regional and

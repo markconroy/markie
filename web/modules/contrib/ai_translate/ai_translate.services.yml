@@ -23,6 +23,7 @@ services:
       - '@twig'
       - '@module_handler'
       - '@cache.ai_translate'
+      - '@?ai_context.selection_factory'
   Drupal\ai_translate\TextTranslatorInterface: '@ai_translate.text_translator'
   ai_translate.chat_model_resolver:
     class: Drupal\ai_translate\ChatModelResolver
@@ -32,6 +33,10 @@ services:
     class: Drupal\ai_translate\EntityTranslationOrchestrator
     autowire: true
   Drupal\ai_translate\EntityTranslationOrchestratorInterface: '@ai_translate.translation_orchestrator'
+  ai_translate.translation_disclosure:
+    class: Drupal\ai_translate\TranslationDisclosure
+    autowire: true
+  Drupal\ai_translate\TranslationDisclosureInterface: '@ai_translate.translation_disclosure'
   plugin.manager.text_extractor:
     class: Drupal\ai_translate\FieldTextExtractorPluginManager
     parent: default_plugin_manager

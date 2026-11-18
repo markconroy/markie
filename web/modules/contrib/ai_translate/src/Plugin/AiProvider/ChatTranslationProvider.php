@@ -20,6 +20,9 @@ use Drupal\ai\OperationType\TranslateText\TranslateTextInput;
 use Drupal\ai\OperationType\TranslateText\TranslateTextInterface;
 use Drupal\ai\OperationType\TranslateText\TranslateTextOutput;
 use Drupal\ai\Plugin\ProviderProxy;
+use Drupal\ai_translate\AiTranslateEntityContext;
+use Drupal\ai_translate\AiTranslateRequestTags;
+use Drupal\ai_translate\AiTranslateLanguageContext;
 use Drupal\ai_translate\ChatModelResolver;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -255,10 +258,28 @@ class ChatTranslationProvider extends AiProviderClientBase implements
         new chatMessage('user', $promptText),
       ]);
       $messages->setSystemPrompt('You are a helpful translator.');
+      $entity_context = AiTranslateEntityContext::fromInput($input);
+      if ($entity_context !== NULL) {
+        AiTranslateEntityContext::applyToInput($messages, $entity_context);
+      }
+      $language_context = AiTranslateLanguageContext::fromLanguages(
+        $input->getSourceLanguage(),
+        $input->getTargetLanguage(),
+      );
+      if ($language_context !== NULL) {
+        AiTranslateLanguageContext::applyToInput(
+          $messages,
+          $language_context,
+        );
+      }
 
       $this->loadTranslator($messages, $model_id, $targetLanguage);
       /** @var /Drupal\ai\OperationType\Chat\ChatOutput $message */
-      $message = $this->realTranslator->chat($messages, $this->chatConfiguration['model_id'], ['ai_translate']);
+      $message = $this->realTranslator->chat(
+        $messages,
+        $this->chatConfiguration['model_id'],
+        AiTranslateRequestTags::forChat(),
+      );
     }
     catch (GuzzleException $exception) {
       // Error handling for the API call.

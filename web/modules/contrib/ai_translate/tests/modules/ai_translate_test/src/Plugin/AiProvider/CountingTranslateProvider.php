@@ -76,6 +76,8 @@ class CountingTranslateProvider extends AiProviderClientBase implements Translat
     return [
       'counter-1' => 'Counter one',
       'counter-2' => 'Counter two',
+      // A label that PHP reads as empty.
+      'counter-0' => '0',
     ];
   }
 

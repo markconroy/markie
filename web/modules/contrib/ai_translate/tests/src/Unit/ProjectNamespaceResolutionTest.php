@@ -7,6 +7,7 @@ namespace Drupal\Tests\ai_translate\Unit;
 use Composer\Autoload\ClassLoader;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ai_translate\TextExtractor;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that this project's classes take precedence over a duplicate copy.
@@ -23,6 +24,7 @@ use Drupal\ai_translate\TextExtractor;
  *
  * @group ai_translate
  */
+#[Group('ai_translate')]
 final class ProjectNamespaceResolutionTest extends UnitTestCase {
 
   /**

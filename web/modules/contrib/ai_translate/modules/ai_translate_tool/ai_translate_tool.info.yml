@@ -4,14 +4,14 @@ package: AI
 lifecycle: experimental
 lifecycle_link: https://www.drupal.org/project/tool/releases/1.0.0-beta10
 type: module
-core_version_requirement: ^10.4 || ^11
+core_version_requirement: ^10.4 || ^11 || ^12
 dependencies:
   - ai_translate:ai_translate
   - tool:tool (>=1.0.0-beta10)
 test_dependencies:
   - tool:tool (>=1.0.0-beta10)
 
-# Information added by Drupal.org packaging script on 2026-10-28
-version: '1.4.4'
+# Information added by Drupal.org packaging script on 2026-11-18
+version: '1.4.5'
 project: 'ai_translate'
-datestamp: 1793183969
+datestamp: 1795015814

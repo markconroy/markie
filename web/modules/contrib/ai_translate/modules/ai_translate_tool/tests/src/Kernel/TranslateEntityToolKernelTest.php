@@ -5,12 +5,16 @@ namespace Drupal\Tests\ai_translate_tool\Kernel;
 use Drupal\Tests\ai_translate\Kernel\EntityTranslationOrchestratorKernelTest;
 use Drupal\tool\Tool\ToolInterface;
 use Drupal\tool\Tool\ToolManager;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel tests for the optional Tool integration.
  *
  * @group ai_translate
  */
+#[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
 class TranslateEntityToolKernelTest extends EntityTranslationOrchestratorKernelTest {
 
   /**

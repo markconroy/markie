@@ -40,6 +40,8 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
    *   The entity type manager.
    * @param \Drupal\content_translation\ContentTranslationManagerInterface $contentTranslationManager
    *   The content translation manager.
+   * @param \Drupal\ai_translate\TranslationDisclosureInterface|null $disclosure
+   *   Records the AI disclosure on new translations.
    */
   public function __construct(
     protected TextExtractorInterface $textExtractor,
@@ -49,6 +51,7 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
     protected LoggerChannelFactoryInterface $loggerFactory,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ContentTranslationManagerInterface $contentTranslationManager,
+    protected ?TranslationDisclosureInterface $disclosure = NULL,
   ) {}
 
   /**
@@ -101,7 +104,12 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
   /**
    * {@inheritdoc}
    */
-  public function translateTextMetadataItem(array $singleField, LanguageInterface $langFrom, LanguageInterface $langTo): ?array {
+  public function translateTextMetadataItem(
+    array $singleField,
+    LanguageInterface $langFrom,
+    LanguageInterface $langTo,
+    array $entityContext = [],
+  ): ?array {
     $translatedText = [];
     foreach ($singleField['_columns'] as $column) {
       try {
@@ -111,6 +119,7 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
             $singleField[$column],
             $langTo,
             $langFrom,
+            $entityContext,
           );
         }
       }
@@ -151,6 +160,7 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
     $this->setTranslationSource($entity, $translation);
     $this->applyTranslationStatus($entity, $translation);
     $this->textExtractor->insertTextMetadata($translation, $processedTranslations);
+    $this->disclosure?->apply($translation, $entity->language(), $entity);
 
     try {
       $translation->save();
@@ -192,8 +202,14 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
 
     $processedTranslations = [];
     $failures = [];
+    $entityContext = AiTranslateEntityContext::toContext($entity);
     foreach ($this->extractTextMetadata($entity) as $singleField) {
-      $translatedField = $this->translateTextMetadataItem($singleField, $langFromObject, $langToObject);
+      $translatedField = $this->translateTextMetadataItem(
+        $singleField,
+        $langFromObject,
+        $langToObject,
+        $entityContext,
+      );
       if ($translatedField === NULL) {
         $failures[] = $singleField['field_name'] ?? (string) reset($singleField['parents']);
         continue;

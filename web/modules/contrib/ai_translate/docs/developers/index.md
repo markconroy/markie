@@ -37,6 +37,15 @@ submodule, a Tool API plugin (`ai_translate_tool:translate_entity`). Both let an
 AI agent translate a content entity without custom code. See
 [Agentic integrations](agentic-integrations.md).
 
+## Context Control Center
+
+When [AI Context](https://www.drupal.org/project/ai_context) is enabled, this
+module ships a **Translate** consumer type so chat-proxy translations can
+receive pushed site context. Canonical ID `translate:default`. Chat-proxy
+also publishes `language_context` (`source` / `target`) for a later
+Language-scope change. See
+[Context Control Center](context-consumers.md).
+
 ## AI provider plugin
 
 The module also ships an AI provider plugin, `chat_translation` (*Chat proxy to

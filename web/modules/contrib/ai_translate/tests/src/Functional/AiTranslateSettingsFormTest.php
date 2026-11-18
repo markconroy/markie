@@ -3,10 +3,14 @@
 namespace Drupal\Tests\ai_translate\Functional;
 
 use Drupal\ai\Entity\AiPromptInterface;
+use Drupal\ai_translate\Form\AiTranslateSettingsForm;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the AI Translate settings form.
@@ -14,6 +18,9 @@ use Drupal\Tests\BrowserTestBase;
  * @group ai_translate
  * @covers \Drupal\ai_translate\Form\AiTranslateSettingsForm
  */
+#[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
+#[CoversClass(AiTranslateSettingsForm::class)]
 class AiTranslateSettingsFormTest extends BrowserTestBase {
 
   use StringTranslationTrait;
@@ -155,6 +162,8 @@ class AiTranslateSettingsFormTest extends BrowserTestBase {
     $session->fieldExists('language_settings[fr][prompt][table]');
     $session->checkboxChecked('use_ai_translate');
     $session->checkboxChecked('cache_translations');
+    // AI Disclosure is not installed, so its setting stays out of sight.
+    $session->fieldNotExists('ai_disclosure_apply');
 
     // 2. Test form validation.
     // 2a. Test default prompt is too short.

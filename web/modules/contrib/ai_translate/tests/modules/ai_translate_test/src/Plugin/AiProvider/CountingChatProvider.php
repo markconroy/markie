@@ -30,11 +30,25 @@ use Drupal\ai\OperationType\Chat\ChatOutput;
 class CountingChatProvider extends AiProviderClientBase implements ChatInterface {
 
   /**
-   * Every model ID the chat operation ran with, in call order.
+   * Every model ID the chat operation ran with, in order.
    *
    * @var string[]
    */
   public static array $calls = [];
+
+  /**
+   * Last ChatInput received by chat(), when it was an object.
+   *
+   * @var \Drupal\ai\OperationType\Chat\ChatInput|null
+   */
+  public static ?ChatInput $lastInput = NULL;
+
+  /**
+   * Last provider request tags passed to chat().
+   *
+   * @var string[]
+   */
+  public static array $lastTags = [];
 
   /**
    * {@inheritdoc}
@@ -92,6 +106,8 @@ class CountingChatProvider extends AiProviderClientBase implements ChatInterface
    */
   public function chat(array|string|ChatInput $input, string $model_id, array $tags = []): ChatOutput {
     static::$calls[] = $model_id;
+    static::$lastTags = $tags;
+    static::$lastInput = $input instanceof ChatInput ? $input : NULL;
     return new ChatOutput(
       new ChatMessage('assistant', 'translated by ' . $model_id),
       '',

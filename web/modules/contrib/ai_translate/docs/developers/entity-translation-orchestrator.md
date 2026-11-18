@@ -111,22 +111,35 @@ own pipeline. This is how the Translate tab runs one field per batch operation.
 |---|---|
 | `resolveSourceEntity($entity, $langFrom)` | Returns the entity's `$langFrom` translation, or the entity itself if it has none. |
 | `extractTextMetadata($entity)` | Returns a flat list of translatable text items, one per field delta. |
-| `translateTextMetadataItem($item, $langFrom, $langTo)` | Translates one item and returns it with a `translated` key added, or `NULL` if it failed. |
+| `translateTextMetadataItem($item, $langFrom, $langTo, $entityContext = [])` | Translates one item and returns it with a `translated` key added, or `NULL` if it failed. Pass entity context from `AiTranslateEntityContext::toContext($entity)` when you have an entity. |
 | `saveTranslatedEntity($entity, $langTo, $processedTranslations, $failures)` | Writes the translated items back, saves the translation, and returns the result. |
+
+Source and target langcodes come from `$langFrom` / `$langTo`. The chat-proxy
+copies them onto the request as `language_context`. Do not put them in the
+context array passed to `translateContent()`; this module reads only
+`entity_context` from it.
 
 Note that `translateTextMetadataItem()` takes `LanguageInterface` objects, while
 the other methods take language codes.
 
 ```php
+use Drupal\ai_translate\AiTranslateEntityContext;
+
 $entity = $this->translationOrchestrator->resolveSourceEntity($entity, $langFrom);
 $langFromObject = $this->languageManager->getLanguage($langFrom);
 $langToObject = $this->languageManager->getLanguage($langTo);
+$entityContext = AiTranslateEntityContext::toContext($entity);
 
 $processed = [];
 $failures = [];
 foreach ($this->translationOrchestrator->extractTextMetadata($entity) as $item) {
   // In a batch or queue, do this one item per operation.
-  $translated = $this->translationOrchestrator->translateTextMetadataItem($item, $langFromObject, $langToObject);
+  $translated = $this->translationOrchestrator->translateTextMetadataItem(
+    $item,
+    $langFromObject,
+    $langToObject,
+    $entityContext,
+  );
   if ($translated === NULL) {
     $failures[] = $item['field_name'];
     continue;

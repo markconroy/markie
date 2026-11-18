@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_translate\Functional;
 
+use Drupal\ai_translate\Plugin\FieldTextExtractor\LbFieldExtractor;
+use Drupal\ai_translate\TextExtractor;
 use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests AI translation of Layout Builder blocks with layout_builder_at.
@@ -17,6 +22,10 @@ use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage;
  * @covers \Drupal\ai_translate\TextExtractor::shouldExtract
  * @covers \Drupal\ai_translate\Plugin\FieldTextExtractor\LbFieldExtractor
  */
+#[Group('ai_translate')]
+#[RunTestsInSeparateProcesses]
+#[CoversClass(TextExtractor::class)]
+#[CoversClass(LbFieldExtractor::class)]
 class LayoutBuilderAsymmetricTranslationTest extends LayoutBuilderTranslationTestBase {
 
   /**

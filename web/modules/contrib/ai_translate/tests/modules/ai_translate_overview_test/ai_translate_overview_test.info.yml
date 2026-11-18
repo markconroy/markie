@@ -1,0 +1,15 @@
+name: 'AI Translate overview test'
+type: module
+description: 'Replaces a translation overview controller with one that takes other arguments than core.'
+package: Testing
+hidden: true
+core_version_requirement: ^10.4 || ^11 || ^12
+dependencies:
+  - ai_translate:ai_translate
+  - drupal:content_translation
+  - drupal:entity_test
+
+# Information added by Drupal.org packaging script on 2026-11-18
+version: '1.4.5'
+project: 'ai_translate'
+datestamp: 1795015814
