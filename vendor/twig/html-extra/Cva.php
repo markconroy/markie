@@ -18,6 +18,14 @@ namespace Twig\Extra\Html;
  */
 final class Cva
 {
+    private const MAX_CACHED_CLASS_LISTS = 1000;
+    private const MAX_CACHED_CLASS_LIST_LENGTH = 2048;
+
+    /**
+     * @var array<string, string>
+     */
+    private static array $classListCache = [];
+
     /**
      * @var list<string|null>
      */
@@ -72,11 +80,12 @@ final class Cva
          * Example:
          *     'colors' => 'primary',
          *
-         * @var array<string, string>
+         * @var array<string, string|bool>
          */
         private array $defaultVariants = [],
     ) {
         $this->base = (array) $base;
+        $this->variants = array_filter($variants, 'is_array');
     }
 
     public function apply(array $recipes, ?string ...$additionalClasses): string
@@ -85,11 +94,8 @@ final class Cva
 
         // Resolve recipes against variants
         foreach ($recipes as $recipeName => $recipeValue) {
-            if (\is_bool($recipeValue)) {
-                $recipeValue = $recipeValue ? 'true' : 'false';
-            }
-            $recipeClasses = $this->variants[$recipeName][$recipeValue] ?? [];
-            $classes = [...$classes, ...(array) $recipeClasses];
+            $recipeClasses = $this->variants[$recipeName][self::toVariantName($recipeValue)] ?? [];
+            $classes = [...$classes, ...self::toList($recipeClasses)];
         }
 
         // Resolve compound variants
@@ -101,16 +107,38 @@ final class Cva
         // Apply default variants if specific recipes aren't provided
         foreach ($this->defaultVariants as $defaultVariantName => $defaultVariantValue) {
             if (!isset($recipes[$defaultVariantName])) {
-                $variantClasses = $this->variants[$defaultVariantName][$defaultVariantValue] ?? [];
-                $classes = [...$classes, ...(array) $variantClasses];
+                $variantClasses = $this->variants[$defaultVariantName][self::toVariantName($defaultVariantValue)] ?? [];
+                $classes = [...$classes, ...self::toList($variantClasses)];
             }
         }
         $classes = [...$classes, ...array_values($additionalClasses)];
 
         $classes = implode(' ', array_filter($classes, 'is_string'));
-        $classes = preg_split('#\s+#', $classes, -1, \PREG_SPLIT_NO_EMPTY) ?: [];
 
-        return implode(' ', array_unique($classes));
+        if (isset(self::$classListCache[$classes])) {
+            return self::$classListCache[$classes];
+        }
+
+        $uniqueClasses = implode(' ', array_unique(preg_split('#\s+#', $classes, -1, \PREG_SPLIT_NO_EMPTY) ?: []));
+
+        if (\strlen($classes) > self::MAX_CACHED_CLASS_LIST_LENGTH) {
+            return $uniqueClasses;
+        }
+
+        if (\count(self::$classListCache) >= self::MAX_CACHED_CLASS_LISTS) {
+            self::$classListCache = [];
+        }
+
+        return self::$classListCache[$classes] = $uniqueClasses;
+    }
+
+    private static function toVariantName(mixed $value): mixed
+    {
+        if (\is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        return $value ?? '';
     }
 
     private function resolveCompoundVariant(array $compound, array $recipes): array
@@ -119,11 +147,20 @@ final class Cva
             if ('class' === $compoundName) {
                 continue;
             }
-            if (!isset($recipes[$compoundName]) || !\in_array($recipes[$compoundName], (array) $compoundValues, true)) {
+            if (!isset($recipes[$compoundName]) || !\in_array($recipes[$compoundName], self::toList($compoundValues), true)) {
                 return [];
             }
         }
 
-        return (array) ($compound['class'] ?? []);
+        return self::toList($compound['class'] ?? null);
+    }
+
+    private static function toList(mixed $value): array
+    {
+        if (null === $value) {
+            return [];
+        }
+
+        return \is_array($value) ? $value : [$value];
     }
 }

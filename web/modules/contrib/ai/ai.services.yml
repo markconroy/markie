@@ -32,6 +32,8 @@ services:
     calls:
       - [ setConfigFactory, [ '@config.factory' ] ]
       - [ setLoggerChannelFactory, [ '@logger.factory']]
+    tags:
+      - { name: plugin_manager_cache_clear }
   ai.tokenizer:
     class: Drupal\ai\Utility\Tokenizer
     arguments: ['@ai.provider']

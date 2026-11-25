@@ -6,17 +6,18 @@ namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "readability",
- *   label = @Translation("Evaluate Readability"),
- *   description = @Translation("Allow an LLM to score the readability of the content."),
- *   operation_type = "chat"
- * )
  */
+#[AiContentSuggestions(
+  id: 'readability',
+  label: new TranslatableMarkup('Evaluate Readability'),
+  description: new TranslatableMarkup('Allow an LLM to score the readability of the content.'),
+  operation_type: 'chat',
+)]
 final class Readability extends AiContentSuggestionsPluginBase {
 
   /**

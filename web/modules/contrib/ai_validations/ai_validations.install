@@ -18,6 +18,9 @@
  * @see https://www.drupal.org/project/ai_validations/issues/3606130
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+
 /**
  * Implements hook_requirements().
  */
@@ -41,7 +44,7 @@ function ai_validations_requirements(string $phase): array {
         'The standalone <code>drupal/ai_validations</code> package is installed but the deprecated bundled submodule is still resolving. Run <code>drush cr</code> to rebuild the cache and complete the migration. See <a href=":url">issue #3552888</a>.',
         [':url' => 'https://www.drupal.org/project/ai/issues/3552888']
       ),
-      'severity' => REQUIREMENT_WARNING,
+      'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Warning, fn() => REQUIREMENT_WARNING),
     ];
   }
 

@@ -10,17 +10,18 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "tone",
- *   label = @Translation("Alter tone"),
- *   description = @Translation("Allow an LLM to provide tone suggestions about the content."),
- *   operation_type = "chat"
- * )
  */
+#[AiContentSuggestions(
+  id: 'tone',
+  label: new TranslatableMarkup('Alter tone'),
+  description: new TranslatableMarkup('Allow an LLM to provide tone suggestions about the content.'),
+  operation_type: 'chat',
+)]
 final class Tone extends AiContentSuggestionsPluginBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -110,7 +111,7 @@ final class Tone extends AiContentSuggestionsPluginBase implements ContainerFact
       ->getStorage('taxonomy_term')
       ->getQuery();
     $query->condition('vid', $source_vocabulary);
-    $query->accessCheck();
+    $query->accessCheck(TRUE);
 
     $accessible_terms = $query->execute();
 
@@ -174,7 +175,7 @@ final class Tone extends AiContentSuggestionsPluginBase implements ContainerFact
       $terms_exist = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery()
         ->condition('vid', $vocabulary->id())
         ->range(0, 1)
-        ->accessCheck()
+        ->accessCheck(TRUE)
         ->execute();
 
       if (!empty($terms_exist)) {

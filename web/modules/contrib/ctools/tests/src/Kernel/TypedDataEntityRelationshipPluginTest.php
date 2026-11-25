@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\User;
 
@@ -9,6 +11,8 @@ use Drupal\user\Entity\User;
  * @coversDefaultClass \Drupal\ctools\Plugin\Relationship\TypedDataEntityRelationship
  * @group CTools
  */
+#[Group('CTools')]
+#[RunTestsInSeparateProcesses]
 class TypedDataEntityRelationshipPluginTest extends RelationshipsTestBase {
 
   /**

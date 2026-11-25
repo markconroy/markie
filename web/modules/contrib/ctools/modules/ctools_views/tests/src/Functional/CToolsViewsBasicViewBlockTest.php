@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools_views\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\views_ui\Functional\UITestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -12,6 +14,8 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * @group ctools_views
  * @see \Drupal\ctools_views\Plugin\Display\Block
  */
+#[Group('ctools_views')]
+#[RunTestsInSeparateProcesses]
 class CToolsViewsBasicViewBlockTest extends UITestBase {
 
   use StringTranslationTrait;
@@ -78,7 +82,6 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert items per page default settings.
     $this->drupalGet('<front>');
-    $result = $this->xpath('//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
     $this->assertSession()->fieldExists('status');
     $this->assertSession()->fieldExists('job');
     $this->assertSession()->buttonExists('Apply');
@@ -92,7 +95,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Get the "Configure block" form for our Views block.
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_pager/' . $default_theme);
-    $this->assertNotEmpty($this->xpath('//input[@type="number" and @name="settings[override][items_per_page]"]'), 'items_per_page setting is a number field');
+    $this->assertSession()->elementExists('xpath', '//input[@type="number" and @name="settings[override][items_per_page]"]');
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
@@ -103,10 +106,10 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert items per page default settings.
     $this->drupalGet('<front>');
-    $result = $this->xpath('//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
+    $result = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
     $this->assertEquals('CTools Views Pager Block', $result[0]->getText());
     $this->assertSession()->pageTextContains('Showing 3 records on page 1');
-    $this->assertEquals(3, count($this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr', 3);
 
     // Override items per page settings.
     $edit = [];
@@ -121,11 +124,11 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert items per page overridden settings.
     $this->drupalGet('<front>');
-    $result = $this->xpath('//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
+    $result = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
     $this->assertEquals('CTools Views Pager Block', $result[0]->getText());
     $this->assertSession()->pageTextContains('Showing 2 records on page 1');
-    $this->assertEquals(2, count($this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr')));
-    $elements = $this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr', 2);
+    $elements = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
     $results = array_map(function ($element) {
       return $element->getText();
     }, $elements);
@@ -140,7 +143,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Get the "Configure block" form for our Views block.
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_pager/' . $default_theme);
-    $this->assertNotEmpty($this->xpath('//input[@type="number" and @name="settings[override][pager_offset]"]'), 'items_per_page setting is a number field');
+    $this->assertSession()->elementExists('xpath', '//input[@type="number" and @name="settings[override][pager_offset]"]');
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
@@ -151,7 +154,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert pager offset default settings.
     $this->drupalGet('<front>');
-    $elements = $this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
+    $elements = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
     $results = array_map(function ($element) {
       return $element->getText();
     }, $elements);
@@ -171,7 +174,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert pager offset overridden settings.
     $this->drupalGet('<front>');
-    $elements = $this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
+    $elements = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table//tr//td[contains(@class, "views-field-id")]');
     $results = array_map(function ($element) {
       return $element->getText();
     }, $elements);
@@ -217,7 +220,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert pager overridden settings to 'some', showing no pager.
     $this->drupalGet('<front>');
-    $this->assertEquals(3, count($this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr', 3);
     $this->assertSession()->elementNotExists('css', '#block-views-block-ctools-views-test-view-block-pager .pager');
 
     // Override pager settings to 'none'.
@@ -234,7 +237,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert pager overridden settings to 'some', showing no pager.
     $this->drupalGet('<front>');
-    $this->assertEquals(5, count($this->xpath('//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_pager")]//table/tbody/tr', 5);
     $this->assertSession()->elementNotExists('css', '#block-views-block-ctools-views-test-view-block-pager .pager');
   }
 
@@ -257,7 +260,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert hide_fields default settings.
     $this->drupalGet('<front>');
-    $this->assertEquals(5, count($this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//td[contains(@class, "views-field-id")]')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//td[contains(@class, "views-field-id")]', 5);
 
     // Override hide_fields settings.
     $edit = [];
@@ -273,7 +276,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Assert hide_fields overridden settings.
     $this->drupalGet('<front>');
-    $this->assertEquals(0, count($this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//td[contains(@class, "views-field-id")]')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//td[contains(@class, "views-field-id")]', 0);
   }
 
   /**
@@ -297,7 +300,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     $this->drupalGet('<front>');
     // Check that the td with class "views-field-id" is the first td in the
     // first tr element.
-    $this->assertEquals(0, count($this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]//td[contains(@class, "views-field-id")]/preceding-sibling::td')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]//td[contains(@class, "views-field-id")]/preceding-sibling::td', 0);
 
     // Override sort_fields settings.
     $edit = [];
@@ -321,13 +324,13 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     // Check that the td with class "views-field-id" is the 5th td in the first
     // tr element.
-    $this->assertEquals(4, count($this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]//td[contains(@class, "views-field-id")]/preceding-sibling::td')));
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]//td[contains(@class, "views-field-id")]/preceding-sibling::td', 4);
 
     // Check that duplicate fields in the View produce expected output.
-    $name1_element = $this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]/td[contains(@class, "views-field-name")]');
+    $name1_element = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]/td[contains(@class, "views-field-name")]');
     $name1 = $name1_element[0]->getText();
     $this->assertEquals('John', trim($name1));
-    $name2_element = $this->xpath('//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]/td[contains(@class, "views-field-name-1")]');
+    $name2_element = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_fields")]//table//tr[1]/td[contains(@class, "views-field-name-1")]');
     $name2 = $name2_element[0]->getText();
     $this->assertEquals('John', trim($name2));
   }
@@ -399,7 +402,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Assert configure_sorts default settings.
     $this->drupalGet('<front>');
     // Check that the results are sorted ASC.
-    $element = $this->xpath('//div[contains(@class, "view-display-id-block_sort")]//table//tr[1]/td[1]');
+    $element = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_sort")]//table//tr[1]/td[1]');
     $value = $element[0]->getText();
     $this->assertEquals('1', trim($value));
 
@@ -417,7 +420,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Assert configure_sorts overridden settings.
     // Check that the results are sorted DESC.
     $this->drupalGet('<front>');
-    $element = $this->xpath('//div[contains(@class, "view-display-id-block_sort")]//table//tr[1]/td[1]');
+    $element = $this->getSession()->getPage()->findAll('xpath', '//div[contains(@class, "view-display-id-block_sort")]//table//tr[1]/td[1]');
     $value = $element[0]->getText();
     $this->assertEquals('5', trim($value));
   }

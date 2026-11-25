@@ -53,6 +53,17 @@ variables:
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
   _CSPELL_WORDS: 'exportables, hzif'
+  # From core 11.5 the PHPUnit deprecation handler only reads core's ignore
+  # file unless pointed at the project's. GitLab CI appends core's patterns to
+  # .deprecation-ignore.txt, so this keeps both. Core 11.4 and older ignore it.
+  DRUPAL_DEPRECATION_FILTER_CONFIG: '{"projectIgnoreFile":"$CI_PROJECT_DIR/.deprecation-ignore.txt"}'
+
+# The previous-major jobs default to $CORE_PREVIOUS_PHP_MIN (PHP 8.1), whose
+# Debian bullseye images can no longer install packages. phpstan and phpunit
+# (previous major) inherit this.
+composer (previous major):
+  variables:
+    PHP_VERSION: '8.3'
 
 
 ###################################################################################

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_validations\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Tests\UnitTestCase;
@@ -17,6 +18,8 @@ use Drupal\image\ImageStyleInterface;
  * @group ai_validations
  * @group 3601250
  */
+#[Group('ai_validations')]
+#[Group('3601250')]
 class AiConstraintValidatorBaseTest extends UnitTestCase {
 
   /**

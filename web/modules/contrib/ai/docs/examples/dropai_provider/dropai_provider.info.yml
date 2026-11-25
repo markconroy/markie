@@ -8,7 +8,7 @@ dependencies:
   - ai:ai
   - key:key
 
-# Information added by Drupal.org packaging script on 2026-10-28
-version: '1.5.2'
+# Information added by Drupal.org packaging script on 2026-11-19
+version: '1.5.3'
 project: 'ai'
-datestamp: 1793185694
+datestamp: 1795101190

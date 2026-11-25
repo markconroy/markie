@@ -49,9 +49,9 @@ class AiPromptType extends ConfigEntityBundleBase implements AiPromptTypeInterfa
   /**
    * The AI Prompt Type ID.
    *
-   * @var string
+   * @var string|null
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The AI Prompt Type label.

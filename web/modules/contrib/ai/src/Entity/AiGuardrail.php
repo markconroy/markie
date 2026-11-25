@@ -59,9 +59,9 @@ final class AiGuardrail extends ConfigEntityBase implements AiGuardrailEntityInt
   /**
    * The guardrail ID.
    *
-   * @var string
+   * @var string|null
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The guardrail label.

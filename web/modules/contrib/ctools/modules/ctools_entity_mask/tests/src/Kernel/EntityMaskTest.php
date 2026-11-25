@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\ctools_entity_mask\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Depends;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\entity_mask_test\Entity\BlockContent;
 use Drupal\KernelTests\KernelTestBase;
@@ -11,6 +14,8 @@ use Drupal\KernelTests\KernelTestBase;
  *
  * @group ctools_entity_mask
  */
+#[Group('ctools_entity_mask')]
+#[RunTestsInSeparateProcesses]
 class EntityMaskTest extends KernelTestBase {
 
   /**
@@ -24,6 +29,7 @@ class EntityMaskTest extends KernelTestBase {
     'field',
     'field_ui',
     'file',
+    'filter',
     'image',
     'link',
     'system',
@@ -36,6 +42,9 @@ class EntityMaskTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    // The test module's config creates block_content field storage, which
+    // needs the entity schema in place first.
+    $this->installEntitySchema('block_content');
     $this->installConfig(['block_content', 'entity_mask_test']);
     $this->installEntitySchema('fake_block_content');
   }
@@ -141,6 +150,7 @@ class EntityMaskTest extends KernelTestBase {
    *
    * @depends testFields
    */
+  #[Depends('testFields')]
   public function testSerialization() {
     $body = $this->getRandomGenerator()->paragraphs(2);
     $link = 'https://www.drupal.org/project/ctools';
@@ -184,6 +194,7 @@ class EntityMaskTest extends KernelTestBase {
    *
    * @depends testId
    */
+  #[Depends('testId')]
   public function testLoad() {
     $block = BlockContent::create(['type' => 'basic']);
     $block->save();
@@ -216,6 +227,8 @@ class EntityMaskTest extends KernelTestBase {
    * @depends testFields
    * @depends testNoTables
    */
+  #[Depends('testFields')]
+  #[Depends('testNoTables')]
   public function testSave() {
     $body = $this->getRandomGenerator()->paragraphs(2);
     $link = 'https://www.drupal.org/project/ctools';

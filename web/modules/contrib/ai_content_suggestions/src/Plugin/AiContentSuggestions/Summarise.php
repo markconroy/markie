@@ -6,17 +6,18 @@ namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "summarise",
- *   label = @Translation("Summarise text"),
- *   description = @Translation("Allow an LLM to provide a summary of the content."),
- *   operation_type = "chat"
- * )
  */
+#[AiContentSuggestions(
+  id: 'summarise',
+  label: new TranslatableMarkup('Summarise text'),
+  description: new TranslatableMarkup('Allow an LLM to provide a summary of the content.'),
+  operation_type: 'chat',
+)]
 final class Summarise extends AiContentSuggestionsPluginBase {
 
   /**

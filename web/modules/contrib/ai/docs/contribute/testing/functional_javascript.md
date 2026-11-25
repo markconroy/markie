@@ -21,8 +21,10 @@ Always add an `@group` annotation with the exact drupal.org issue number you're 
  * @group 1234567
  */
 ```
+A PHPUnit attribute with the issue number, `#[Group('1234567')]`, works as well.
+
 **Why do I need to do this?**
-Because FJS tests take so long to run, we skip running them on the main branch (like 1.x or 2.x) to save CI resources. Instead, our filtering script looks specifically for tests tagged with the numerical issue ID matching your current issue branch (like `1234567-my-feature`). If you don't add the issue number group, your test will simply be ignored during issue branch tests and will only ever run when we tag a release!
+Because FJS tests take so long to run, we only run all of them when we tag a release. On an issue branch (like `1234567-my-feature`), our filtering script runs only the tests tagged with the numerical issue ID in the branch name. On any branch without an issue number in its name, including the main branches (like 1.x or 2.x), no FJS tests run. If you don't add the issue number group, your test will simply be ignored during issue branch tests and will only ever run when we tag a release!
 
 ### 2. Turn on Video Recording
 Make sure to add this small property to your test class so that Drupal records a video of the test:

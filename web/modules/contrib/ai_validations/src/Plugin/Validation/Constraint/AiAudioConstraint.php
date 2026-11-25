@@ -6,7 +6,7 @@ namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
-use Symfony\Component\Validator\Constraint;
+use Drupal\ai_validations\AiConstraintBase;
 
 /**
  * AI audio check constraint.
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraint;
   id: 'AiAudioPrompt',
   label: new TranslatableMarkup('AI audio check', [], ['context' => 'Validation']),
 )]
-class AiAudioConstraint extends Constraint {
+class AiAudioConstraint extends AiConstraintBase {
 
   /**
    * The prompt used to evaluate the transcript.

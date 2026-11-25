@@ -25,9 +25,13 @@ use Robo\Common\BuilderAwareTrait;
  *
  * ``` php
  * <?php
+ * $changes = [];
+ * while ($change = $this->ask('Change (leave empty to finish)')) {
+ *     $changes[] = $change;
+ * }
  * $this->taskChangelog()
  *  ->version($version)
- *  ->askForChanges()
+ *  ->changes($changes)
  *  ->run();
  * ?>
  * ```
@@ -232,7 +236,7 @@ class Changelog extends BaseTask implements BuilderAwareInterface
      */
     protected function generateHeader()
     {
-        return "#### {$this->version}\n\n";
+        return "#### {$this->version} (" . date('Y-m-d') . ")\n\n";
     }
 
     /**
@@ -242,6 +246,6 @@ class Changelog extends BaseTask implements BuilderAwareInterface
      */
     public function processLogRow($i)
     {
-        return "* $i *" . date('Y-m-d') . "*";
+        return "* $i";
     }
 }

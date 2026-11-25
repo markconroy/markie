@@ -186,8 +186,9 @@ class TypedDataResolver {
    * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   An array of contexts from which to extract our token's label.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
-   *   The administrative label of $token.
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The administrative label of $token, or NULL if the token could not be
+   *   resolved.
    */
   public function getLabelByToken(string $token, array $contexts) {
     // @todo Optimize this by allowing to limit the desired token?

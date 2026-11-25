@@ -8,6 +8,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\ai\FunctionalJavascriptTests\BaseClassFunctionalJavascriptTests;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
 #[RunTestsInSeparateProcesses]
 class SummarisePluginTest extends BaseClassFunctionalJavascriptTests {
 
@@ -56,29 +58,31 @@ class SummarisePluginTest extends BaseClassFunctionalJavascriptTests {
     $field_storage = FieldStorageConfig::loadByName('node', 'body');
     if (!$field_storage) {
       // Add the body field storage and instance manually to avoid using
-      // the deprecated node_add_body_field() function.
+      // the deprecated node_add_body_field() function. Drupal 12 moved the
+      // text_with_summary field type to a contributed module.
       $field_storage = FieldStorageConfig::create([
         'field_name' => 'body',
         'entity_type' => 'node',
-        'type' => 'text_with_summary',
+        'type' => \Drupal::service('plugin.manager.field.field_type')->hasDefinition('text_with_summary') ? 'text_with_summary' : 'text_long',
       ]);
       $field_storage->save();
     }
+    $with_summary = $field_storage->getType() === 'text_with_summary';
 
     FieldConfig::create([
       'field_storage' => $field_storage,
       'bundle' => 'page',
       'label' => 'Body',
-      'settings' => [
+      'settings' => $with_summary ? [
         'display_summary' => TRUE,
         'allowed_formats' => [],
-      ],
+      ] : [],
     ])->save();
 
     // Add the body field to the default node form display.
     \Drupal::service('entity_display.repository')
       ->getFormDisplay('node', 'page')
-      ->setComponent('body', ['type' => 'text_textarea_with_summary'])
+      ->setComponent('body', ['type' => $with_summary ? 'text_textarea_with_summary' : 'text_textarea'])
       ->save();
 
     // Enable the Summarise plugin with the EchoProvider model and restrict it

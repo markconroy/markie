@@ -39,6 +39,21 @@ variables:
   # version on merge requests and pushes.
   OPT_IN_TEST_PREVIOUS_MAJOR: '1'
   _AUTORUN_PREVIOUS_MAJOR: 'push-and-mr'
+  # Also test Drupal 12 on merge requests and pushes.
+  OPT_IN_TEST_NEXT_MAJOR: '1'
+  _AUTORUN_NEXT_MAJOR: 'push-and-mr'
+  # The AI module and the modules it requires that have no Drupal 12 release
+  # yet. Drop each one once it has. field_validation comes in through
+  # ai_validations.
+  _LENIENT_ALLOW_LIST: ai,ai_ckeditor,ai_translate,field_validation
+
+# @todo Make blocking once the AI module has a Drupal 12 release.
+composer (next major):
+  allow_failure: true
+phpstan (next major):
+  allow_failure: true
+phpunit (next major):
+  allow_failure: true
 
 # drupal/ai ships its own ai_content_suggestions submodule with the same
 # machine name and namespace as this standalone module. When both are

@@ -89,7 +89,7 @@ final class AiAssistant extends ConfigEntityBase implements AiAssistantInterface
   /**
    * The example ID.
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The example label.

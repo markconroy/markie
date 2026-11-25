@@ -3,6 +3,12 @@
 namespace Drupal\ctools_wizard_test\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ctools_wizard_test\ExampleConfigEntityListBuilder;
+use Drupal\ctools_wizard_test\Form\ExampleConfigEntityDeleteForm;
+use Drupal\ctools_wizard_test\Wizard\EntityAddWizard;
+use Drupal\ctools_wizard_test\Wizard\EntityEditWizard;
 use Drupal\ctools_wizard_test\ExampleConfigEntityInterface;
 
 /**
@@ -41,7 +47,42 @@ use Drupal\ctools_wizard_test\ExampleConfigEntityInterface;
  *     "two",
  *   }
  * )
+ *
+ * The annotation is kept for Drupal 10, which has no entity type attributes.
  */
+#[ConfigEntityType(
+  id: 'ctools_wizard_test_config_entity',
+  label: new TranslatableMarkup('Example config entity'),
+  config_prefix: 'ctools_wizard_test_config_entity',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'list_builder' => ExampleConfigEntityListBuilder::class,
+    'form' => [
+      'delete' => ExampleConfigEntityDeleteForm::class,
+    ],
+    'wizard' => [
+      'add' => EntityAddWizard::class,
+      'edit' => EntityEditWizard::class,
+    ],
+  ],
+  links: [
+    'canonical' => '/admin/structure/ctools_wizard_test_config_entity/{ctools_wizard_test_config_entity}',
+    'edit-form' => '/admin/structure/ctools_wizard_test_config_entity/{machine_name}/{step}',
+    'delete-form' => '/admin/structure/ctools_wizard_test_config_entity/{ctools_wizard_test_config_entity}/delete',
+    'collection' => '/admin/structure/ctools_wizard_test_config_entity',
+  ],
+  admin_permission: 'administer site configuration',
+  config_export: [
+    'id',
+    'label',
+    'one',
+    'two',
+  ],
+)]
 class ExampleConfigEntity extends ConfigEntityBase implements ExampleConfigEntityInterface {
 
   /**

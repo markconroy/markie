@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 
@@ -9,6 +11,8 @@ use Drupal\Core\Plugin\Context\EntityContextDefinition;
  * @coversDefaultClass \Drupal\ctools\Plugin\RelationshipManager
  * @group CTools
  */
+#[Group('CTools')]
+#[RunTestsInSeparateProcesses]
 class RelationshipManagerTest extends RelationshipsTestBase {
 
   /**

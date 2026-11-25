@@ -7,45 +7,72 @@ use Drupal\ai\OperationType\InputBase;
 use Drupal\ai\OperationType\InputInterface;
 
 /**
- * Input object for audio to audio input.
+ * Input object for image to video input.
  */
 class ImageToVideoInput extends InputBase implements InputInterface {
 
   /**
-   * The audio file to convert.
+   * The image file to animate.
    *
    * @var \Drupal\ai\OperationType\GenericType\ImageFile
    */
   private ImageFile $file;
 
   /**
+   * An optional prompt to guide the generated video.
+   *
+   * @var string|null
+   */
+  private ?string $prompt = NULL;
+
+  /**
    * The constructor.
    *
    * @param \Drupal\ai\OperationType\GenericType\ImageFile $file
-   *   The audio file to convert.
+   *   The image file to animate.
    */
   public function __construct(ImageFile $file) {
     $this->file = $file;
   }
 
   /**
-   * Get the mp3 binary to convert into another binary.
+   * Get the image file to animate.
    *
    * @return \Drupal\ai\OperationType\GenericType\ImageFile
-   *   The binary.
+   *   The image file.
    */
   public function getImageFile(): ImageFile {
     return $this->file;
   }
 
   /**
-   * Set the audio file.
+   * Set the image file.
    *
    * @param \Drupal\ai\OperationType\GenericType\ImageFile $file
-   *   The audio file.
+   *   The image file.
    */
   public function setImageFile(ImageFile $file) {
     $this->file = $file;
+  }
+
+  /**
+   * Get the prompt that guides the generated video.
+   *
+   * @return string|null
+   *   The prompt, or NULL if not set.
+   */
+  public function getPrompt(): ?string {
+    return $this->prompt;
+  }
+
+  /**
+   * Set the prompt that guides the generated video.
+   *
+   * @param string|null $prompt
+   *   The prompt to set, or NULL to unset.
+   */
+  public function setPrompt(?string $prompt): void {
+    $this->prompt = $prompt;
   }
 
   /**
@@ -71,6 +98,7 @@ class ImageToVideoInput extends InputBase implements InputInterface {
   public function toArray(): array {
     return [
       'file' => $this->file->toArray(),
+      'prompt' => $this->prompt,
     ];
   }
 

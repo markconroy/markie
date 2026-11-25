@@ -210,7 +210,7 @@ display:
             description: ''
             use_operator: false
             operator: field_ctools_views_tags_target_id_op
-            identifier: field_ctools_views_tags_target_id
+            identifier: tags_autocomplete_alternate_identifier
             required: false
             remember: false
             multiple: false
@@ -660,7 +660,7 @@ display:
             description: ''
             use_operator: false
             operator: field_ctools_views_tags_target_id_op
-            identifier: field_ctools_views_tags_target_id
+            identifier: tags_filter_alternate_identifier
             required: false
             remember: false
             multiple: false
@@ -871,7 +871,7 @@ display:
           group_info:
             label: Title
             description: ''
-            identifier: title
+            identifier: non-default-identifier
             optional: true
             widget: select
             multiple: false

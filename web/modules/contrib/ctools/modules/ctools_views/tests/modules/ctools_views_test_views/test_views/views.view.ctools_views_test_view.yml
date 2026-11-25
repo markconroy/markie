@@ -107,6 +107,7 @@ display:
               responsive: ''
           default: '-1'
           empty_table: false
+          class: ''
       row:
         type: fields
       fields:

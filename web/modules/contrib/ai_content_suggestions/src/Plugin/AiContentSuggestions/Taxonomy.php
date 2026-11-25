@@ -14,17 +14,18 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "taxonomy_suggest",
- *   label = @Translation("Suggest taxonomy tags"),
- *   description = @Translation("Allow an LLM to suggest SEO-friendly taxonomy tags for the content."),
- *   operation_type = "chat"
- * )
  */
+#[AiContentSuggestions(
+  id: 'taxonomy_suggest',
+  label: new TranslatableMarkup('Suggest taxonomy tags'),
+  description: new TranslatableMarkup('Allow an LLM to suggest SEO-friendly taxonomy tags for the content.'),
+  operation_type: 'chat',
+)]
 final class Taxonomy extends AiContentSuggestionsPluginBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -218,12 +219,12 @@ final class Taxonomy extends AiContentSuggestionsPluginBase implements Container
     $vocabularies_options = [];
     foreach ($all_vocabularies as $vocabulary_id => $vocabulary) {
       // Check if the vocabulary has any terms.
-      $query = $this->entityTypeManager
+      $terms = $this->entityTypeManager
         ->getStorage('taxonomy_term')
-        ->getQuery();
-      $query->condition('vid', $vocabulary_id);
-      $query->accessCheck();
-      $terms = $query->execute();
+        ->getQuery()
+        ->condition('vid', $vocabulary_id)
+        ->accessCheck(TRUE)
+        ->execute();
       if (!empty($terms)) {
         $vocabularies_options[$vocabulary_id] = $vocabulary->label();
       }
@@ -257,7 +258,7 @@ final class Taxonomy extends AiContentSuggestionsPluginBase implements Container
       ->getStorage('taxonomy_term')
       ->getQuery();
     $query->condition('vid', $source_vocabulary);
-    $query->accessCheck();
+    $query->accessCheck(TRUE);
 
     $accessible_terms = $query->execute();
 

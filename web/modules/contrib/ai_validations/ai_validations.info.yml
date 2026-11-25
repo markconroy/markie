@@ -9,7 +9,7 @@ dependencies:
   - field_validation:field_validation
   - drupal:image
 
-# Information added by Drupal.org packaging script on 2026-10-15
-version: '1.4.0'
+# Information added by Drupal.org packaging script on 2026-11-19
+version: '1.4.1'
 project: 'ai_validations'
-datestamp: 1792067499
+datestamp: 1795081587

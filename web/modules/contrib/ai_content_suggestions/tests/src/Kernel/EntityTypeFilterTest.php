@@ -12,12 +12,16 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the entity type filtering logic for AI content suggestions.
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
+#[RunTestsInSeparateProcesses]
 class EntityTypeFilterTest extends KernelTestBase {
 
   /**

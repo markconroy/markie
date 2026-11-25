@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
 
@@ -10,6 +12,8 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group ctools
  */
+#[Group('ctools')]
+#[RunTestsInSeparateProcesses]
 class CToolsWizardTest extends BrowserTestBase {
 
   use StringTranslationTrait;

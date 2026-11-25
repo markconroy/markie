@@ -239,8 +239,17 @@ class ChatFormBlock extends BlockBase implements ContainerFactoryPluginInterface
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
+    // An unconfigured block is useless; hide it. Callers that instantiate the
+    // block with default configuration (for example page builders listing all
+    // block plugins) would otherwise pass NULL to load(), which logs an
+    // array_flip() warning in EntityStorageBase::loadMultiple().
+    $assistant_id = $this->configuration['ai_assistant'] ?? NULL;
+    if (!is_string($assistant_id) || $assistant_id === '') {
+      return AccessResult::forbidden('No AI Assistant configured.');
+    }
+
     // Load the AI assistant entity based on the block configuration.
-    $assistant = $this->entityTypeManager->getStorage('ai_assistant')->load($this->configuration['ai_assistant']);
+    $assistant = $this->entityTypeManager->getStorage('ai_assistant')->load($assistant_id);
 
     // Check if the assistant exists and is enabled.
     if (!$assistant || !$assistant->status()) {

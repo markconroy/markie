@@ -6,6 +6,7 @@ use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use OnnxRuntime\Vendor;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -67,6 +68,7 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
     ) {
       $this->markTestSkipped('FFI extension is not loaded.');
     }
+    $this->skipIfOnnxRuntimeUnavailable();
     parent::setUp();
 
     if ($this->profile != 'standard') {
@@ -92,6 +94,31 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
     $this->setupServerAndIndex();
     $this->createSampleContent();
     $this->indexContent();
+  }
+
+  /**
+   * Skips the test when the ONNX Runtime library cannot be downloaded.
+   *
+   * The test embedding provider uses mysql-vector, which downloads ONNX
+   * Runtime from GitHub the first time it is used. Downloading it here, in the
+   * test process, puts it in the vendor directory, where the site under test
+   * finds it as well.
+   */
+  protected function skipIfOnnxRuntimeUnavailable(): void {
+    set_error_handler(static function (int $severity, string $message): never {
+      throw new \ErrorException($message, 0, $severity);
+    });
+    ob_start();
+    try {
+      Vendor::check();
+    }
+    catch (\Throwable $e) {
+      $this->markTestSkipped('ONNX Runtime could not be downloaded: ' . $e->getMessage());
+    }
+    finally {
+      ob_end_clean();
+      restore_error_handler();
+    }
   }
 
   /**

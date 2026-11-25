@@ -55,7 +55,7 @@ final class AutomatorsTool extends ConfigEntityBase implements AutomatorsToolInt
   /**
    * The example ID.
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The example label.

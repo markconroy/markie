@@ -9,6 +9,8 @@ use Drupal\ai_content_suggestions\Form\SettingsForm;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\SchemaCheckTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests ai_content_suggestions.settings config schema coverage.
@@ -17,6 +19,8 @@ use Drupal\Tests\SchemaCheckTestTrait;
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
+#[RunTestsInSeparateProcesses]
 class AiContentSuggestionsSettingsSchemaTest extends KernelTestBase {
 
   use SchemaCheckTestTrait;

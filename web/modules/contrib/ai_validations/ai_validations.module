@@ -73,11 +73,9 @@ function _ai_validations_sync_rule_to_collection(array &$form, FormStateInterfac
 
   // Access the form's rule set and rule via reflection, as they are protected.
   $rule_set_ref = new \ReflectionProperty($form_object, 'fieldValidationRuleSet');
-  $rule_set_ref->setAccessible(TRUE);
   $rule_set = $rule_set_ref->getValue($form_object);
 
   $rule_ref = new \ReflectionProperty($form_object, 'fieldValidationRule');
-  $rule_ref->setAccessible(TRUE);
   $rule = $rule_ref->getValue($form_object);
 
   if (!$rule_set || !$rule || !$rule->getUuid()) {

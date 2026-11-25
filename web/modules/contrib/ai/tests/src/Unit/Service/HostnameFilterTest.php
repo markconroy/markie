@@ -10,6 +10,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ai\Dto\HostnameFilterDto;
 use Drupal\ai\Service\HostnameFilter;
+use Masterminds\HTML5;
 
 /**
  * @coversDefaultClass \Drupal\ai\Service\HostnameFilter
@@ -796,6 +797,8 @@ HTML;
       'rewriteLinks' => TRUE,
       'fullTrust' => FALSE,
       'plainTextMode' => FALSE,
+      'markdownMode' => TRUE,
+      'jsonMode' => TRUE,
     ];
 
     $dto = HostnameFilterDto::create($data);
@@ -803,6 +806,8 @@ HTML;
     $this->assertTrue($dto->rewriteLinks);
     $this->assertFalse($dto->fullTrust);
     $this->assertFalse($dto->plainTextMode);
+    $this->assertTrue($dto->markdownMode);
+    $this->assertTrue($dto->jsonMode);
 
     $array = $dto->toArray();
     $this->assertEquals($data, $array);
@@ -2313,7 +2318,7 @@ TEXT;
       'uppercase scheme, integer IPv4' => ['HTTPS://1572395042/x', '1572395042'],
       'other scheme' => ['ftp://evil.com/x', 'evil.com'],
       'protocol-relative integer IPv4' => ['//1572395042/x', '1572395042'],
-      'protocol-relative hex IPv4' => ['//0x7f000001/x', '0x7f000001'],
+      'protocol-relative hex IPv4' => ['//0x7f000001/x', '0x' . dechex(2130706433)],
       'protocol-relative single label' => ['//evil/x', 'evil'],
       'backslash integer IPv4' => ['/\\1572395042/x', '1572395042'],
       'backslash IDN full stop' => ['/\\evil．com/x', 'evil'],
@@ -2340,6 +2345,483 @@ TEXT;
       'newline escape' => ['line one\\\\nline two'],
       'json path' => ['{"p":"\\/node\\/1"}'],
     ];
+  }
+
+  /**
+   * Tests that Markdown without HTML is not HTML-encoded.
+   *
+   * @covers ::filterText
+   */
+  public function testMarkdownWithoutHtmlIsNotEncoded(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $text = 'Configuration & Accessories > note [link](https://evil.com/x) and [shop](https://example.com/p)';
+    $result = $this->hostnameFilter->filterText($text);
+    $this->assertSame('Configuration & Accessories > note link and [shop](https://example.com/p)', $result);
+  }
+
+  /**
+   * Tests that Markdown block quotes, code and comparisons stay intact.
+   *
+   * @covers ::filterText
+   */
+  public function testMarkdownSyntaxIsPreserved(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $text = "> A quote\n\n`a && b`\n\n| a | b |\n|---|---|\n| 1 < 2 | 3 > 2 |";
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Tests that text containing HTML still passes the HTML filter.
+   *
+   * @covers ::filterText
+   */
+  public function testTextWithHtmlIsStillFiltered(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $text = 'A & B <a href="https://evil.com/x">link</a> <script>alert(1)</script>';
+    $result = $this->hostnameFilter->filterText($text);
+    $this->assertStringNotContainsString('evil.com', $result);
+    $this->assertStringNotContainsString('<script', $result);
+    $this->assertStringContainsString('<a>link</a>', $result);
+  }
+
+  /**
+   * Tests that plain text mode keeps and removes Markdown links as a whole.
+   *
+   * @covers ::filterText
+   */
+  public function testPlainTextModeKeepsMarkdownLinksIntact(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $text = 'Configuration & Accessories > note [link](https://evil.com/x) and [shop](https://example.com/p)';
+    $result = $this->hostnameFilter->filterText($text);
+    $this->assertSame('Configuration & Accessories > note link and [shop](https://example.com/p)', $result);
+  }
+
+  /**
+   * Tests that plain text mode never rewrites a disallowed Markdown link.
+   *
+   * @covers ::filterText
+   */
+  public function testPlainTextModeDoesNotRewriteMarkdownLinks(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setRewriteLinks(TRUE);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('See [link](https://evil.com/x).');
+    $this->assertSame('See link.', $result);
+  }
+
+  /**
+   * Tests that plain text mode keeps the JSON escape following a removed URL.
+   *
+   * @covers ::filterText
+   */
+  public function testPlainTextModeKeepsJsonEscapeAfterRemovedUrl(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('{"a":"<a href=\"https://evil.com/x\">x</a> <a href=\"javascript:alert(1)\">y</a>"}');
+    $this->assertSame('{"a":"<a href=\"\">x</a> <a href=\"\">y</a>"}', $result);
+  }
+
+  /**
+   * Tests that plain text mode keeps the punctuation following a URL.
+   *
+   * @covers ::filterText
+   */
+  public function testPlainTextModeKeepsTrailingPunctuation(): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $result = $this->hostnameFilter->filterText('See https://example.com/page. Not (https://evil.com/x)!');
+    $this->assertSame('See https://example.com/page. Not ()!', $result);
+  }
+
+  /**
+   * Tests email links keep the existing plain-text URL policy.
+   *
+   * @dataProvider plainTextEmailLinksProvider
+   */
+  public function testPlainTextModePreservesMarkdownEmailLinks(string $text): void {
+    $this->hostnameFilter->setPlainTextMode(TRUE);
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Provides email URLs in the supported Markdown link forms.
+   */
+  public static function plainTextEmailLinksProvider(): array {
+    return [
+      'inline' => ['[Email](mailto:info@example.com)'],
+      'uppercase scheme' => ['[Email](MAILTO:info@example.com)'],
+      'autolink' => ['<mailto:info@example.com>'],
+      'reference' => ["[Email][contact]\n\n[contact]: mailto:info@example.com"],
+    ];
+  }
+
+  /**
+   * Tests JSON payloads are filtered value by value and stay decodable.
+   *
+   * @param string $input
+   *   The text to filter.
+   * @param string $expected
+   *   The expected output.
+   *
+   * @dataProvider jsonPayloadProvider
+   */
+  public function testJsonPayload(string $input, string $expected): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->assertSame($expected, $this->hostnameFilter->filterText($input));
+  }
+
+  /**
+   * Data provider for testJsonPayload().
+   */
+  public static function jsonPayloadProvider(): array {
+    $clean = '{"title":"Hello","body":"<p>Text <a href=\"https://example.com/a\">ok</a> &amp; x < y</p>","count":5,"empty":{}}';
+    $array = "\n  [{\"note\":\"a < b && \\\"q\\\" > c\"},\"5 & 6\"]\n";
+    $fenced = "Result:\n```json\n{\"body\": \"<p>ok & fine</p>\"}\n```\nDone.";
+    // The fence forms that models write, each as an opening and closing line.
+    $fences = [
+      'tag in capitals' => ['```JSON', "\n```"],
+      'space before the tag' => ['``` json', "\n```"],
+      'tildes' => ['~~~json', "\n~~~"],
+      'jsonc tag' => ['```jsonc', "\n```"],
+      'not closed' => ['```json', "\n"],
+    ];
+    $fence_rows = [];
+    foreach ($fences as $label => [$open, $close]) {
+      $fence_rows["fence, $label"] = [
+        "$open\n{\"a\": \"<a href=\\\"https://evil.com/x\\\">c</a>\"}$close",
+        "$open\n{\"a\": \"<a>c</a>\"}$close",
+      ];
+    }
+    return $fence_rows + [
+      'clean object' => [$clean, $clean],
+      'clean padded array' => [$array, $array],
+      'clean fenced' => [$fenced, $fenced],
+      'html link removed' => [
+        '{"body":"<p><a href=\"https://evil.com/x\">click</a> &amp;</p>","safe":"<p>Hi</p>"}',
+        '{"body":"<p><a>click</a> &amp;</p>","safe":"<p>Hi</p>"}',
+      ],
+      'markdown link in key and value' => [
+        '{"[k](https://evil.com/k)":"See [docs](https://evil.com/docs)."}',
+        '{"k":"See docs."}',
+      ],
+      'script removed' => [
+        '{"body":"a<script src=\"https://example.com/x.js\"></script>b"}',
+        '{"body":"ab"}',
+      ],
+      'empty object and array kept' => [
+        '{"o":{},"a":[],"z":1.0,"u":"café","x":"<a href=\"https://evil.com/x\">x</a>"}',
+        '{"o":{},"a":[],"z":1.0,"u":"café","x":"<a>x</a>"}',
+      ],
+      // Only the strings that change are rewritten, so numbers PHP cannot
+      // represent, number formats and whitespace are kept.
+      'numbers and formatting kept' => [
+        "{\n  \"id\": 12345678901234567890, \"f\": 1.50, \"e\": 1E3, \"z\": -0,\n  \"x\": \"<a href=\\\"https://evil.com/x\\\">c</a>\"\n}",
+        "{\n  \"id\": 12345678901234567890, \"f\": 1.50, \"e\": 1E3, \"z\": -0,\n  \"x\": \"<a>c</a>\"\n}",
+      ],
+      'filtered key equal to a sibling key' => [
+        '{"k":"keep","[k](https://evil.com/k)":"other"}',
+        '{"k":"keep","k":"other"}',
+      ],
+      // A decoder keeps only the last member of a duplicate key.
+      'duplicate key' => [
+        '{"a":"[x](https://evil.com/x)","a":"y"}',
+        '{"a":"x","a":"y"}',
+      ],
+      'nested json in string' => [
+        json_encode(['args' => json_encode(['d' => '<a href="https://evil.com/x">c</a>', 'k' => 'plain'])]),
+        '{"args":"{\"d\":\"<a>c</a>\",\"k\":\"plain\"}"}',
+      ],
+      'fenced with violation' => [
+        "Result:\n```json\n{\"body\": \"<a href=\\\"https://evil.com/x\\\">c</a>\"}\n```",
+        "Result:\n```json\n{\"body\": \"<a>c</a>\"}\n```",
+      ],
+      'violation in prose around fence' => [
+        "See [here](https://evil.com/x):\n```json\n{\"a\": \"x &lt; y\"}\n```",
+        "See here:\n```json\n{\"a\": \"x &lt; y\"}\n```",
+      ],
+      // The JSON path would return this as-is. Markup is needed to tell the
+      // paths apart, since the prose path keeps text without markup as-is.
+      'top-level scalar is not json' => ['"<b>a</b> & b"', '"<b>a</b> &amp; b"'],
+      // A JSON escape can hide an attribute from the decoded check.
+      'apostrophe escape' => [
+        '{"a":"<b data-x=\u0027 onclick=alert(1) \u0027>hi</b>"}',
+        '{"a":"\u003Cb data-x=\u0027 onclick=alert(1) \u0027\u003Ehi\u003C/b\u003E"}',
+      ],
+      'quote escape' => [
+        '{"a":"<b data-x=\" onclick=alert(1) \">hi</b>"}',
+        '{"a":"\u003Cb data-x=\u0022 onclick=alert(1) \u0022\u003Ehi\u003C/b\u003E"}',
+      ],
+      // The raw text is what a consumer renders. Markdown can form across
+      // two strings, or on a raw line, where no decoded string shows it.
+      'autolink across two strings' => [
+        '{"a":"<https://evil.com/x","b":">"}',
+        '{"a":"\u003Chttps://evil.com/x","b":"\u003E"}',
+      ],
+      // Escaping cannot help here, so the regular pipeline takes over.
+      'raw line is a reference definition' => [
+        "[\"a]: https://evil.com/x\",\n[\"a]\"]]",
+        "\n[\"a]\"]]",
+      ],
+      // The JSON path would keep the "&" of the second payload as it is.
+      'two fences use the regular pipeline' => [
+        "~~~json\n{\"a\":1}\n~~~\n```json\n{\"b\":\"<b>x</b> & y\"}\n```",
+        "~~~json\n{\"a\":1}\n~~~\n```json\n{\"b\":\"<b>x</b> &amp; y\"}\n```",
+      ],
+      // A tag opened before the fence and closed after it.
+      'tag spanning the fence' => [
+        "See <img alt=\"\n```json\n{\"a\":1}\n```\n\" src=https://evil.test/x.png>",
+        "See <img alt=\"\n```json\n{\">",
+      ],
+    ];
+  }
+
+  /**
+   * Tests angle brackets in Markdown do not trigger HTML serialization.
+   *
+   * @dataProvider markdownAngleBracketsProvider
+   */
+  public function testMarkdownAngleBracketsArePreserved(string $text): void {
+    $this->hostnameFilter->setMarkdownMode(TRUE);
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Provides Markdown autolinks, reference destinations and code examples.
+   */
+  public static function markdownAngleBracketsProvider(): array {
+    return [
+      'autolink' => ['See <https://example.com/page> & more'],
+      'reference destination' => ["[Shop][ref] & more\n\n[ref]: <https://example.com/page>"],
+      'inline code' => ['`List<T> & value`'],
+      'multiple backticks' => ['``List<T> & `value` ``'],
+      'multiline code span' => ["`List<T>\n& value`"],
+      'backtick fence' => ["```html\n<script>alert(1)</script> & <T>\n```"],
+      'tilde fence' => ["~~~html\n<script>alert(1)</script> & <T>\n~~~"],
+      'unclosed fence' => ["```html\n<script>alert(1)</script> & <T>"],
+      'indented code' => ["    List<T> & value\n    <script>alert(1)</script>"],
+      'code in blockquote' => ["> ```html\n> <script>alert(1)</script> & <T>\n> ```"],
+      'code in list' => ["- Example:\n\n  ```html\n  <script>alert(1)</script> & <T>\n  ```"],
+    ];
+  }
+
+  /**
+   * Tests JSON mode never HTML-encodes a payload that does not decode.
+   *
+   * @param string $input
+   *   The malformed or partial JSON.
+   * @param string $expected
+   *   The expected output.
+   *
+   * @dataProvider jsonModeProvider
+   */
+  public function testJsonModeFallback(string $input, string $expected): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $this->hostnameFilter->setJsonMode(TRUE);
+    $this->assertSame($expected, $this->hostnameFilter->filterText($input));
+  }
+
+  /**
+   * Data provider for testJsonModeFallback().
+   */
+  public static function jsonModeProvider(): array {
+    return [
+      'clean' => ['{"a": "x < y & z"', '{"a": "x < y & z"'],
+      'untrusted url' => [
+        '{"a": "see https://evil.com/x &", "b": "https://example.com/y"',
+        '{"a": "see  &", "b": "https://example.com/y"',
+      ],
+      'script and handler' => [
+        '{"a":"<img src=x onerror=alert(1)><script>alert(2)</script>"',
+        '{"a":"<img src="x">"',
+      ],
+      // The backslash of the \" that follows the URL must stay, or the JSON
+      // string would end at that quote.
+      'escaped quote after an untrusted url' => [
+        '{"a":"<a href=\"https://evil.com/x\">bad</a>","b":',
+        '{"a":"<a href=\"\">bad</a>","b":',
+      ],
+      'escaped quote after a script url' => [
+        '{"a":"<a href=\"javascript:alert(1)\">bad</a>","b":',
+        '{"a":"<a href=\"\">bad</a>","b":',
+      ],
+      // A provider can answer with prose although a schema was set.
+      'prose with a markdown link' => [
+        'See [the docs](https://evil.com/d) & more.',
+        'See the docs & more.',
+      ],
+    ];
+  }
+
+  /**
+   * Tests HTML is still filtered when Markdown constructs precede it.
+   *
+   * @dataProvider markdownWithHtmlProvider
+   */
+  public function testMarkdownDoesNotHideHtmlLinks(string $text): void {
+    $this->hostnameFilter->setMarkdownMode(TRUE);
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($text);
+    $this->assertStringNotContainsString('evil.com', $result);
+    $this->assertStringNotContainsString('javascript:', $result);
+  }
+
+  /**
+   * Provides HTML links alongside Markdown and malformed HTML tags.
+   */
+  public static function markdownWithHtmlProvider(): array {
+    return [
+      'after code' => ['`List<T>` <a href="https://evil.com">link</a>'],
+      'after autolink' => ['<https://example.com> <img src="https://evil.com/image.png">'],
+      'backticks inside attribute' => ['<a href="https://evil.com/`value`">link</a>'],
+      'malformed image' => ['<img/src="https://evil.com/image.png">'],
+      'malformed link' => ['<a/href="javascript:alert(1)">link</a>'],
+      'unmatched backtick' => ['` <a href="https://evil.com">link</a>'],
+    ];
+  }
+
+  /**
+   * Tests HTML consumers cannot bypass filtering with Markdown code syntax.
+   *
+   * @dataProvider htmlInMarkdownCodeProvider
+   */
+  public function testHtmlInMarkdownCodeIsFilteredByDefault(string $text): void {
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($text);
+    $this->assertStringNotContainsString('evil.com', $result);
+    $this->assertStringNotContainsString('onerror', $result);
+    $this->assertStringNotContainsString('<script', $result);
+  }
+
+  /**
+   * Provides raw HTML hidden from a Markdown parser by code syntax.
+   */
+  public static function htmlInMarkdownCodeProvider(): array {
+    return [
+      'indented image' => ['    <img src="https://evil.com/pixel" onerror="alert(1)">'],
+      'indented link' => ['    <a href="https://evil.com">Click</a>'],
+      'inline image' => ['`<img src="https://evil.com/pixel" onerror="alert(1)">`'],
+      'fenced script' => ["```html\n<script>alert(1)</script>\n```"],
+    ];
+  }
+
+  /**
+   * Tests that an invalid UTF-8 byte cannot hide a tag from the filter.
+   *
+   * @dataProvider invalidUtf8BeforeTagNameProvider
+   */
+  public function testInvalidUtf8BeforeTagNameIsFiltered(bool $markdown_mode, string $text): void {
+    $this->hostnameFilter->setMarkdownMode($markdown_mode);
+    $this->hostnameFilter->setAllowedDomains(['example.com']);
+    $result = $this->hostnameFilter->filterText($text);
+    // The HTML parser either drops the byte, and the filter removes the tag,
+    // or, from masterminds/html5 2.12 on, replaces it with U+FFFD as browsers
+    // do, after which "<" does not start a tag and the rest stays text. Either
+    // way no element may point to evil.com or run a handler.
+    $this->assertNoUnsafeElement($result);
+  }
+
+  /**
+   * Asserts that no element in markup loads evil.com or has an event handler.
+   *
+   * @param string $markup
+   *   The markup, read as a browser reads it: invalid UTF-8 bytes become
+   *   U+FFFD before the HTML is parsed.
+   */
+  private function assertNoUnsafeElement(string $markup): void {
+    $substitute = mb_substitute_character();
+    mb_substitute_character(0xFFFD);
+    $markup = mb_scrub($markup, 'UTF-8');
+    mb_substitute_character($substitute);
+    $fragment = (new HTML5(['disable_html_ns' => TRUE]))->loadHTMLFragment($markup);
+    $xpath = new \DOMXPath($fragment->ownerDocument);
+    $unsafe = [];
+    foreach ($xpath->query('.//@*', $fragment) as $attribute) {
+      if (str_contains($attribute->value, 'evil.com') || str_starts_with(strtolower($attribute->name), 'on')) {
+        $unsafe[] = $attribute->ownerElement->nodeName . '[' . $attribute->name . '="' . $attribute->value . '"]';
+      }
+    }
+    $this->assertSame([], $unsafe, $markup);
+  }
+
+  /**
+   * Provides tags whose name follows an invalid UTF-8 byte.
+   */
+  public static function invalidUtf8BeforeTagNameProvider(): array {
+    $cases = [
+      'image' => "<\x80img src=\"https://evil.com/beacon.png\">",
+      'event handler' => "<\x80img src=x onerror=\"fetch('https://evil.com')\">",
+      'meta refresh' => "<\xFFmeta http-equiv=\"refresh\" content=\"0;url=https://evil.com\">",
+      'link' => "<\xC3a href=\"https://evil.com\">link",
+      'stray byte next to html' => "<b>bold</b> \x80 <a href=\"https://evil.com\">link</a>",
+    ];
+    $data = [];
+    foreach ($cases as $name => $text) {
+      $data["$name, default mode"] = [FALSE, $text];
+      $data["$name, markdown mode"] = [TRUE, $text];
+    }
+    return $data;
+  }
+
+  /**
+   * Tests which text is detected as HTML markup.
+   *
+   * @dataProvider htmlMarkupDetectionProvider
+   */
+  public function testHtmlMarkupDetection(string $text, bool $expected): void {
+    $method = new \ReflectionMethod($this->hostnameFilter, 'containsHtmlMarkup');
+    $this->assertSame($expected, $method->invoke($this->hostnameFilter, $text));
+  }
+
+  /**
+   * Provides text with and without HTML markup.
+   */
+  public static function htmlMarkupDetectionProvider(): array {
+    return [
+      'no angle bracket' => ['A & B > C', FALSE],
+      'less-than before space' => ['a < b', FALSE],
+      'less-than before digit' => ['<1 & 2', FALSE],
+      'trailing less-than' => ['a & b <', FALSE],
+      'less-than before non-ASCII letter' => ["<\u{e9}t\u{e9} & caf\u{e9}", FALSE],
+      'start tag' => ['<a', TRUE],
+      'uppercase start tag' => ['<IMG', TRUE],
+      'end tag' => ['</x', TRUE],
+      'comment' => ['<!--', TRUE],
+      'processing instruction' => ['<?x', TRUE],
+      'invalid byte before tag name' => ["<\x80img", TRUE],
+      'invalid byte without tag' => ["A & B \x80", TRUE],
+    ];
+  }
+
+  /**
+   * Tests a per-request Markdown override is restored for the next caller.
+   */
+  public function testMarkdownModeOverrideIsRestored(): void {
+    $text = '    <img src="https://evil.com/pixel" onerror="alert(1)">';
+    $snapshot = $this->hostnameFilter->snapshotSettings();
+    $this->hostnameFilter->applySettings(new HostnameFilterDto(markdownMode: TRUE));
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+
+    $markdown_snapshot = $this->hostnameFilter->snapshotSettings();
+    $this->hostnameFilter->applySettings(new HostnameFilterDto(markdownMode: FALSE));
+    $this->assertStringNotContainsString('evil.com', $this->hostnameFilter->filterText($text));
+    $this->hostnameFilter->restoreSettings($markdown_snapshot);
+    $this->assertSame($text, $this->hostnameFilter->filterText($text));
+
+    $this->hostnameFilter->restoreSettings($snapshot);
+    $this->assertStringNotContainsString('evil.com', $this->hostnameFilter->filterText($text));
+  }
+
+  /**
+   * Tests jsonMode round trips through the DTO and snapshots.
+   */
+  public function testJsonModeSettingsRoundTrip(): void {
+    $snapshot = $this->hostnameFilter->snapshotSettings();
+    $this->hostnameFilter->applySettings(new HostnameFilterDto(jsonMode: TRUE));
+    $this->assertTrue($this->hostnameFilter->snapshotSettings()['jsonMode']);
+    $this->hostnameFilter->restoreSettings($snapshot);
+    $this->assertNull($this->hostnameFilter->snapshotSettings()['jsonMode']);
   }
 
 }

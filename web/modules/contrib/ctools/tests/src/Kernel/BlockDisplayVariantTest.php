@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\ctools\Event\BlockVariantEvent;
 use Drupal\ctools\Event\BlockVariantEvents;
@@ -14,6 +16,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @coversDefaultClass \Drupal\ctools\Plugin\DisplayVariant\BlockDisplayVariant
  * @group CTools
  */
+#[Group('CTools')]
+#[RunTestsInSeparateProcesses]
 class BlockDisplayVariantTest extends KernelTestBase {
 
   use ProphecyTrait;

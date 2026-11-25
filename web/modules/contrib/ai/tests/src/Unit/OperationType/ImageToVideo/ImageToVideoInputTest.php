@@ -26,6 +26,20 @@ class ImageToVideoInputTest extends TestCase {
   }
 
   /**
+   * Test getting and setting the optional prompt.
+   */
+  public function testPrompt(): void {
+    $input = $this->getInput();
+    // Defaults to NULL so image-only models are unaffected.
+    $this->assertNull($input->getPrompt());
+    $input->setPrompt('a cat playing the piano');
+    $this->assertEquals('a cat playing the piano', $input->getPrompt());
+    $this->assertEquals('a cat playing the piano', $input->toArray()['prompt']);
+    $input->setPrompt(NULL);
+    $this->assertNull($input->getPrompt());
+  }
+
+  /**
    * Helper function to get the events.
    *
    * @return \PHPUnit\Framework\MockObject\MockObject|\Drupal\ai\OperationType\ImageToVideo\ImageToVideoInput

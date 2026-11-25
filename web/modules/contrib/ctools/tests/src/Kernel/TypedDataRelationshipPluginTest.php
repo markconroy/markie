@@ -2,12 +2,16 @@
 
 namespace Drupal\Tests\ctools\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Plugin\Context\ContextInterface;
 
 /**
  * @coversDefaultClass \Drupal\ctools\Plugin\Relationship\TypedDataRelationship
  * @group CTools
  */
+#[Group('CTools')]
+#[RunTestsInSeparateProcesses]
 class TypedDataRelationshipPluginTest extends RelationshipsTestBase {
 
   /**
@@ -96,6 +100,31 @@ class TypedDataRelationshipPluginTest extends RelationshipsTestBase {
     $this->assertEquals('email', $relationship->getContextDefinition()->getDataType());
     $this->assertTrue($relationship->hasContextValue());
     $this->assertEquals($this->entities['user']->getEmail(), $relationship->getContextValue());
+  }
+
+  /**
+   * @covers ::getRelationshipValue
+   */
+  public function testRelationshipValue() {
+    /** @var \Drupal\ctools\Plugin\Relationship\TypedDataRelationship $nid_plugin */
+    $nid_plugin = $this->relationshipManager->createInstance('typed_data_relationship:entity:node:nid');
+    $nid_plugin->setContextValue('base', $this->entities['node1']);
+    $this->assertEquals($this->entities['node1']->id(), $nid_plugin->getRelationshipValue());
+
+    /** @var \Drupal\ctools\Plugin\Relationship\TypedDataRelationship $title_plugin */
+    $title_plugin = $this->relationshipManager->createInstance('typed_data_relationship:entity:node:title');
+    $title_plugin->setContextValue('base', $this->entities['node1']);
+    $this->assertEquals($this->entities['node1']->label(), $title_plugin->getRelationshipValue());
+
+    /** @var \Drupal\ctools\Plugin\Relationship\TypedDataRelationship $uid_plugin */
+    $uid_plugin = $this->relationshipManager->createInstance('typed_data_relationship:entity:node:uid');
+    $uid_plugin->setContextValue('base', $this->entities['node3']);
+    $this->assertEquals($this->entities['node3']->getOwnerId(), $uid_plugin->getRelationshipValue());
+
+    /** @var \Drupal\ctools\Plugin\Relationship\TypedDataRelationship $mail_plugin */
+    $mail_plugin = $this->relationshipManager->createInstance('typed_data_relationship:entity:user:mail');
+    $mail_plugin->setContextValue('base', $this->entities['user']);
+    $this->assertEquals($this->entities['user']->getEmail(), $mail_plugin->getRelationshipValue());
   }
 
 }

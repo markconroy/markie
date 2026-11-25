@@ -6,7 +6,7 @@ namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
-use Symfony\Component\Validator\Constraint;
+use Drupal\ai_validations\AiConstraintBase;
 
 /**
  * Ai text classification check constraint.
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraint;
   id: 'AiTextClassification',
   label: new TranslatableMarkup('AI Text Classification Check', [], ['context' => 'Validation']),
 )]
-class AiTextClassificationConstraint extends Constraint {
+class AiTextClassificationConstraint extends AiConstraintBase {
 
   /**
    * The message that will be shown if the constraint is violated.

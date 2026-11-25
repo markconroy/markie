@@ -66,7 +66,7 @@ final class AiAutomator extends ConfigEntityBase implements AiAutomatorInterface
   /**
    * The example ID.
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The example label.

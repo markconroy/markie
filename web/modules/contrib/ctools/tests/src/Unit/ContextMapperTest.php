@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\ctools\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -20,6 +21,7 @@ use Drupal\Tests\UnitTestCase;
  *
  * @group CTools
  */
+#[Group('CTools')]
 class ContextMapperTest extends UnitTestCase {
 
   use ProphecyTrait;

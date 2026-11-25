@@ -7,17 +7,18 @@ namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginBase;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "moderate",
- *   label = @Translation("Moderate text"),
- *   description = @Translation("Allow an LLM to provide moderation suggestions about the content."),
- *   operation_type = "moderation"
- * )
  */
+#[AiContentSuggestions(
+  id: 'moderate',
+  label: new TranslatableMarkup('Moderate text'),
+  description: new TranslatableMarkup('Allow an LLM to provide moderation suggestions about the content.'),
+  operation_type: 'moderation',
+)]
 final class Moderate extends AiContentSuggestionsPluginBase {
 
   /**

@@ -12,12 +12,16 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests getPluginResponse() by building the node add form for the 'page' type.
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
+#[RunTestsInSeparateProcesses]
 class GetPluginResponseTest extends KernelTestBase {
 
   /**
@@ -48,7 +52,7 @@ class GetPluginResponseTest extends KernelTestBase {
     NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
 
     // Set a current user that has the required AI suggestion permission.
-    $account = $this->createMock(AccountInterface::class);
+    $account = $this->createStub(AccountInterface::class);
     $account->method('hasPermission')
       ->willReturnCallback(
         fn(string $permission) => $permission === 'access ai content suggestion tools',
@@ -92,11 +96,11 @@ class GetPluginResponseTest extends KernelTestBase {
   private function buildPageNodeAddForm(string $operation = 'default'): array {
     $node = Node::create(['type' => 'page', 'uid' => 0]);
 
-    $form_object = $this->createMock(ContentEntityFormInterface::class);
+    $form_object = $this->createStub(ContentEntityFormInterface::class);
     $form_object->method('getEntity')->willReturn($node);
     $form_object->method('getOperation')->willReturn($operation);
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
     $form_state->method('getFormObject')->willReturn($form_object);
 
     // Minimal form structure with a title field to give getAllTextFields() a
@@ -170,7 +174,7 @@ class GetPluginResponseTest extends KernelTestBase {
 
     // Simulate the form state produced when the summarise_submit button is
     // clicked.
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
     $form_state->method('getTriggeringElement')
       ->willReturn(['#plugin' => 'summarise']);
     $form_state->method('getValue')
@@ -204,7 +208,7 @@ class GetPluginResponseTest extends KernelTestBase {
       ],
     ];
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
     $form_state->method('getTriggeringElement')
       ->willReturn(['#plugin' => $plugin_id]);
     $form_state->method('getValue')
@@ -237,7 +241,7 @@ class GetPluginResponseTest extends KernelTestBase {
       ],
     ];
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
     $form_state->method('getTriggeringElement')
       ->willReturn(['#plugin' => $plugin_id]);
     $form_state->method('getValue')

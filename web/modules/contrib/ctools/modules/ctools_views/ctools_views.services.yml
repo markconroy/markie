@@ -1,0 +1,5 @@
+services:
+  # Registered explicitly so the legacy hooks can reach it on Drupal < 11.1.
+  Drupal\ctools_views\Hook\CtoolsViewsHooks:
+    class: Drupal\ctools_views\Hook\CtoolsViewsHooks
+    autowire: true

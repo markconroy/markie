@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools_block\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -9,6 +11,8 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group ctools_block
  */
+#[Group('ctools_block')]
+#[RunTestsInSeparateProcesses]
 class EntityFieldBlockTest extends BrowserTestBase {
 
   /**

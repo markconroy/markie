@@ -3,12 +3,16 @@
 namespace Drupal\Tests\ai_content_suggestions\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests enabling ai_content_suggestions and its dependencies.
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
+#[RunTestsInSeparateProcesses]
 class InstallAiContentSuggestionsTest extends KernelTestBase {
 
   /**

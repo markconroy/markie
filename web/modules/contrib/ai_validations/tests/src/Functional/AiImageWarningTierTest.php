@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_validations\Functional;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\ai_validations_test\Plugin\AiProvider\ClassifierTestProvider;
 use Drupal\field\Entity\FieldConfig;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('ai_validations')]
 #[Group('3606131')]
+#[RunTestsInSeparateProcesses]
 class AiImageWarningTierTest extends BrowserTestBase {
 
   /**

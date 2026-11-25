@@ -2,12 +2,16 @@
 
 namespace Drupal\Tests\ctools\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Language\LanguageInterface;
 
 /**
  * @coversDefaultClass \Drupal\ctools\Plugin\Relationship\TypedDataEntityRelationship
  * @group CTools
  */
+#[Group('CTools')]
+#[RunTestsInSeparateProcesses]
 class TypedDataLanguageRelationshipPluginTest extends RelationshipsTestBase {
 
   /**

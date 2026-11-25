@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools_entity_mask\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\entity_mask_test\Entity\BlockContent;
 use Drupal\file\Entity\File;
 use Drupal\Tests\BrowserTestBase;
@@ -11,6 +13,8 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group ctools_entity_mask
  */
+#[Group('ctools_entity_mask')]
+#[RunTestsInSeparateProcesses]
 class DisplayTest extends BrowserTestBase {
 
   /**

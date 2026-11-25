@@ -4,6 +4,7 @@ namespace Drupal\ctools_block\Plugin\Block;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -15,6 +16,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\ctools_block\Plugin\Deriver\EntityFieldDeriver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,6 +27,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   deriver = "Drupal\ctools_block\Plugin\Deriver\EntityFieldDeriver",
  * )
  */
+#[Block(
+  id: 'entity_field',
+  deriver: EntityFieldDeriver::class,
+)]
 class EntityField extends BlockBase implements ContextAwarePluginInterface, ContainerFactoryPluginInterface {
 
   /**

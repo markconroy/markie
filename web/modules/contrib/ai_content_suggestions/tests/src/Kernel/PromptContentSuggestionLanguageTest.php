@@ -64,7 +64,9 @@ class PromptContentSuggestionLanguageTest extends KernelTestBase {
       FieldStorageConfig::create([
         'field_name' => 'body',
         'entity_type' => 'node',
-        'type' => 'text_with_summary',
+        // Drupal 12 moved the text_with_summary field type to a contributed
+        // module.
+        'type' => \Drupal::service('plugin.manager.field.field_type')->hasDefinition('text_with_summary') ? 'text_with_summary' : 'text_long',
       ])->save();
     }
     FieldConfig::create([

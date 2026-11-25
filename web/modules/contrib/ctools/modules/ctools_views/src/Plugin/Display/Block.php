@@ -34,13 +34,6 @@ class Block extends CoreBlock {
   protected $request;
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -50,7 +43,6 @@ class Block extends CoreBlock {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->filterManager = $container->get('plugin.manager.views.filter');
     $instance->request = $container->get('request_stack')->getCurrentRequest();
-    $instance->entityTypeManager = $container->get('entity_type.manager');
 
     return $instance;
   }
@@ -289,7 +281,6 @@ class Block extends CoreBlock {
 
           // If the current filter has a value saved in block configuration...
           if (isset($block_configuration['exposed'][$filter_key])) {
-            $identifier = $handler->options['expose']['identifier'];
             $this->mapConfigToHandler($handler, $block_configuration['exposed'][$filter_key]);
           }
 
@@ -304,27 +295,36 @@ class Block extends CoreBlock {
           }
           else {
             $handler->buildExposedForm($form['exposed'][$filter_key], $exposed_form_state);
+            $identifier = $handler->options['expose']['identifier'];
 
-            $form_field_present = isset($form['exposed'][$filter_key][$id]);
+            // An exposed operator nests the value element in a wrapper.
+            $element = &$form['exposed'][$filter_key];
+            $wrapper = $identifier . '_wrapper';
+            if (isset($element[$wrapper])) {
+              $element = &$element[$wrapper];
+            }
+
+            $form_field_present = isset($element[$identifier]);
             $block_config_present = isset($block_configuration['exposed'][$filter_key]);
 
-            $form_field_type = $form_field_present ? $form['exposed'][$filter_key][$id]['#type'] : FALSE;
+            $form_field_type = $element[$identifier]['#type'] ?? FALSE;
             $filter_plugin_id = $block_config_present ? $block_configuration['exposed'][$filter_key]['plugin_id'] : FALSE;
             if ($form_field_present && $block_config_present) {
 
               if ($form_field_type == 'select') {
                 // Single-value selects get default value set to 'All'
                 // in buildExposedForm(), so set their defaults manually.
-                $form['exposed'][$filter_key][$id]['#default_value'] = $block_configuration['exposed'][$filter_key]['value'] ?? NULL;
+                $element[$identifier]['#default_value'] = $block_configuration['exposed'][$filter_key]['value'] ?? NULL;
               }
 
               elseif ($form_field_type == 'entity_autocomplete' && $filter_plugin_id == 'taxonomy_index_tid') {
                 // Entity reference autocomplete fields need their values
                 // converted back to a string for the textfield input.
                 $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple($block_configuration['exposed'][$filter_key]['value']);
-                $form['exposed'][$filter_key][$id]['#default_value'] = EntityAutocomplete::getEntityLabels($terms);
+                $element[$identifier]['#default_value'] = EntityAutocomplete::getEntityLabels($terms);
               }
             }
+            unset($element);
           }
 
           $form['exposed'][$filter_key]['exposed'] = [
@@ -431,6 +431,7 @@ class Block extends CoreBlock {
           $handler_form_state = new FormState();
           $handler_form_state->setValues($values);
           $handler->validateExposed($form, $handler_form_state);
+          $filter_key = "filter-{$key}";
 
           /*
            * Select list doesn't change validated_exposed_input value
@@ -438,8 +439,16 @@ class Block extends CoreBlock {
            */
           // @todo Determine whether this is actually necessary or not.
           if (isset($handler->options['type']) && $handler->options['type'] === 'select') {
-            if ($values['filter-' . $key][$identifier] === 'All') {
-              $handler->validated_exposed_input = NULL;
+            $wrapper = !empty($values[$filter_key][$identifier . '_wrapper']) ? $identifier . '_wrapper' : FALSE;
+            if ($wrapper) {
+              if ($values[$filter_key][$wrapper][$identifier] === 'All') {
+                $handler->validated_exposed_input = NULL;
+              }
+            }
+            else {
+              if ($values[$filter_key][$identifier] === 'All') {
+                $handler->validated_exposed_input = NULL;
+              }
             }
           }
           foreach ($handler_form_state->getErrors() as $name => $message) {
@@ -496,6 +505,9 @@ class Block extends CoreBlock {
     // Save "Configure filters" / "Disable filters" settings to block
     // configuration.
     if (!empty($allow_settings['configure_filters'])) {
+      // Core passes the parent form; block_field passes the settings subform.
+      $settings_form = $form['settings'] ?? $form;
+
       // Store the validated and raw exposed filters.
       $handlers = $this->view->getDisplay()->getHandlers('filter');
 
@@ -513,14 +525,14 @@ class Block extends CoreBlock {
             if ($wrapper) {
               $configuration['exposed'][$config_key] = $this->extractExposedValues(
                 $handler,
-                $form['settings']['exposed'][$config_key][$wrapper],
+                $settings_form['exposed'][$config_key][$wrapper],
                 $values[$config_key][$wrapper]
               );
             }
             else {
               $configuration['exposed'][$config_key] = $this->extractExposedValues(
                 $handler,
-                $form['settings']['exposed'][$config_key],
+                $settings_form['exposed'][$config_key],
                 $values[$config_key]
               );
             }
@@ -901,6 +913,7 @@ class Block extends CoreBlock {
     // Grouped filters store values at a different key,
     // which we match, to match the handler's schema.
     elseif ($handler->isAGroup()) {
+      $identifier = $handler->options['group_info']['identifier'];
       $is_multiple = $handler->multipleExposedInput();
       $value_key = $is_multiple ? 'default_group_multiple' : 'default_group';
       if ($is_multiple) {

@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Depends;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Uuid\UuidInterface;
@@ -18,6 +20,7 @@ use Drupal\Tests\UnitTestCase;
  *
  * @group Ctools
  */
+#[Group('Ctools')]
 class VariantCollectionTraitTest extends UnitTestCase {
 
   use ProphecyTrait;
@@ -77,6 +80,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    *
    * @depends testGetVariants
    */
+  #[Depends('testGetVariants')]
   public function testGetVariantsSort(VariantPluginCollection $variants) {
     $this->assertEquals(['bar' => 'bar', 'foo' => 'foo'], $variants->getInstanceIds());
   }
@@ -122,6 +126,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    *
    * @depends testAddVariant
    */
+  #[Depends('testAddVariant')]
   public function testGetVariant($data) {
     [$trait_object, $uuid, $plugin] = $data;
     $this->manager->createInstance()->shouldNotBeCalled();
@@ -135,6 +140,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    *
    * @depends testGetVariant
    */
+  #[Depends('testGetVariant')]
   public function testRemoveVariant($data) {
     [$trait_object, $uuid] = $data;
 
@@ -148,6 +154,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    *
    * @depends testRemoveVariant
    */
+  #[Depends('testRemoveVariant')]
   public function testGetVariantException($data) {
     [$trait_object, $uuid] = $data;
     // Attempt to retrieve a variant that has been removed.

@@ -2,13 +2,14 @@
 
 namespace Drupal\ai_assistant_api\Service;
 
-use Drupal\ai_assistant_api\Event\AiAssistantPassContextToAgentEvent;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface;
+use Drupal\ai_assistant_api\Event\AiAssistantPassContextToAgentEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -65,11 +66,13 @@ class AgentRunner {
    *   Whether to run in verbose mode.
    * @param array $context
    *   The context from assistant.
+   * @param bool $streaming
+   *   Whether to stream the output.
    *
    * @return \Drupal\ai\OperationType\Chat\ChatOutput
    *   The chat output.
    */
-  public function runAsAgent(string $assistant_id, array $chat_history, array $defaults, string $job_id, bool $verbose_mode = FALSE, array $context = []): ChatOutput {
+  public function runAsAgent(string $assistant_id, array $chat_history, array $defaults, string $job_id, bool $verbose_mode = FALSE, array $context = [], bool $streaming = FALSE): ChatOutput {
     $this->jobId = $job_id;
     /** @var \Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface $agent */
     $agent = $this->aiAgentPluginManager->createInstance($assistant_id);
@@ -109,6 +112,9 @@ class AgentRunner {
         $new_messages[] = new ChatMessage($message['role'], $message['message']);
       }
       $input = new ChatInput($new_messages);
+      if ($streaming) {
+        $input->setStreamedOutput(TRUE);
+      }
       $agent->setChatInput($input);
       $agent->setAiProvider($this->aiProvider->createInstance($defaults['provider_id']));
       $agent->setModelName($defaults['model_id']);
@@ -122,16 +128,21 @@ class AgentRunner {
     $event = new AiAssistantPassContextToAgentEvent($agent, $context);
     $this->eventDispatcher->dispatch($event, AiAssistantPassContextToAgentEvent::EVENT_NAME);
     $agent->determineSolvability();
-    // If the agent is still running, we store it for the next run.
-    if (!$agent->isFinished()) {
-      $this->tempStore->get('ai_assistant_threads')->set($job_id, $agent->toArray());
-    }
-    else {
-      // Cleanup when finished.
-      $this->tempStore->get('ai_assistant_threads')->delete($job_id);
-    }
     // Job will always be solvable if we are here.
     $response = $agent->solve();
+
+    if ($response instanceof StreamedChatMessageIteratorInterface) {
+      $response->addCallback(function () use ($agent, $job_id): void {
+        $this->storeAgentState($agent, $job_id);
+      });
+      return new ChatOutput(
+        $response,
+        [$response],
+        [],
+      );
+    }
+
+    $this->storeAgentState($agent, $job_id);
 
     // Check if tools was used.
     $message = new ChatMessage('assistant', is_string($response) ? $response : '');
@@ -145,6 +156,24 @@ class AgentRunner {
       [$response],
       [],
     );
+  }
+
+  /**
+   * Stores or removes the agent state after its current response completes.
+   *
+   * @param \Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface $agent
+   *   The agent to persist.
+   * @param string $job_id
+   *   The agent thread ID.
+   */
+  private function storeAgentState(ConfigAiAgentInterface $agent, string $job_id): void {
+    $temp_store = $this->tempStore->get('ai_assistant_threads');
+    if (!$agent->isFinished()) {
+      $temp_store->set($job_id, $agent->toArray());
+    }
+    else {
+      $temp_store->delete($job_id);
+    }
   }
 
 }

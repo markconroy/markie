@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ctools_views\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -10,6 +12,8 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *
  * @group ctools_views
  */
+#[Group('ctools_views')]
+#[RunTestsInSeparateProcesses]
 class CToolsViewsSchemaValidationTest extends KernelTestBase {
 
   /**

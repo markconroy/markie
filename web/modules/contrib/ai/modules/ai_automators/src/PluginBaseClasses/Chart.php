@@ -85,7 +85,7 @@ class Chart extends RuleBase implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function verifyValue(ContentEntityInterface $entity, $value, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
-    if (empty(str_getcsv($value))) {
+    if (empty(str_getcsv($value, ',', '"', '\\'))) {
       return FALSE;
     }
     return TRUE;
@@ -100,10 +100,10 @@ class Chart extends RuleBase implements AiAutomatorTypeInterface {
     $data = [];
     foreach ($cols as $colKey => $col) {
       if (strpos($col, ';') !== FALSE) {
-        $rows = str_getcsv($col, ';');
+        $rows = str_getcsv($col, ';', '"', '\\');
       }
       else {
-        $rows = str_getcsv($col, ',');
+        $rows = str_getcsv($col, ',', '"', '\\');
       }
       if (count($rows) < 2) {
         continue;

@@ -6,7 +6,7 @@ namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
-use Symfony\Component\Validator\Constraint;
+use Drupal\ai_validations\AiConstraintBase;
 
 /**
  * Ai check constraint.
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraint;
   id: 'AiTextPrompt',
   label: new TranslatableMarkup('AI check', [], ['context' => 'Validation']),
 )]
-class AiTextConstraint extends Constraint {
+class AiTextConstraint extends AiConstraintBase {
 
   /**
    * Prompt.

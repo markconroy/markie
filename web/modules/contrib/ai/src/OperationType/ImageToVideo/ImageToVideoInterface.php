@@ -19,7 +19,7 @@ interface ImageToVideoInterface extends OperationTypeInterface {
   /**
    * Generate video from image.
    *
-   * @param string|array|\Drupal\ai\Operation\ImageToVideo\ImageToVideoInput $input
+   * @param string|array|\Drupal\ai\OperationType\ImageToVideo\ImageToVideoInput $input
    *   The image to generate video from or a binary.
    * @param string $model_id
    *   The model id to use.

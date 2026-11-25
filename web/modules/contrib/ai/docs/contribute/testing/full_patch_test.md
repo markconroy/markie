@@ -319,8 +319,19 @@ If you are testing against a dev release, the JS components are not built and yo
 
 ## Upgrade test (on first run only)
 1. Now run `ddev composer require 'drupal/ai:1.3.x-dev@dev'` to get the latest changes in the 1.3.x branch.
-2. Run database updates with `ddev drush updb -y`. Usually this is not needed for patch releases, but run it to be sure.
-3. Clear caches with `ddev drush cr`
+2. The dev release does not ship built JS components, so rebuild them (you need nodejs 20+):
+    1. `cd web/modules/contrib/ai/ui/json-schema-editor`
+    2. `npm install`
+    3. `npm run build`
+    4. `cd ../mdxeditor`
+    5. `npm install`
+    6. `npm run build`
+    7. `cd ../../modules/ai_ckeditor/`
+    8. `npm install`
+    9. `npm run build`
+    10. Return to your project root.
+3. Run database updates with `ddev drush updb -y`. Usually this is not needed for patch releases, but run it to be sure.
+4. Clear caches with `ddev drush cr`
 
 ## Re-test the base functionality
 1. Now rerun all test categories above to ensure everything still works after the upgrade.

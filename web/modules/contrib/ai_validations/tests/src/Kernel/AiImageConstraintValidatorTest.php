@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_validations\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ai_validations\Plugin\Validation\Constraint\AiImageConstraint;
 use Drupal\ai_validations\Plugin\Validation\Constraint\AiImageConstraintValidator;
@@ -25,6 +26,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[Group('ai_validations')]
 #[Group('3606131')]
+#[RunTestsInSeparateProcesses]
 class AiImageConstraintValidatorTest extends KernelTestBase {
 
   /**

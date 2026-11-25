@@ -51,9 +51,9 @@ class AiPrompt extends ConfigEntityBase implements AiPromptInterface {
   /**
    * The AI Prompt ID.
    *
-   * @var string
+   * @var string|null
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The AI Prompt label.

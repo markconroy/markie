@@ -3,12 +3,16 @@
 namespace Drupal\Tests\ai_content_suggestions\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test so calling the API endpoints works via the base class.
  *
  * @group ai_content_suggestions
  */
+#[Group('ai_content_suggestions')]
+#[RunTestsInSeparateProcesses]
 class TestApiEndpointTest extends KernelTestBase {
 
   /**

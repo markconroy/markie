@@ -371,9 +371,28 @@ class ProviderProxy {
       // If the output is a none-streamed ChatOutput we apply host validation.
       // The DTO (if any) is already applied on the singleton at this point.
       if ($response instanceof ChatOutput && $response->getNormalized() instanceof ChatMessage) {
-        // Filter the content.
-        $new_text = $this->hostnameFilterService->filterText($response->getNormalized()->getText());
-        $response->getNormalized()->setText($new_text);
+        // When a structured output schema was requested the response is a
+        // JSON payload; put the filter in JSON mode so even a malformed
+        // payload is never pushed through the HTML round trip. An explicit
+        // jsonMode on the caller's DTO wins over this auto-enable. Scoped
+        // to this call only via snapshot/restore.
+        $json_snapshot = NULL;
+        if ($arguments[0] instanceof ChatInput
+          && $arguments[0]->getChatStructuredJsonSchema() !== []
+          && ($arguments[0]->getHostnameFilter()?->jsonMode) === NULL) {
+          $json_snapshot = $this->hostnameFilterService->snapshotSettings();
+          $this->hostnameFilterService->setJsonMode(TRUE);
+        }
+        try {
+          // Filter the content.
+          $new_text = $this->hostnameFilterService->filterText($response->getNormalized()->getText());
+          $response->getNormalized()->setText($new_text);
+        }
+        finally {
+          if ($json_snapshot !== NULL) {
+            $this->hostnameFilterService->restoreSettings($json_snapshot);
+          }
+        }
       }
       $this->eventDispatcher->dispatch($post_generate_event, PostGenerateResponseEvent::EVENT_NAME);
       // Get a potential new response from the event.

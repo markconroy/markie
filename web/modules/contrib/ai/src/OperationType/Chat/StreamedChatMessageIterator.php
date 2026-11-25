@@ -924,7 +924,29 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
     $raw = $this->buffer;
     $this->buffer = '';
 
-    return $this->getHostnameFilterService()->filterText($raw);
+    $service = $this->getHostnameFilterService();
+
+    // A structured output stream carries partial JSON in each flush, which
+    // the HTML round trip would mangle; JSON mode keeps the structure. An
+    // explicit jsonMode on the caller's DTO wins. Scoped via snapshot/restore
+    // because the filter service is a request-wide singleton.
+    if ($this->input instanceof ChatInput
+      && $this->input->getChatStructuredJsonSchema() !== []
+      && ($this->input->getHostnameFilter()?->jsonMode) === NULL) {
+      $snapshot = $service->snapshotSettings();
+      // Plain text mode would skip the HTML checks that JSON mode keeps, so
+      // it only stays on when the caller asked for it.
+      $service->setPlainTextMode($this->input->getHostnameFilter()?->plainTextMode === TRUE);
+      $service->setJsonMode(TRUE);
+      try {
+        return $service->filterText($raw);
+      }
+      finally {
+        $service->restoreSettings($snapshot);
+      }
+    }
+
+    return $service->filterText($raw);
   }
 
   /**

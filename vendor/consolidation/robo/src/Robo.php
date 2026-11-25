@@ -3,6 +3,7 @@
 namespace Robo;
 
 use Composer\Autoload\ClassLoader;
+use League\Container\Argument\Literal\StringArgument;
 use League\Container\Container;
 use League\Container\ContainerAwareInterface;
 use League\Container\Definition\DefinitionInterface;
@@ -25,8 +26,8 @@ use Symfony\Component\Process\Process;
  */
 class Robo
 {
-    const APPLICATION_NAME = 'Robo';
-    private const VERSION = '5.2.3';
+    public const APPLICATION_NAME = 'Robo';
+    private const VERSION = '5.2.4';
 
     /**
      * The currently active container object, or NULL if not initialized yet.
@@ -335,8 +336,8 @@ class Robo
         self::addShared($container, 'symfonyStyleInjector', \Robo\Symfony\SymfonyStyleInjector::class);
         self::addShared($container, 'consoleIOInjector', \Robo\Symfony\ConsoleIOInjector::class);
         self::addShared($container, 'parameterInjection', \Consolidation\AnnotatedCommand\ParameterInjection::class)
-            ->addMethodCall('register', ['Symfony\Component\Console\Style\SymfonyStyle', 'symfonyStyleInjector'])
-            ->addMethodCall('register', ['Robo\Symfony\ConsoleIO', 'consoleIOInjector']);
+            ->addMethodCall('register', [new StringArgument('Symfony\Component\Console\Style\SymfonyStyle'), 'symfonyStyleInjector'])
+            ->addMethodCall('register', [new StringArgument('Robo\Symfony\ConsoleIO'), 'consoleIOInjector']);
         self::addShared($container, 'commandProcessor', \Consolidation\AnnotatedCommand\CommandProcessor::class)
             ->addArgument('hookManager')
             ->addMethodCall('setFormatterManager', ['formatterManager'])
@@ -547,7 +548,7 @@ class Robo
         // If the instance is a Symfony Command, register it with
         // the application
         if ($instance instanceof Command) {
-            $app->addCommand($instance);
+            static::addCommandToApplication($app, $instance);
             return $instance;
         }
 
@@ -555,9 +556,28 @@ class Robo
         $commandFactory = $container->get('commandFactory');
         $commandList = $commandFactory->createCommandsFromClass($instance);
         foreach ($commandList as $command) {
-            $app->addCommand($command);
+            static::addCommandToApplication($app, $command);
         }
         return $instance;
+    }
+
+    /**
+     * Add a command to any Symfony Console application.
+     *
+     * Symfony Console < 7.4 has no Application::addCommand(), and $app is not
+     * always a \Robo\Application, which provides it on every version.
+     *
+     * @param \Symfony\Component\Console\Application $app
+     * @param \Symfony\Component\Console\Command\Command $command
+     *
+     * @return null|\Symfony\Component\Console\Command\Command
+     */
+    public static function addCommandToApplication($app, Command $command)
+    {
+        if (method_exists($app, 'addCommand')) {
+            return $app->addCommand($command);
+        }
+        return $app->add($command);
     }
 
     /**

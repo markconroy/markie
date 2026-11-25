@@ -165,11 +165,6 @@ class AiAssistantApiRunner {
    */
   public function setAssistant(AiAssistant $assistant) {
     $this->assistant = $assistant;
-
-    // Generate the thread id.
-    if ($this->shouldStoreSession() && !$this->threadId) {
-      $this->threadId = $this->generateUniqueKey();
-    }
   }
 
   /**
@@ -255,18 +250,27 @@ class AiAssistantApiRunner {
     }
     // Otherwise, keep a bounded, rotating pool of concurrent threads per
     // owner instead of a single persistent one: reuse the first free slot,
-    // or evict the oldest once the pool is full. This is a stopgap; real
-    // garbage collection would be an improvement.
+    // or evict the least recently used once the pool is full. This is a
+    // stopgap; real garbage collection would be an improvement.
     $uid = $this->currentUser->id();
     $pool_size = 10;
+    $evicted_key = "assistant_thread_{$uid}_0";
+    $oldest = PHP_INT_MAX;
     for ($i = 0; $i <= $pool_size; $i++) {
       $key = "assistant_thread_{$uid}_{$i}";
       if (!$chatMemory->hasThread($key)) {
         return $key;
       }
+      $messages = $chatMemory->loadMessages($key);
+      $last_used = $messages ? (int) end($messages)->getTimestamp() : 0;
+      if ($last_used < $oldest) {
+        $oldest = $last_used;
+        $evicted_key = $key;
+      }
     }
-    $evicted_key = "assistant_thread_{$uid}_0";
     $chatMemory->deleteThread($evicted_key);
+    // Drop the evicted thread's output contexts etc. so they don't carry over.
+    $this->getTempStore()->delete($evicted_key);
     return $evicted_key;
   }
 
@@ -326,6 +330,7 @@ class AiAssistantApiRunner {
         $this->getThreadsKey(),
         $this->getVerboseMode(),
         $this->getContext(),
+        $this->streaming,
       );
     }
 
@@ -355,12 +360,12 @@ class AiAssistantApiRunner {
           $this->usingAction = TRUE;
           $instance = $this->actions->createInstance($action['plugin'], $this->assistant->get('actions_enabled')[$action['plugin']] ?? []);
           $instance->setAssistant($this->assistant);
-          $instance->setThreadId($this->threadId);
+          $instance->setThreadId($this->getThreadsKey());
           $instance->setAiProvider($this->aiProvider->createInstance($defaults['provider_id']));
           $instance->setMessages($this->getMessageHistory());
           // Pass the assistant and the thread id so it can be tagged.
           $action['ai_assistant_api'] = $this->assistant->id();
-          $action['thread_id'] = $this->threadId;
+          $action['thread_id'] = $this->getThreadsKey();
           $instance->triggerAction($action['action'], $action);
         }
       }
@@ -465,7 +470,7 @@ class AiAssistantApiRunner {
   protected function assistantMessage($pre_prompt = FALSE) {
     $connect = $this->getProviderAndModel();
     $provider = $this->aiProvider->createInstance($connect['provider_id']);
-    $assistant_message = $this->assistantMessageBuilder->buildMessage($this->assistant, $this->threadId, $pre_prompt, $this->context);
+    $assistant_message = $this->assistantMessageBuilder->buildMessage($this->assistant, $this->getThreadsKey(), $pre_prompt, $this->context);
     // Let other modules change the system role.
     $event = new AiAssistantSystemRoleEvent($assistant_message);
     $this->eventDispatcher->dispatch($event, AiAssistantSystemRoleEvent::EVENT_NAME);
@@ -517,7 +522,7 @@ class AiAssistantApiRunner {
       'ai_assistant_api',
       'ai_assistant_api_assistant_message',
       'ai_assistant_api_assistant_message_' . $this->assistant->id(),
-      'ai_assistant_thread_' . $this->threadId,
+      'ai_assistant_thread_' . $this->getThreadsKey(),
     ];
 
     if ($pre_prompt) {
@@ -547,16 +552,16 @@ class AiAssistantApiRunner {
    *   The output contexts.
    */
   public function getOutputContexts() {
-    return $this->getTempStore()->get($this->threadId)['output_contexts'] ?? [];
+    return $this->getTempStore()->get($this->getThreadsKey())['output_contexts'] ?? [];
   }
 
   /**
    * Reset the output contexts.
    */
   public function resetOutputContexts() {
-    $session = $this->getTempStore()->get($this->threadId);
+    $session = $this->getTempStore()->get($this->getThreadsKey());
     $session['output_contexts'] = [];
-    $this->getTempStore()->set($this->threadId, $session);
+    $this->getTempStore()->set($this->getThreadsKey(), $session);
   }
 
   /**
@@ -566,16 +571,16 @@ class AiAssistantApiRunner {
    *   The output structured results.
    */
   public function getStructuredResults() {
-    return $this->getTempStore()->get($this->threadId)['structured_results'] ?? [];
+    return $this->getTempStore()->get($this->getThreadsKey())['structured_results'] ?? [];
   }
 
   /**
    * Resets the output data structure.
    */
   public function resetStructuredResults() {
-    $session = $this->getTempStore()->get($this->threadId);
+    $session = $this->getTempStore()->get($this->getThreadsKey());
     $session['structured_results'] = [];
-    $this->getTempStore()->set($this->threadId, $session);
+    $this->getTempStore()->set($this->getThreadsKey(), $session);
   }
 
   /**
@@ -591,7 +596,7 @@ class AiAssistantApiRunner {
         'role' => $message->getRole(),
         'message' => $message->getText(),
         'timestamp' => $message->getTimestamp(),
-      ], $chatMemory->loadMessages($this->threadId));
+      ], $chatMemory->loadMessages($this->getThreadsKey()));
     }
     // Otherwise just return the last message.
     if (isset($this->userMessage) && $this->userMessage instanceof UserMessage) {
@@ -607,7 +612,7 @@ class AiAssistantApiRunner {
    * Reset the message history.
    */
   public function resetMessageHistory() {
-    $this->assistant->getChatMemory()?->clearMessages($this->threadId);
+    $this->assistant->getChatMemory()?->clearMessages($this->getThreadsKey());
   }
 
   /**
@@ -686,7 +691,7 @@ class AiAssistantApiRunner {
    *   The message to add.
    */
   protected function addMessageToSession($role, $message) {
-    $this->assistant->getChatMemory()?->appendMessages($this->threadId, [
+    $this->assistant->getChatMemory()?->appendMessages($this->getThreadsKey(), [
       new ChatMessage($role, $message, [], time()),
     ]);
   }

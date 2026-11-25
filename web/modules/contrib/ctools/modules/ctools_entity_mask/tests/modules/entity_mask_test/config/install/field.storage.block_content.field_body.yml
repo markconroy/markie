@@ -7,7 +7,7 @@ dependencies:
 id: block_content.field_body
 field_name: field_body
 entity_type: block_content
-type: text_with_summary
+type: text_long
 settings: {  }
 module: text
 locked: false

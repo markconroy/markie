@@ -1,0 +1,39 @@
+request:
+  messages:
+  - role: user
+    text: "structured-json-filter-test-trigger"
+    images: []
+    tools: null
+    tool_id: null
+  debug_data: {}
+  chat_tools: null
+  chat_structured_json_schema:
+    name: content_item
+    description: null
+    strict: false
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+      required:
+        - title
+        - body
+  chat_strict_schema: false
+response:
+  normalized:
+    role: assistant
+    text: '{"title":"Hello","body":"<p>Text <a href=\"https://example.com/a\">ok</a> &amp; x < y</p>","count":5,"empty":{}}'
+    images: []
+    tools: null
+    tool_id: null
+  rawOutput: []
+  metadata: {}
+  tokenUsage:
+    input: null
+    output: null
+    total: null
+    reasoning: null
+    cached: null

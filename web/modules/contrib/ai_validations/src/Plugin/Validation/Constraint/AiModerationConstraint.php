@@ -6,7 +6,7 @@ namespace Drupal\ai_validations\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Validation\Attribute\Constraint as ConstraintAttribute;
-use Symfony\Component\Validator\Constraint;
+use Drupal\ai_validations\AiConstraintBase;
 
 /**
  * AI moderation constraint.
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraint;
   id: 'AiModeration',
   label: new TranslatableMarkup('AI Moderation Check', [], ['context' => 'Validation']),
 )]
-class AiModerationConstraint extends Constraint {
+class AiModerationConstraint extends AiConstraintBase {
 
   /**
    * Comma-separated list of moderation categories to watch.

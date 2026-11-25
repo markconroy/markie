@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\ctools\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Block\BlockPluginInterface;
@@ -15,6 +16,7 @@ use Drupal\Tests\UnitTestCase;
  *
  * @group CTools
  */
+#[Group('CTools')]
 class BlockPluginCollectionTest extends UnitTestCase {
 
   use ProphecyTrait;

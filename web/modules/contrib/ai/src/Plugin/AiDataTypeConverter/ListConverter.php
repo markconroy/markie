@@ -73,7 +73,7 @@ class ListConverter extends AiDataTypeConverterPluginBase {
     }
     elseif (is_string($value)) {
       // Try CSV (handles quoted commas).
-      $csv = str_getcsv(trim($value));
+      $csv = str_getcsv(trim($value), ',', '"', '\\');
       // If CSV produced multiple items OR the single item contained a comma.
       if (count($csv) > 1 || str_contains(trim($value), ',')) {
         // Trim and drop empty segments.

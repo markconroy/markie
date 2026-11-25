@@ -34,7 +34,7 @@ class ImageToVideoOutput implements OutputInterface {
    * The constructor.
    *
    * @param \Drupal\ai\OperationType\GenericType\VideoFile[] $normalized
-   *   The audio file.
+   *   The video files.
    * @param mixed $rawOutput
    *   The raw output from the AI provider.
    * @param mixed $metadata
@@ -47,10 +47,10 @@ class ImageToVideoOutput implements OutputInterface {
   }
 
   /**
-   * Returns a audio file object.
+   * Returns the video file objects.
    *
    * @return \Drupal\ai\OperationType\GenericType\VideoFile[]
-   *   The audio file object.
+   *   The video file objects.
    */
   public function getNormalized(): array {
     return $this->normalized;

@@ -6,17 +6,18 @@ namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ai_content_suggestions\Attribute\AiContentSuggestions;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the ai_content_suggestions.
- *
- * @AiContentSuggestions(
- *   id = "title_suggest",
- *   label = @Translation("Suggest title"),
- *   description = @Translation("Allow an LLM to suggest an SEO-friendly title for the content."),
- *   operation_type = "chat"
- * )
  */
+#[AiContentSuggestions(
+  id: 'title_suggest',
+  label: new TranslatableMarkup('Suggest title'),
+  description: new TranslatableMarkup('Allow an LLM to suggest an SEO-friendly title for the content.'),
+  operation_type: 'chat',
+)]
 final class Title extends AiContentSuggestionsPluginBase {
 
   /**

@@ -1,0 +1,16 @@
+# Patterns for deprecations that the module deliberately does not fix yet.
+# GitLab CI appends core's own .deprecation-ignore.txt to this file.
+# See https://www.drupal.org/node/3285162 for the format.
+
+# Symfony's DebugClassLoader asks ctools to add native return types that core
+# interfaces and base classes "might add". ctools' plugins, forms, contexts and
+# storage classes are extended by Panels, Page Manager and other modules, so
+# adding native return types here would fatally break those subclasses. Remove
+# this once core declares the native types and downstream has caught up.
+%Method "[^"]+::[^"]+\(\)" might add "[^"]+" as a native return type declaration in the future. Do the same in (?:implementation|child class) "Drupal\\(ctools\w*|entity_mask_test)\\[^"]+" now to avoid errors or add an explicit @return annotation to suppress this message%
+
+# Twig 3.31 announces a new "bool $check" argument for
+# FilesystemLoader::addPath(). Core's own loader subclass does not declare it
+# yet and core's ignore file has no entry for it, so every test that renders a
+# template reports it. Remove this once core handles it.
+%The "Drupal\\Core\\Template\\Loader\\FilesystemLoader::addPath\(\)" method will require a new "bool \$check" argument in the next major version of its parent class "Twig\\Loader\\FilesystemLoader", not defining it is deprecated\.%

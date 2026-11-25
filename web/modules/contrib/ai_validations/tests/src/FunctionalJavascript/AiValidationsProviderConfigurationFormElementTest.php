@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_validations\FunctionalJavascript;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -27,6 +28,8 @@ use Drupal\user\UserInterface;
  * @group 3586397
  */
 #[RunTestsInSeparateProcesses]
+#[Group('ai_validations')]
+#[Group('3586397')]
 class AiValidationsProviderConfigurationFormElementTest extends WebDriverTestBase {
 
   use ContentTypeCreationTrait;

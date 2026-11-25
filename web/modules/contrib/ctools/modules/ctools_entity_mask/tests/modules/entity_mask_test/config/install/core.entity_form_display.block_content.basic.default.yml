@@ -17,11 +17,10 @@ bundle: basic
 mode: default
 content:
   field_body:
-    type: text_textarea_with_summary
+    type: text_textarea
     weight: 1
     settings:
       rows: 9
-      summary_rows: 3
       placeholder: ''
     third_party_settings: {  }
     region: content

@@ -6,6 +6,12 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\ai\Dto\HostnameFilterDto;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\CommonMark\Node\Block\HtmlBlock;
+use League\CommonMark\Extension\CommonMark\Node\Inline\HtmlInline;
+use League\CommonMark\Node\Inline\Text;
+use League\CommonMark\Parser\MarkdownParser;
 use Masterminds\HTML5;
 
 /**
@@ -45,11 +51,33 @@ class HostnameFilter {
   protected ?bool $plainTextMode = NULL;
 
   /**
+   * Whether the consumer renders Markdown rather than HTML.
+   */
+  protected bool $markdownMode = FALSE;
+
+  /**
+   * Whether the filtered text is known to be a JSON payload.
+   *
+   * JSON payloads are auto-detected regardless of this flag; setting it
+   * additionally guarantees that a payload that fails to decode (malformed
+   * or truncated JSON) is filtered as plain text instead of being pushed
+   * through the HTML round trip, which would corrupt its structure.
+   *
+   * @var bool|null
+   */
+  protected ?bool $jsonMode = NULL;
+
+  /**
    * HTML5 parser instance.
    *
    * @var \Masterminds\HTML5
    */
   private HTML5 $html5;
+
+  /**
+   * Markdown parser used to distinguish HTML from code and autolinks.
+   */
+  private ?MarkdownParser $markdownParser = NULL;
 
   /**
    * URL-bearing attributes by tag.
@@ -119,11 +147,35 @@ class HostnameFilter {
 
     // If plain text mode is enabled, filter as plain text.
     if ($this->plainTextMode) {
-      return $this->filterUrlsInPlainText($text);
+      // Resolve disallowed Markdown links and images as a whole first, so the
+      // URL pattern below does not leave broken link syntax like "[text](".
+      return $this->filterUrlsInPlainText($this->filterMarkdownLinks($text, FALSE, TRUE));
+    }
+
+    // JSON payloads (structured output, prompt-engineered JSON, JSON tool
+    // arguments) must keep their structure: filter their string values
+    // individually instead of pushing the whole payload through the HTML5
+    // round trip below, which would entity-encode it beyond decoding.
+    $json_result = $this->filterJsonText($text);
+    if ($json_result !== NULL) {
+      return $json_result;
+    }
+
+    // The caller declared the text a JSON payload but it did not decode
+    // (malformed, truncated or a partial stream chunk).
+    if ($this->jsonMode) {
+      return $this->filterJsonFragment($text);
     }
 
     // Filter Markdown syntax first.
     $text = $this->filterMarkdownLinks($text);
+
+    // Text without any markup has no HTML to filter. Return it as is, because
+    // the round trip through the HTML serializer would encode characters like
+    // "&" and ">" and thereby break Markdown block quotes, code and tables.
+    if (!$this->containsHtmlMarkup($text)) {
+      return $text;
+    }
 
     // Filter HTML tags.
     $dom = $this->html5->loadHTMLFragment($text);
@@ -180,6 +232,28 @@ class HostnameFilter {
   }
 
   /**
+   * Enables Markdown code preservation for consumers that render Markdown.
+   *
+   * @param bool $markdown_mode
+   *   TRUE only when the filtered output will be rendered as Markdown.
+   */
+  public function setMarkdownMode(bool $markdown_mode): void {
+    $this->markdownMode = $markdown_mode;
+  }
+
+  /**
+   * Set whether the filtered text is known to be a JSON payload.
+   *
+   * @param bool $json_mode
+   *   TRUE to treat undecodable payloads as plain text instead of HTML,
+   *   FALSE to use the regular pipeline for them. Decodable JSON payloads
+   *   are auto-detected and structure-preserved regardless of this flag.
+   */
+  public function setJsonMode(bool $json_mode): void {
+    $this->jsonMode = $json_mode;
+  }
+
+  /**
    * Apply settings from a HostnameFilterDto.
    *
    * This allows programmatic override of settings.php configuration.
@@ -197,8 +271,14 @@ class HostnameFilter {
     if ($dto->fullTrust !== NULL) {
       $this->setFullTrust($dto->fullTrust);
     }
+    if ($dto->markdownMode !== NULL) {
+      $this->setMarkdownMode($dto->markdownMode);
+    }
     if ($dto->plainTextMode !== NULL) {
       $this->setPlainTextMode($dto->plainTextMode);
+    }
+    if ($dto->jsonMode !== NULL) {
+      $this->setJsonMode($dto->jsonMode);
     }
   }
 
@@ -219,6 +299,8 @@ class HostnameFilter {
       'rewriteLinks' => $this->rewriteLinks,
       'fullTrust' => $this->fullTrust,
       'plainTextMode' => $this->plainTextMode,
+      'markdownMode' => $this->markdownMode,
+      'jsonMode' => $this->jsonMode,
     ];
   }
 
@@ -233,6 +315,8 @@ class HostnameFilter {
     $this->rewriteLinks = $snapshot['rewriteLinks'] ?? NULL;
     $this->fullTrust = $snapshot['fullTrust'] ?? NULL;
     $this->plainTextMode = $snapshot['plainTextMode'] ?? NULL;
+    $this->markdownMode = $snapshot['markdownMode'] ?? FALSE;
+    $this->jsonMode = $snapshot['jsonMode'] ?? NULL;
   }
 
   /**
@@ -335,7 +419,9 @@ class HostnameFilter {
           'Removed disallowed URL: @url',
           ['@url' => $matches[0]]
         );
-        return '';
+        // A trailing backslash starts an escape sequence that follows the
+        // URI, such as the \" that closes an attribute in a JSON string.
+        return substr($matches[0], strlen(rtrim($matches[0], '\\')));
       }
       return $matches[0];
     }, $input);
@@ -362,19 +448,74 @@ class HostnameFilter {
       if (preg_match('/^[\/\\\\]/', $url) && !$this->isProtocolRelativeHost($url)) {
         return $url;
       }
-      // Remove trailing punctuation that's not part of the URL.
-      $url = rtrim($url, '.,!?;:\'")');
+      // Trailing punctuation is not part of the URL, but part of the text
+      // around it, like the end of a sentence or of a Markdown link. The same
+      // goes for a trailing backslash: it starts an escape sequence, such as
+      // the \" that closes an attribute in a JSON string.
+      $url = rtrim($url, '.,!?;:\'")\\');
+      $trailing = substr($matches[0], strlen($url));
       if (!$this->isUrlAllowed($url)) {
         $this->loggerFactory->get('ai')->warning(
           'Removed disallowed URL: @url',
           ['@url' => $url]
         );
-        return '';
+        return $trailing;
       }
       // Keep the original text, including any trailing punctuation.
       return $matches[0];
     }, $input);
     return $output;
+  }
+
+  /**
+   * Checks for HTML markup, respecting the consumer's rendering mode.
+   *
+   * In Markdown mode, autolinks, reference destinations and code can have angle
+   * brackets without being HTML. Parse Markdown without rendering it so those
+   * constructs do not trigger an HTML round trip. Check ordinary text too,
+   * since browsers can interpret malformed tags that Markdown treats as text.
+   *
+   * @param string $text
+   *   The text to check.
+   *
+   * @return bool
+   *   TRUE if the text contains HTML markup, FALSE if it is text only.
+   */
+  protected function containsHtmlMarkup(string $text): bool {
+    // The HTML parser drops invalid UTF-8 bytes before tokenizing, so
+    // "<\x80img" is a tag to the parser although the checks below see none.
+    // Such text takes the HTML path. This also keeps it away from the Markdown
+    // parser, which rejects invalid UTF-8 with an exception.
+    if (!mb_check_encoding($text, 'UTF-8')) {
+      return TRUE;
+    }
+
+    if (preg_match('/<[a-z\/!?]/i', $text) !== 1) {
+      return FALSE;
+    }
+
+    // HTML consumers treat tags inside backticks or indented text as markup.
+    // Only exempt Markdown code when the caller explicitly selects Markdown.
+    if (!$this->markdownMode) {
+      return TRUE;
+    }
+
+    if ($this->markdownParser === NULL) {
+      $environment = new Environment();
+      $environment->addExtension(new CommonMarkCoreExtension());
+      $this->markdownParser = new MarkdownParser($environment);
+    }
+    $walker = $this->markdownParser->parse($text)->walker();
+    while ($event = $walker->next()) {
+      $node = $event->getNode();
+      if ($node instanceof HtmlBlock || $node instanceof HtmlInline) {
+        return TRUE;
+      }
+      if ($node instanceof Text && preg_match('/<[a-z\/!?]/i', $node->getLiteral()) === 1) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**
@@ -417,8 +558,13 @@ class HostnameFilter {
    *
    * @param \DOMNode $node
    *   The DOM node to process.
+   *
+   * @return bool
+   *   TRUE if this node or any descendant was removed or rewritten, FALSE
+   *   if the tree passed through untouched.
    */
-  protected function filterHtmlLinks(\DOMNode $node): void {
+  protected function filterHtmlLinks(\DOMNode $node): bool {
+    $modified = FALSE;
     if ($node instanceof \DOMElement) {
       $tag = strtolower($node->tagName);
 
@@ -426,7 +572,7 @@ class HostnameFilter {
       // code assistant, you will have to opt out of filtering specifically.
       if (in_array($tag, ['script', 'iframe', 'embed', 'object', 'style'], TRUE)) {
         $node->parentNode?->removeChild($node);
-        return;
+        return TRUE;
       }
 
       // Strip event handler attributes (on* attributes) and HTMX attributes
@@ -442,6 +588,7 @@ class HostnameFilter {
       }
       foreach ($attrsToRemove as $attrName) {
         $node->removeAttribute($attrName);
+        $modified = TRUE;
       }
 
       // Meta refresh redirects encode the destination as "<delay>;url=<url>"
@@ -459,6 +606,7 @@ class HostnameFilter {
               ['@url' => $refreshUrl]
             );
             $node->removeAttribute('content');
+            $modified = TRUE;
           }
         }
       }
@@ -479,6 +627,7 @@ class HostnameFilter {
                 ['@attr' => $attr, '@url' => $url]
               );
               $node->removeAttribute($attr);
+              $modified = TRUE;
             }
             continue;
           }
@@ -498,6 +647,7 @@ class HostnameFilter {
               );
               $node->removeAttribute($attr);
             }
+            $modified = TRUE;
           }
         }
       }
@@ -507,12 +657,14 @@ class HostnameFilter {
         $bgUrl = $node->getAttribute('background');
         if (!$this->isUrlAllowed($bgUrl)) {
           $node->removeAttribute('background');
+          $modified = TRUE;
         }
       }
 
       // Strip inline CSS url().
       if ($node->hasAttribute('style') && stripos($node->getAttribute('style'), 'url(') !== FALSE) {
         $node->removeAttribute('style');
+        $modified = TRUE;
       }
     }
 
@@ -523,66 +675,276 @@ class HostnameFilter {
     }
 
     foreach ($children as $child) {
-      $this->filterHtmlLinks($child);
+      // The recursive call must run first so || cannot short-circuit it.
+      $modified = $this->filterHtmlLinks($child) || $modified;
     }
+
+    return $modified;
   }
 
   /**
-   * Process DOM elements and filter by hostname.
+   * Filter a JSON payload without corrupting its structure.
    *
-   * @param \DOMNodeList $elements
-   *   The elements to process.
-   * @param string $attribute
-   *   The attribute containing the URL (href or src).
-   * @param \DOMDocument $doc
-   *   The DOM document.
+   * Structured output responses (and prompt-engineered JSON) must never be
+   * pushed through the HTML5 round trip in ::filterText(): the serializer
+   * entity-encodes characters that are meaningful in JSON and the payload
+   * stops being decodable. Instead, every string in the payload (values and
+   * keys) is filtered on its own and only the strings that change are
+   * rewritten. A clean payload is returned byte-for-byte.
+   *
+   * Two payload shapes are recognized: text that is wholly a JSON object or
+   * array (surrounding whitespace allowed), and a single fenced code block
+   * (```json with optional surrounding prose, or a bare ``` fence surrounded
+   * only by whitespace) whose content is a JSON object or array.
+   *
+   * @param string $text
+   *   The text that may be a JSON payload.
+   * @param int $depth
+   *   Current recursion depth for nested JSON-in-string values.
+   *
+   * @return string|null
+   *   The filtered text, or NULL when the text is not a recognizable JSON
+   *   payload and the caller should fall through to the regular pipeline.
    */
-  protected function processElements(\DOMNodeList $elements, string $attribute, \DOMDocument $doc): void {
-    // Convert to array to avoid issues when removing nodes.
-    $elementsArray = [];
-    foreach ($elements as $element) {
-      $elementsArray[] = $element;
+  protected function filterJsonText(string $text, int $depth = 0): ?string {
+    if ($depth > 8) {
+      return NULL;
     }
 
-    foreach ($elementsArray as $element) {
-      /** @var \DOMElement $element */
-      $url = $element->getAttribute($attribute);
+    $trimmed = trim($text);
+    if ($trimmed === '') {
+      return NULL;
+    }
 
-      if (empty($url)) {
-        continue;
-      }
-
-      // Check if URL is allowed.
-      if (!$this->isUrlAllowed($url)) {
-        // Log the removal.
-        $this->loggerFactory->get('ai')->warning(
-          'AI Module removed the unsecure @type with URL from the output: @url',
-          [
-            '@type' => $element->nodeName,
-            '@url' => $url,
-          ]
-        );
-
-        // Remove the element or just the attribute.
-        if ($element->nodeName === 'img') {
-          // Remove entire img tag.
-          if ($element->parentNode) {
-            $element->parentNode->removeChild($element);
-          }
-        }
-        else {
-          // For links, either rewrite or remove based on settings.
-          if ($this->shouldRewriteLinks()) {
-            // Replace link text with the URL itself.
-            $element->nodeValue = $url;
-          }
-          else {
-            // Keep the text but remove the href.
-            $element->removeAttribute($attribute);
-          }
-        }
+    // Whole-payload JSON object or array. Scalar payloads ("text", 5, true)
+    // are deliberately not treated as JSON: they are indistinguishable from
+    // prose and carry no structure to preserve.
+    if ($trimmed[0] === '{' || $trimmed[0] === '[') {
+      $decoded = json_decode($trimmed);
+      if (is_array($decoded) || is_object($decoded)) {
+        return $this->filterJsonPayload($text, $depth);
       }
     }
+
+    return $this->filterFencedJsonText($text, $depth);
+  }
+
+  /**
+   * Filter the strings of a valid JSON payload and check the result.
+   *
+   * The strings are checked decoded, but the raw text is what gets returned.
+   * JSON escapes (\" or \u0027) can hide an attribute from the decoded check
+   * that an HTML parser reading the raw text sees, and Markdown can form
+   * across two strings (an autolink that opens in one and closes in the
+   * next). When the filtered payload still reads as unsafe, "<", ">", "&" and
+   * quotes are escaped as \u sequences instead. Both forms decode to the same
+   * data. Escaping cannot break a raw line that reads as a Markdown reference
+   * definition; such a payload is left to the regular pipeline.
+   *
+   * @param string $json
+   *   Valid JSON text, surrounding whitespace allowed.
+   * @param int $depth
+   *   Current recursion depth for nested JSON-in-string values.
+   *
+   * @return string|null
+   *   The filtered payload, or NULL when it cannot be made safe as JSON and
+   *   the caller should fall through to the regular pipeline.
+   */
+  protected function filterJsonPayload(string $json, int $depth): ?string {
+    foreach ([FALSE, TRUE] as $escape) {
+      $filtered = $this->filterJsonStrings($json, $depth, $escape);
+      if ($filtered === NULL) {
+        return NULL;
+      }
+      if (!$this->hasUnsafeMarkup($filtered)) {
+        return $filtered;
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * Filter every string of a valid JSON text in place.
+   *
+   * Valid JSON has no double quote outside a string, so the pattern matches
+   * exactly the strings, keys included. Only the strings that filtering
+   * changed are rewritten: numbers (also the ones PHP cannot represent),
+   * whitespace and duplicate keys are returned as they came in.
+   *
+   * @param string $json
+   *   Valid JSON text.
+   * @param int $depth
+   *   Current recursion depth for nested JSON-in-string values.
+   * @param bool $escape
+   *   TRUE to rewrite every string with "<", ">", "&" and quotes as \u
+   *   sequences, FALSE to rewrite only the strings that filtering changed.
+   *
+   * @return string|null
+   *   The filtered JSON text, or NULL when a string could not be processed.
+   */
+  protected function filterJsonStrings(string $json, int $depth, bool $escape): ?string {
+    $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+    if ($escape) {
+      $flags |= JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+    }
+    $failed = FALSE;
+    $pattern = '/"[^"\\\\]*+(?:\\\\.[^"\\\\]*+)*+"/s';
+    $filtered = preg_replace_callback($pattern, function (array $matches) use ($depth, $flags, $escape, &$failed): string {
+      $value = json_decode($matches[0]);
+      if (!is_string($value)) {
+        $failed = TRUE;
+        return $matches[0];
+      }
+      // A string can itself be a serialized JSON document (tool arguments
+      // commonly are); preserve its structure too.
+      $new_value = $this->filterJsonText($value, $depth + 1);
+      if ($new_value === NULL) {
+        $modified = FALSE;
+        $new_value = $this->filterScalarString($value, $modified);
+      }
+      if ($new_value === $value && !$escape) {
+        return $matches[0];
+      }
+      $encoded = json_encode($new_value, $flags);
+      if ($encoded === FALSE) {
+        $failed = TRUE;
+        return $matches[0];
+      }
+      return $encoded;
+    }, $json);
+    return $failed || $filtered === NULL ? NULL : $filtered;
+  }
+
+  /**
+   * Filter a single fenced code block containing a JSON payload.
+   *
+   * The fence is ``` or ~~~, the language tag is "json" or starts with it
+   * (JSON, jsonc), and a reply that was cut off may lack the closing fence.
+   *
+   * @param string $text
+   *   The text that may contain a fenced JSON payload.
+   * @param int $depth
+   *   Current recursion depth for nested JSON-in-string values.
+   *
+   * @return string|null
+   *   The filtered text, or NULL when no fenced JSON payload was found.
+   */
+  protected function filterFencedJsonText(string $text, int $depth): ?string {
+    $fence_pattern = '/^(?<prefix>.*?)(?<open>(?<fence>```|~~~)[ \t]*(?<lang>json[a-z0-9]*)?[ \t]*\R)(?<payload>.*?)(?:(?<close>\R[ \t]*\k<fence>)(?<suffix>.*)|(?<tail>\s*))$/si';
+    if (!preg_match($fence_pattern, $text, $fence)) {
+      return NULL;
+    }
+    // Without a closing fence only trailing whitespace follows the payload.
+    $fence += ['tail' => ''];
+
+    // A bare fence is only trusted as a JSON container when nothing but
+    // whitespace surrounds it; with prose around it the language tag is
+    // required. Multiple fences fall through to the regular pipeline.
+    if ($fence['lang'] === '' && (trim($fence['prefix']) !== '' || trim($fence['suffix']) !== '')) {
+      return NULL;
+    }
+    if (str_contains($fence['suffix'], '```') || str_contains($fence['suffix'], '~~~')) {
+      return NULL;
+    }
+
+    $payload = trim($fence['payload']);
+    if ($payload === '' || ($payload[0] !== '{' && $payload[0] !== '[')) {
+      return NULL;
+    }
+    $decoded = json_decode($payload);
+    if (!is_array($decoded) && !is_object($decoded)) {
+      return NULL;
+    }
+
+    $encoded = $this->filterJsonStrings($fence['payload'], $depth, FALSE);
+    if ($encoded === NULL) {
+      return NULL;
+    }
+    $prose_modified = FALSE;
+    $result = $this->filterScalarString($fence['prefix'], $prose_modified)
+      . $fence['open'] . $encoded . $fence['close']
+      . $this->filterScalarString($fence['suffix'], $prose_modified)
+      . $fence['tail'];
+
+    // The prose was filtered in two pieces, so a tag opened before the fence
+    // and closed after it was never seen whole. If the assembled text still
+    // holds anything unsafe, let the regular pipeline handle all of it.
+    return $this->hasUnsafeMarkup($result) ? NULL : $result;
+  }
+
+  /**
+   * Filter a JSON payload that could not be decoded.
+   *
+   * Used for malformed or truncated payloads and partial streamed chunks.
+   * Disallowed URLs are removed as plain text, which keeps the structure
+   * intact; dangerous markup then goes through the same DOM walk as JSON
+   * string values, which only rewrites the text when it finds something.
+   *
+   * @param string $text
+   *   The JSON-like text.
+   *
+   * @return string
+   *   The filtered text.
+   */
+  protected function filterJsonFragment(string $text): string {
+    // Resolve disallowed Markdown links as a whole first, so the URL pattern
+    // does not leave broken link syntax like "[text]()".
+    $text = $this->filterUrlsInPlainText($this->filterMarkdownLinks($text, FALSE));
+    $modified = FALSE;
+    return $this->filterScalarString($text, $modified);
+  }
+
+  /**
+   * Check whether text, read as markup, holds something the filter removes.
+   *
+   * @param string $text
+   *   The text to check.
+   *
+   * @return bool
+   *   TRUE when the Markdown filter or the DOM walk would change the text.
+   */
+  protected function hasUnsafeMarkup(string $text): bool {
+    return $this->filterMarkdownLinks($text) !== $text
+      || (str_contains($text, '<') && $this->filterHtmlLinks($this->html5->loadHTMLFragment($text)));
+  }
+
+  /**
+   * Filter a single plain string through the Markdown and HTML pipelines.
+   *
+   * Unlike ::filterText(), the input is only rewritten when a disallowed
+   * URL or dangerous construct was actually found: the HTML5 serializer
+   * output is used only when the DOM walk reported a modification, so
+   * benign strings (including ones with stray "<" or "&") pass through
+   * byte-for-byte instead of being entity-encoded by the round trip.
+   *
+   * @param string $value
+   *   The string to filter.
+   * @param bool $modified
+   *   Set to TRUE when filtering changed the string, FALSE otherwise.
+   *
+   * @return string
+   *   The filtered string, or the original string when nothing was found.
+   */
+  protected function filterScalarString(string $value, bool &$modified): string {
+    $modified = FALSE;
+    $filtered = $this->filterMarkdownLinks($value);
+    // The Markdown callbacks return the match untouched when the URL is
+    // allowed, so a difference here always means a violation was handled.
+    $md_modified = ($filtered !== $value);
+
+    // Without "<" the HTML5 fragment contains no elements, so the DOM
+    // filter cannot find anything; skip the expensive parse.
+    $html_modified = FALSE;
+    if (str_contains($filtered, '<')) {
+      $dom = $this->html5->loadHTMLFragment($filtered);
+      $html_modified = $this->filterHtmlLinks($dom);
+      if ($html_modified) {
+        $filtered = $this->html5->saveHTML($dom);
+      }
+    }
+
+    $modified = $md_modified || $html_modified;
+    return $modified ? $filtered : $value;
   }
 
   /**
@@ -590,12 +952,17 @@ class HostnameFilter {
    *
    * @param string $markdown
    *   The Markdown content.
+   * @param bool $allow_rewrite
+   *   (optional) FALSE to always reduce a disallowed link to its text, even if
+   *   rewriting disallowed links is enabled. Defaults to TRUE.
+   * @param bool $preserve_mailto
+   *   (optional) TRUE to preserve mailto URLs, matching plain-text mode.
    *
    * @return string
    *   The filtered Markdown.
    */
-  protected function filterMarkdownLinks(string $markdown): string {
-    $markdown = $this->filterMarkdownInlineLinks($markdown);
+  protected function filterMarkdownLinks(string $markdown, bool $allow_rewrite = TRUE, bool $preserve_mailto = FALSE): string {
+    $markdown = $this->filterMarkdownInlineLinks($markdown, $allow_rewrite, $preserve_mailto);
 
     // Markdown auto links (<scheme:...>) and reference-style link definitions
     // ([label]: url) are not covered by the inline patterns above, yet a
@@ -603,8 +970,8 @@ class HostnameFilter {
     // URLs must be checked against the allowlist too, otherwise disallowed
     // schemes and hosts can be smuggled through these syntaxes.
     $autolinkPattern = '/<([a-z][a-z0-9+.-]*:[^\s<>]*)>/i';
-    $markdown = preg_replace_callback($autolinkPattern, function ($matches) {
-      if (!$this->isUrlAllowed($matches[1])) {
+    $markdown = preg_replace_callback($autolinkPattern, function ($matches) use ($preserve_mailto) {
+      if (!($preserve_mailto && $this->isMailtoUrl($matches[1])) && !$this->isUrlAllowed($matches[1])) {
         $this->loggerFactory->get('ai')->warning(
           'Removed disallowed Markdown autolink with URL: @url',
           ['@url' => $matches[1]]
@@ -618,13 +985,13 @@ class HostnameFilter {
     // the definition may sit inside a block quote, a list item or any
     // indentation a container allows.
     $referenceDefinitionPattern = '/^[ \t]*(?:(?:>|[-+*]|\d{1,9}[.)])[ \t]*)*\[(?:\\\\.|[^\\\\\]])+\]:\s*(\S+).*$/m';
-    $markdown = preg_replace_callback($referenceDefinitionPattern, function ($matches) {
+    $markdown = preg_replace_callback($referenceDefinitionPattern, function ($matches) use ($preserve_mailto) {
       // CommonMark allows the destination to be wrapped in angle brackets
       // ("[ref]: <url>"). Strip them before the host check, otherwise
       // parse_url() cannot detect the host behind the leading "<" and the
       // disallowed URL is let through.
       $url = trim($matches[1], '<>');
-      if (!$this->isMarkdownUrlAllowed($url)) {
+      if (!$this->isMarkdownUrlAllowed($url, $preserve_mailto)) {
         $this->loggerFactory->get('ai')->warning(
           'Removed disallowed Markdown reference link with URL: @url',
           ['@url' => $url]
@@ -651,11 +1018,16 @@ class HostnameFilter {
    *
    * @param string $markdown
    *   The Markdown content.
+   * @param bool $allow_rewrite
+   *   (optional) FALSE to always reduce a disallowed link to its text, even if
+   *   rewriting disallowed links is enabled. Defaults to TRUE.
+   * @param bool $preserve_mailto
+   *   (optional) TRUE to preserve mailto URLs, matching plain-text mode.
    *
    * @return string
    *   The filtered Markdown.
    */
-  protected function filterMarkdownInlineLinks(string $markdown): string {
+  protected function filterMarkdownInlineLinks(string $markdown, bool $allow_rewrite = TRUE, bool $preserve_mailto = FALSE): string {
     $links = [];
     $openers = [];
     $escaped = [];
@@ -713,7 +1085,7 @@ class HostnameFilter {
       return $markdown;
     }
     usort($links, static fn(array $a, array $b): int => $a['start'] <=> $b['start']);
-    return $this->rebuildMarkdownLinks($markdown, $links, 0, $length);
+    return $this->rebuildMarkdownLinks($markdown, $links, 0, $length, $allow_rewrite, $preserve_mailto);
   }
 
   /**
@@ -797,11 +1169,16 @@ class HostnameFilter {
    *   The start offset of the span.
    * @param int $to
    *   The end offset of the span.
+   * @param bool $allow_rewrite
+   *   (optional) FALSE to always reduce a disallowed link to its text, even if
+   *   rewriting disallowed links is enabled. Defaults to TRUE.
+   * @param bool $preserve_mailto
+   *   (optional) TRUE to preserve mailto URLs, matching plain-text mode.
    *
    * @return string
    *   The filtered span.
    */
-  protected function rebuildMarkdownLinks(string $markdown, array $links, int $from, int $to): string {
+  protected function rebuildMarkdownLinks(string $markdown, array $links, int $from, int $to, bool $allow_rewrite = TRUE, bool $preserve_mailto = FALSE): string {
     $output = '';
     $cursor = $from;
     foreach ($links as $link) {
@@ -811,10 +1188,10 @@ class HostnameFilter {
       }
       $output .= substr($markdown, $cursor, $link['start'] - $cursor);
       $cursor = $link['end'];
-      $text = $this->rebuildMarkdownLinks($markdown, $links, $link['text_start'], $link['text_end']);
+      $text = $this->rebuildMarkdownLinks($markdown, $links, $link['text_start'], $link['text_end'], $allow_rewrite, $preserve_mailto);
       $url = $link['url'];
 
-      if ($url === '' || $this->isMarkdownUrlAllowed($url)) {
+      if ($url === '' || $this->isMarkdownUrlAllowed($url, $preserve_mailto)) {
         $output .= substr($markdown, $link['start'], $link['text_start'] - $link['start'])
           . $text
           . substr($markdown, $link['text_end'], $link['end'] - $link['text_end']);
@@ -835,7 +1212,7 @@ class HostnameFilter {
       );
       // Rewriting keeps the link but shows its target, which only makes sense
       // for web URLs. Hostless schemes such as javascript: are always removed.
-      if ($this->shouldRewriteLinks() && preg_match('#^\s*(?:https?:)?//[^\s()<>]+$#i', $url)) {
+      if ($allow_rewrite && $this->shouldRewriteLinks() && preg_match('#^\s*(?:https?:)?//[^\s()<>]+$#i', $url)) {
         $output .= '[' . $url . '](' . $url . ')';
       }
       else {
@@ -854,11 +1231,18 @@ class HostnameFilter {
    *
    * @param string $url
    *   The raw destination as written in the Markdown.
+   * @param bool $preserve_mailto
+   *   (optional) TRUE to allow mailto URLs, matching plain-text mode.
    *
    * @return bool
    *   TRUE if allowed, FALSE otherwise.
    */
-  protected function isMarkdownUrlAllowed(string $url): bool {
+  protected function isMarkdownUrlAllowed(string $url, bool $preserve_mailto = FALSE): bool {
+    // Plain-text mode preserves mailto URLs. Applying the Markdown pass must
+    // preserve that policy for links and autolinks as well as bare URLs.
+    if ($preserve_mailto && $this->isMailtoUrl($url)) {
+      return TRUE;
+    }
     $unescaped = (string) preg_replace('/\\\\([!-\/:-@\[-`{-~])/', '$1', $url);
     foreach ([$url, $unescaped] as $candidate) {
       if (!$this->isUrlAllowed($candidate) || !$this->isUrlAllowed(trim($candidate, '<>'))) {
@@ -866,6 +1250,19 @@ class HostnameFilter {
       }
     }
     return TRUE;
+  }
+
+  /**
+   * Checks whether a URL uses the mailto scheme.
+   *
+   * @param string $url
+   *   The URL to check.
+   *
+   * @return bool
+   *   TRUE for mailto URLs, FALSE otherwise.
+   */
+  protected function isMailtoUrl(string $url): bool {
+    return preg_match('/^mailto:/i', $url) === 1;
   }
 
   /**

@@ -65,7 +65,11 @@ class TypedDataRelationshipDeriver extends TypedDataPropertyDeriverBase implemen
         '@base' => $data_type_definition['label'],
       ]);
 
-      $main_property = $property_definition->getFieldStorageDefinition()->getPropertyDefinition($property_definition->getFieldStorageDefinition()->getMainPropertyName());
+      // Field types such as map have no main property, and others may name a
+      // main property they do not define. Neither can be derived.
+      $storage_definition = $property_definition->getFieldStorageDefinition();
+      $main_property_name = $storage_definition->getMainPropertyName();
+      $main_property = $main_property_name !== NULL ? $storage_definition->getPropertyDefinition($main_property_name) : NULL;
       if ($main_property) {
         $derivative['data_type'] = $main_property->getDataType();
         $derivative['property_name'] = $property_name;

@@ -1616,4 +1616,12 @@ HTML;
     $this->assertTrue($result->getValue());
   }
 
+  /**
+   * Test that a clean JSON string argument is preserved byte-for-byte.
+   */
+  public function testJsonStringValuePreservedVerbatim(): void {
+    $json = '{"body":"<p>Text <a href=\"https://example.com/a\">ok</a> &amp; x < y</p>","empty":{}}';
+    $this->assertSame($json, $this->createResultWithValue($json)->getValue());
+  }
+
 }

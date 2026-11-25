@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_validations\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ai_validations\Plugin\Validation\Constraint\AiTextConstraint;
@@ -24,6 +25,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[Group('ai_validations')]
 #[Group('3607948')]
+#[RunTestsInSeparateProcesses]
 class AiTextConstraintValidatorTest extends KernelTestBase {
 
   /**

@@ -2,6 +2,8 @@
 
 namespace Drupal\ctools\Plugin\Relationship;
 
+use Drupal\ctools\Attribute\Relationship;
+use Drupal\ctools\Plugin\Deriver\TypedDataEntityRelationshipDeriver;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 
@@ -13,6 +15,10 @@ use Drupal\Core\Plugin\Context\EntityContextDefinition;
  *   deriver = "\Drupal\ctools\Plugin\Deriver\TypedDataEntityRelationshipDeriver"
  * )
  */
+#[Relationship(
+  id: 'typed_data_entity_relationship',
+  deriver: TypedDataEntityRelationshipDeriver::class,
+)]
 class TypedDataEntityRelationship extends TypedDataRelationship {
 
   /**

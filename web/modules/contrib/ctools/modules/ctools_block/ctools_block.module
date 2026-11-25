@@ -5,17 +5,17 @@
  * Chaos Tools Blocks.
  */
 
+use Drupal\Core\Hook\Attribute\ExtensionFileIsConverted;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\ctools_block\Hook\CtoolsBlockHooks;
+
 /**
- * Remove ctools block from appearing on viewable block types.
+ * Implements hook_plugin_filter_TYPE_alter() for block plugins.
  *
- * In general, users should be using the core block types instead.
+ * @phpstan-ignore attribute.notFound
  */
+#[ExtensionFileIsConverted]
+#[LegacyHook]
 function ctools_block_plugin_filter_block_alter(array &$definitions, array $extra, $consumer) {
-  if ($consumer == 'layout_builder') {
-    foreach ($definitions as $label => $definition) {
-      if ($definition['provider'] == 'ctools_block') {
-        unset($definitions[$label]);
-      }
-    }
-  }
+  \Drupal::service(CtoolsBlockHooks::class)->pluginFilterBlockAlter($definitions, $extra, $consumer);
 }

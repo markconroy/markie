@@ -56,7 +56,7 @@ final class AutomatorChainType extends ConfigEntityBundleBase {
   /**
    * The machine name of this automator chain type.
    */
-  protected string $id;
+  protected ?string $id = NULL;
 
   /**
    * The human-readable name of the automator chain type.
